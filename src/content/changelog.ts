@@ -16,6 +16,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-09-26",
     items: [
       {
+        kind: "added",
+        text: {
+          ko: "한 콤보에 루트 여러 개. 루트에 마우스를 올리면 데미지·프레임 등이 그 루트로 바뀜",
+          en: "Combos can hold multiple routes; hover a route to see its damage, frames and gauge cost",
+          ja: "1つのコンボに複数ルート。ルートにマウスを重ねるとダメージ・フレームなどがそのルートに切り替わる",
+        },
+      },
+      {
         kind: "changed",
         text: {
           ko: "콤보·셋업 건수에 대상 수준 숨김도 반영",

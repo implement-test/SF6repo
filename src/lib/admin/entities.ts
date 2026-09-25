@@ -10,6 +10,8 @@ export type Field = { key: string; label: string; help?: string; required?: bool
   | { type: "localized"; multiline?: boolean }
   | { type: "notation" }
   | { type: "starters" }
+  /** 콤보 루트 여러 개 + 루트별 수치. 첫 번째는 칼럼, 나머지는 extra_routes 에 저장 */
+  | { type: "routes" }
   | { type: "text" | "url" }
   | { type: "number"; step?: number; min?: number; max?: number; nullable?: boolean }
   | { type: "select"; options: Option[]; nullable?: boolean }
@@ -129,13 +131,12 @@ export const ENTITIES: Record<EntityType, Entity> = {
             wide: true,
             help: "같은 루트로 이어지는 시동기를 그룹으로 묶습니다. 프리셋을 불러오면 프리셋 이름의 그룹이 됩니다. 데미지 기준 시동기를 고르세요 (고르지 않으면 첫 번째).",
           },
-          { key: "notation_classic", label: "루트 (클래식)", type: "notation", required: true, wide: true },
           {
-            key: "notation_modern",
-            label: "루트 (모던)",
-            type: "notation",
+            key: "routes",
+            label: "루트",
+            type: "routes",
             wide: true,
-            help: "비워 두면 '클래식 전용'으로 표시됩니다.",
+            help: "같은 시동기로 이어지는 루트를 여러 개 넣을 수 있습니다. 카드에는 루트 1의 수치가 보이고, 다른 루트에 마우스를 올리면 그 루트의 수치로 바뀝니다. 데미지는 시동기 칸에서 고른 데미지 기준 시동기로 잰 값. 모던을 비워 두면 '클래식 전용'.",
           },
         ],
       },
@@ -146,24 +147,7 @@ export const ENTITIES: Record<EntityType, Entity> = {
           { key: "position_start", label: "시작 위치", type: "select", options: POSITIONS },
         ],
       },
-      {
-        title: "수치",
-        fields: [
-          {
-            key: "damage",
-            label: "데미지",
-            type: "number",
-            step: 1,
-            min: 0,
-            nullable: true,
-            help: "시동기 칸에서 고른 데미지 기준 시동기로 잰 값",
-          },
-          { key: "drive_cost", label: "드라이브 소모 (칸)", type: "number", step: 0.5, min: 0, max: 6 },
-          { key: "sa_cost", label: "SA 소모 (칸)", type: "number", step: 1, min: 0, max: 3 },
-          { key: "frame_after", label: "콤보 후 프레임", type: "text", help: "예: +32, 다운 +30" },
-          { key: "difficulty", label: "입력 난이도", type: "select", options: DIFFICULTY },
-        ],
-      },
+      { title: "기타", fields: [{ key: "difficulty", label: "입력 난이도", type: "select", options: DIFFICULTY }] },
       { title: "설명", fields: [{ key: "notes", label: "메모", type: "localized", multiline: true }] },
       MEDIA_GROUP,
       META_GROUP,
@@ -173,10 +157,7 @@ export const ENTITIES: Record<EntityType, Entity> = {
       starters: [],
       hit_states: ["normal"],
       position_start: "midscreen",
-      frame_after: null,
-      drive_cost: 0,
-      sa_cost: 0,
-      damage: null,
+      routes: [{ classic: "", modern: null, damage: null, drive_cost: 0, sa_cost: 0, frame_after: null }],
       difficulty: "normal",
     }),
   },

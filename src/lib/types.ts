@@ -84,13 +84,25 @@ export type ComboStarter = {
 /** 시동기 그룹. 프리셋을 불러오면 프리셋 이름으로 그룹 하나가 된다. name 이 없으면 이름 없는 그룹 */
 export type StarterGroup = { name: string | null; starters: ComboStarter[] };
 
+/** 한 콤보 안의 루트 하나와 그 루트의 수치 */
+export type ComboRoute = {
+  classic: string;
+  modern: string | null;
+  damage: number | null;
+  drive_cost: number;
+  sa_cost: number;
+  frame_after: string | null;
+};
+
 export type Combo = ContentBase &
   Media & {
     character_id: number;
     title: Localized | null;
     /** 시동기 그룹. 데미지 기준은 damage_basis 로 고른 시동기 (없으면 첫 번째) */
     starters: StarterGroup[];
-    /** 루트 */
+    /** 2번째부터의 루트 (첫 번째 루트는 아래 칼럼들). comboRoutes() 로 합쳐 쓴다 */
+    extra_routes?: ComboRoute[];
+    /** 첫 번째 루트 */
     notation_classic: string;
     notation_modern: string | null;
     hit_states: HitState[];

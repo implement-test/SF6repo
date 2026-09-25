@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import { ENTITIES, today, type Field } from "@/lib/admin/entities";
 import { findUnknownTokens, parseNotation } from "@/lib/notation/parse";
 import { describeError, revalidateSite, supabaseBrowser } from "@/lib/supabase/browser";
-import type { Localized, Patch, PracticeConfig, SetupOption, StarterGroup } from "@/lib/types";
+import type { ComboRoute, Localized, Patch, PracticeConfig, SetupOption, StarterGroup } from "@/lib/types";
 import { parseYouTube } from "@/lib/youtube";
 import { normalizeOptions, normalizePractice } from "@/lib/setup";
 import { normalizeStarterGroups } from "@/lib/starters";
+import { comboRoutes, routesToColumns } from "@/lib/combo-routes";
+import { RoutesInput } from "./routes-input";
 import { NotationImage } from "../notation";
 import { useAdmin, type EditorRequest } from "./admin-context";
 import { formatPatchVersion } from "@/lib/patch";
@@ -32,6 +34,8 @@ function normalizeValues(v: Values): Values {
   if ("options" in out) out.options = normalizeOptions(out.options);
   if ("practice" in out) out.practice = normalizePractice(out.practice);
   if ("starters" in out) out.starters = normalizeStarterGroups(out.starters);
+  // 콤보: 칼럼(첫 번째 루트) + extra_routes 를 루트 목록 하나로
+  if (!("routes" in out) && "drive_cost" in out) out.routes = comboRoutes(out as Parameters<typeof comboRoutes>[0]);
   return out;
 }
 const LANGS = [
@@ -443,6 +447,16 @@ function FieldInput({
         />
       );
 
+    case "routes":
+      return (
+        <RoutesInput
+          label={field.label}
+          help={field.help}
+          value={(value as ComboRoute[] | null) ?? []}
+          onChange={onChange}
+        />
+      );
+
     case "situations":
       return <SituationsInput label={field.label} value={(value as string[] | null) ?? []} onChange={onChange} />;
 
@@ -630,6 +644,13 @@ function buildPayload(fields: Field[], values: Values): { payload: Values; probl
       case "starters":
         payload[field.key] = cleanStarterGroups(raw as StarterGroup[] | null);
         break;
+      case "routes": {
+        // 첫 번째 루트는 기존 칼럼, 나머지는 extra_routes 로 나눠 저장한다
+        const columns = routesToColumns((raw as ComboRoute[] | null) ?? []);
+        if (!columns) return { payload, problem: "루트 1의 클래식 표기를 입력하세요." };
+        Object.assign(payload, columns);
+        break;
+      }
       case "setupOptions":
         payload[field.key] = cleanOptions(raw as SetupOption[] | null);
         break;

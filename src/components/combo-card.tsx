@@ -5,7 +5,9 @@ import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { pickLocalized } from "@/lib/i18n/localized";
 import { parseYouTube } from "@/lib/youtube";
 import { damageBasisIndex, flattenStarters } from "@/lib/starters";
+import { comboRoutes } from "@/lib/combo-routes";
 import { ControlNotation } from "./notation";
+import { RouteList, RoutePanels, RouteRow, RouteScope } from "./combo-route-switch";
 import { LevelBadge, NotTranslatedBadge, OutdatedBadge, Tag } from "./badges";
 import { SegmentGauge } from "./gauges";
 import { ItemMedia } from "./media";
@@ -48,7 +50,10 @@ export function ComboCard({
   // 직접 고른 기준은 데미지가 아직 비어 있어도 강조한다 (고르지 않았으면 데미지가 있을 때만 첫 번째를 강조)
   const basisChosen = starters.some((s) => s.damage_basis);
   const basisNote = dict.combo.damageBasis.replace("{n}", String(basisIndex + 1));
-  const hasMedia = !!combo.media_url || !!parseYouTube(combo.youtube_url);
+  const routes = comboRoutes(combo);
+  const multiRoute = routes.length > 1;
+  const hasDamage = routes.some((r) => r.damage !== null);
+  const hasMedia =!!combo.media_url || !!parseYouTube(combo.youtube_url);
 
   return (
     <article
@@ -56,6 +61,7 @@ export function ComboCard({
       data-level={embedded ? undefined : combo.target_level}
       className="group relative grid border border-border bg-surface transition-colors hover:border-border-strong md:grid-cols-[1fr_15rem]"
     >
+      <RouteScope>
       {/* 대상 수준 색 띠 */}
       <span aria-hidden className="absolute inset-y-0 left-0 w-1" style={{ background: `var(--lv-${combo.target_level})` }} />
 
@@ -91,7 +97,7 @@ export function ComboCard({
                       {group.starters.map((s, i) => {
                         // 번호는 그룹을 넘어 이어진다. 데미지 기준 시동기는 강조한다
                         const n = groupOffsets[g] + i + 1;
-                        const isBasis = (combo.damage !== null || basisChosen) && n - 1 === basisIndex;
+                        const isBasis = (hasDamage || basisChosen) && n - 1 === basisIndex;
                         return (
                           <li
                             key={i}
@@ -120,18 +126,41 @@ export function ComboCard({
               </div>
             </div>
           )}
-          <div className={`grid gap-2 px-3 py-3 ${starters.length > 0 ? "border-t border-border sm:grid-cols-[4.5rem_1fr]" : ""}`}>
-            {starters.length > 0 && <span className="eyebrow pt-1.5">{dict.combo.route}</span>}
-            <div className="flex min-w-0 items-start gap-2">
-              {starters.length > 0 && <span className="pt-1 text-muted">→</span>}
-              <div className="min-w-0">
-                <ControlNotation
-                  classic={combo.notation_classic}
-                  modern={combo.notation_modern}
-                  classicOnlyLabel={dict.combo.classicOnly}
-                />
+          <div
+            className={`grid gap-2 px-3 py-3 ${starters.length > 0 || multiRoute ? "sm:grid-cols-[4.5rem_1fr]" : ""} ${starters.length > 0 ? "border-t border-border" : ""}`}
+          >
+            {(starters.length > 0 || multiRoute) && <span className="eyebrow pt-1.5">{dict.combo.route}</span>}
+            {multiRoute ? (
+              // 루트가 여러 개: 마우스를 올린 루트의 수치를 오른쪽에 보여 준다
+              <RouteList className="flex flex-col gap-1">
+                {routes.map((route, r) => (
+                  <RouteRow
+                    key={r}
+                    index={r}
+                    className="group/route -mx-2 flex cursor-default items-start gap-2.5 border-l-2 border-transparent px-2 py-1 transition-colors data-[active=true]:border-accent data-[active=true]:bg-surface-2"
+                  >
+                    <span className="display w-4 pt-1 text-right text-base text-muted group-data-[active=true]/route:text-accent">
+                      {r + 1}
+                    </span>
+                    {starters.length > 0 && <span className="pt-1 text-muted">→</span>}
+                    <div className="min-w-0">
+                      <ControlNotation classic={route.classic} modern={route.modern} classicOnlyLabel={dict.combo.classicOnly} />
+                    </div>
+                  </RouteRow>
+                ))}
+              </RouteList>
+            ) : (
+              <div className="flex min-w-0 items-start gap-2">
+                {starters.length > 0 && <span className="pt-1 text-muted">→</span>}
+                <div className="min-w-0">
+                  <ControlNotation
+                    classic={combo.notation_classic}
+                    modern={combo.notation_modern}
+                    classicOnlyLabel={dict.combo.classicOnly}
+                  />
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -168,25 +197,36 @@ export function ComboCard({
       </div>
 
       <aside className="flex flex-col justify-between gap-3 border-t border-border bg-surface-2/60 px-4 py-4 md:border-l md:border-t-0">
-        <div>
-          <p className="eyebrow">{dict.combo.damage}</p>
-          <p className="display text-4xl tabular-nums text-highlight-text">
-            {combo.damage !== null ? combo.damage.toLocaleString() : "—"}
-          </p>
-          {starters.length > 0 && combo.damage !== null && (
-            <p className="mt-1 text-xs text-muted">* {basisNote}</p>
-          )}
-        </div>
-        {combo.frame_after && (
-          <div>
-            <p className="eyebrow">{dict.combo.frameAfter}</p>
-            <p className="display text-2xl tabular-nums">{combo.frame_after}</p>
-          </div>
-        )}
-        <div className="flex flex-col gap-1.5">
-          <SegmentGauge label="Drive" value={combo.drive_cost} max={6} color="var(--drive)" />
-          <SegmentGauge label="SA" value={combo.sa_cost} max={3} color="var(--sa)" />
-        </div>
+        <RoutePanels
+          panels={routes.map((route, r) => (
+            <div key={r} className="flex flex-col gap-3">
+              <div>
+                <p className="eyebrow">
+                  {dict.combo.damage}
+                  {multiRoute && (
+                    <span className="ml-1.5 text-accent">
+                      · {dict.combo.route} {r + 1}
+                    </span>
+                  )}
+                </p>
+                <p className="display text-4xl tabular-nums text-highlight-text">
+                  {route.damage !== null ? route.damage.toLocaleString() : "—"}
+                </p>
+                {starters.length > 0 && route.damage !== null && <p className="mt-1 text-xs text-muted">* {basisNote}</p>}
+              </div>
+              {route.frame_after && (
+                <div>
+                  <p className="eyebrow">{dict.combo.frameAfter}</p>
+                  <p className="display text-2xl tabular-nums">{route.frame_after}</p>
+                </div>
+              )}
+              <div className="flex flex-col gap-1.5">
+                <SegmentGauge label="Drive" value={route.drive_cost} max={6} color="var(--drive)" />
+                <SegmentGauge label="SA" value={route.sa_cost} max={3} color="var(--sa)" />
+              </div>
+            </div>
+          ))}
+        />
         <div className="flex items-center justify-between text-xs text-muted">
           <span>
             {dict.combo.difficulty} <b className="text-fg">{dict.difficulty[combo.difficulty]}</b>
@@ -223,6 +263,7 @@ export function ComboCard({
           />
         </div>
       )}
+      </RouteScope>
     </article>
   );
 }
