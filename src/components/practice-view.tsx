@@ -50,7 +50,7 @@ function ReversalTable({
   // 줄 높이 고정. 긴 커맨드는 말줄임(…)하고 마우스를 올리면 전체를 보여 준다.
   const row = "h-9";
   const num = "w-16 px-2 text-center align-middle tabular-nums";
-  const blanks = Math.max(0, rowCount - Math.max(rows.length, 1));
+  const blanks = rows.length === 0 ? 0 : Math.max(0, rowCount - rows.length);
 
   return (
     <div className="overflow-x-auto border border-border">
@@ -65,8 +65,10 @@ function ReversalTable({
         </thead>
         <tbody className="divide-y divide-border">
           {rows.length === 0 ? (
-            <tr className={row}>
-              <td colSpan={cols} className="px-3 align-middle text-muted">
+            // 비어 있으면 줄을 나누지 않고 한 칸으로 합쳐 정가운데에 '없음'. 높이는 옆 표의 줄 수에 맞춘다
+            // (표 테두리가 겹쳐 그려지므로 줄 사이 선은 줄 높이 안에 들어간다).
+            <tr style={{ height: `calc(${rowCount} * 2.25rem)` }}>
+              <td colSpan={cols} className="px-3 text-center align-middle text-muted">
                 {t.noSlot}
               </td>
             </tr>
