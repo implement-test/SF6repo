@@ -47,6 +47,7 @@ export default async function SetupsPage({ params }: PageProps<"/[lang]/[charact
       <DraftItems table="setups" entity="setup" characterId={character.id} label="셋업" />
       <SetupFilters
         dict={dict}
+        characterId={character.id}
         situations={situations.map((s) => ({ slug: s.slug, name: situationNames[s.slug] }))}
         items={published.map((setup) => ({
           id: setup.id,

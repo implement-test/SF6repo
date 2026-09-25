@@ -42,6 +42,7 @@ export default async function CombosPage({ params }: PageProps<"/[lang]/[charact
       <DraftItems table="combos" entity="combo" characterId={character.id} label="콤보" />
       <ComboFilters
         dict={dict}
+        characterId={character.id}
         items={combos
           .filter((c) => c.is_published)
           .map((combo) => ({

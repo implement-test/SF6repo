@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { HIT_STATES, POSITIONS, type HitState, type ScreenPosition } from "@/lib/types";
+import { SortableCards } from "./admin/sortable-cards";
 
 export type ComboFilterItem = {
   id: number;
@@ -29,7 +30,15 @@ function toggle<T>(list: T[], value: T): T[] {
 }
 
 /** 히트 상태 / 시작 위치 태그 필터. 아무것도 선택하지 않으면 전체를 보여 준다. */
-export function ComboFilters({ items, dict }: { items: ComboFilterItem[]; dict: Dictionary }) {
+export function ComboFilters({
+  items,
+  dict,
+  characterId,
+}: {
+  items: ComboFilterItem[];
+  dict: Dictionary;
+  characterId: number;
+}) {
   const [hit, setHit] = useState<HitState[]>([]);
   const [pos, setPos] = useState<ScreenPosition[]>([]);
 
@@ -74,11 +83,13 @@ export function ComboFilters({ items, dict }: { items: ComboFilterItem[]; dict: 
           {items.length === 0 ? dict.combo.none : dict.combo.empty}
         </p>
       ) : (
-        <div className="flex flex-col gap-2">
-          {visible.map((item) => (
-            <div key={item.id}>{item.card}</div>
-          ))}
-        </div>
+        <SortableCards
+          table="combos"
+          characterId={characterId}
+          items={items}
+          visibleIds={new Set(visible.map((i) => i.id))}
+          className="flex flex-col gap-2"
+        />
       )}
     </div>
   );

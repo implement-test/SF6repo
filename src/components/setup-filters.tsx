@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
+import { SortableCards } from "./admin/sortable-cards";
 
 export type SetupFilterItem = { id: number; situations: string[]; card: ReactNode };
 
@@ -10,7 +11,9 @@ export function SetupFilters({
   items,
   situations,
   dict,
+  characterId,
 }: {
+  characterId: number;
   items: SetupFilterItem[];
   situations: { slug: string; name: string }[];
   dict: Dictionary;
@@ -54,11 +57,13 @@ export function SetupFilters({
           {items.length === 0 ? dict.setup.empty : dict.setup.none}
         </p>
       ) : (
-        <div className="flex flex-col gap-3">
-          {visible.map((item) => (
-            <div key={item.id}>{item.card}</div>
-          ))}
-        </div>
+        <SortableCards
+          table="setups"
+          characterId={characterId}
+          items={items}
+          visibleIds={new Set(visible.map((i) => i.id))}
+          className="flex flex-col gap-3"
+        />
       )}
     </div>
   );

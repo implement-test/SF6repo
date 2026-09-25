@@ -16,6 +16,15 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-09-26",
     items: [
       {
+        kind: "added",
+        adminOnly: true,
+        text: {
+          ko: "콤보·셋업 목록에서 카드 왼쪽 ▲ ⠿ ▼ 로 바로 순서 변경 (자동 저장)",
+          en: "Reorder combos and setups right in the list with ▲ ⠿ ▼ beside each card (auto-saved)",
+          ja: "コンボ・セットプレイ一覧でカード左の ▲ ⠿ ▼ から直接並び替え（自動保存）",
+        },
+      },
+      {
         kind: "changed",
         adminOnly: true,
         text: {
