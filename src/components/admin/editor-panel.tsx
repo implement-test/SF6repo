@@ -5,14 +5,15 @@ import { useRouter } from "next/navigation";
 import { ENTITIES, today, type Field } from "@/lib/admin/entities";
 import { findUnknownTokens, parseNotation } from "@/lib/notation/parse";
 import { describeError, revalidateSite, supabaseBrowser } from "@/lib/supabase/browser";
-import type { ComboStarter, Localized, Patch, PracticeConfig, SetupOption } from "@/lib/types";
+import type { Localized, Patch, PracticeConfig, SetupOption, StarterGroup } from "@/lib/types";
 import { parseYouTube } from "@/lib/youtube";
 import { normalizeOptions, normalizePractice } from "@/lib/setup";
+import { normalizeStarterGroups } from "@/lib/starters";
 import { NotationImage } from "../notation";
 import { useAdmin, type EditorRequest } from "./admin-context";
 import { formatPatchVersion } from "@/lib/patch";
 import { History, useAuthorNames } from "./history";
-import { StartersInput, cleanStarters, inputClass } from "./starters-input";
+import { StarterGroupsInput, cleanStarterGroups, inputClass } from "./starters-input";
 import { ClockInput } from "./clock-input";
 import {
   ComboLinksInput,
@@ -30,6 +31,7 @@ function normalizeValues(v: Values): Values {
   const out = { ...v };
   if ("options" in out) out.options = normalizeOptions(out.options);
   if ("practice" in out) out.practice = normalizePractice(out.practice);
+  if ("starters" in out) out.starters = normalizeStarterGroups(out.starters);
   return out;
 }
 const LANGS = [
@@ -421,10 +423,10 @@ function FieldInput({
 
     case "starters":
       return (
-        <StartersInput
+        <StarterGroupsInput
           label={field.label}
           help={field.help}
-          value={(value as ComboStarter[] | null) ?? []}
+          value={(value as StarterGroup[] | null) ?? []}
           onChange={onChange}
           characterId={characterId}
         />
@@ -615,7 +617,7 @@ function buildPayload(fields: Field[], values: Values): { payload: Values; probl
         payload[field.key] = raw === null || raw === undefined ? (field.nullable ? null : 0) : raw;
         break;
       case "starters":
-        payload[field.key] = cleanStarters(raw as ComboStarter[] | null);
+        payload[field.key] = cleanStarterGroups(raw as StarterGroup[] | null);
         break;
       case "setupOptions":
         payload[field.key] = cleanOptions(raw as SetupOption[] | null);

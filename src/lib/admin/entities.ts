@@ -129,7 +129,7 @@ export const ENTITIES: Record<EntityType, Entity> = {
             label: "시동 기본기",
             type: "starters",
             wide: true,
-            help: "같은 루트로 이어지는 시동기를 필요한 만큼 추가합니다. 첫 번째 시동기가 데미지 기준입니다.",
+            help: "같은 루트로 이어지는 시동기를 그룹으로 묶습니다. 프리셋을 불러오면 프리셋 이름의 그룹이 됩니다. 첫 그룹의 첫 시동기가 데미지 기준입니다.",
           },
           { key: "notation_classic", label: "루트 (클래식)", type: "notation", required: true, wide: true },
           {

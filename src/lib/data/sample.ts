@@ -34,8 +34,14 @@ export const sampleCombos: Combo[] = [
     id: 1,
     title: { ko: "[예시] 기본 콤보", en: "[Sample] Basic combo" },
     starters: [
-      { classic: "2LP → 2LP", modern: "2L → 2L" },
-      { classic: "5LP", modern: "5L" },
+      {
+        name: "약 시동",
+        starters: [
+          { classic: "2LP → 2LP", modern: "2L → 2L" },
+          { classic: "5LP", modern: "5L" },
+        ],
+      },
+      { name: "카운터 시동", starters: [{ classic: "counter 5MP", modern: "counter 5M" }] },
     ],
     notation_classic: "214LP",
     notation_modern: "214L",
@@ -73,7 +79,7 @@ export const sampleCombos: Combo[] = [
     id: 3,
     patch_id: 0,
     title: { ko: "[예시] 임팩트 후 코너", en: "[Sample] Corner after impact", ja: "[例] インパクト後 画面端" },
-    starters: [{ classic: "DI", modern: "DI" }],
+    starters: [{ name: null, starters: [{ classic: "DI", modern: "DI" }] }],
     notation_classic: "(벽꽝) → air HP → delay 5HP → 623KK → 236236P",
     notation_modern: "(벽꽝) → air H → delay 5H → 623SP → 236236H",
     hit_states: ["corner_impact_stun"],

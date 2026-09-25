@@ -2,6 +2,7 @@ import "server-only";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Character, Combo, Patch, Setup, SetupComboLink, SetupSituation } from "@/lib/types";
 import { normalizeOptions, normalizePractice } from "@/lib/setup";
+import { normalizeStarterGroups } from "@/lib/starters";
 import {
   sampleCharacters,
   sampleCombos,
@@ -68,7 +69,9 @@ export async function getAuthorNames(): Promise<Record<string, string>> {
 export async function getCombos(characterId: number): Promise<Combo[]> {
   const c = db();
   if (!c) return sampleCombos.filter((combo) => combo.character_id === characterId);
-  return rows<Combo>(c.from("combos").select("*").eq("character_id", characterId).order("sort_order"));
+  const list = await rows<Combo>(c.from("combos").select("*").eq("character_id", characterId).order("sort_order"));
+  // 예전 형식(시동기 목록)도 그룹 목록으로 맞춘다.
+  return list.map((cb) => ({ ...cb, starters: normalizeStarterGroups(cb.starters) }));
 }
 
 export async function getSetupSituations(): Promise<SetupSituation[]> {
@@ -124,7 +127,7 @@ export async function getComboForEmbed(
   if (!c) combo = sampleCombos.find((cb) => cb.id === id);
   else {
     const { data } = await c.from("combos").select("*").eq("id", id).maybeSingle();
-    combo = data ?? undefined;
+    combo = data ? { ...data, starters: normalizeStarterGroups(data.starters) } : undefined;
   }
   if (!combo || !combo.is_published) return null;
 

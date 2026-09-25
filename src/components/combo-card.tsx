@@ -4,6 +4,7 @@ import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { pickLocalized } from "@/lib/i18n/localized";
 import { parseYouTube } from "@/lib/youtube";
+import { flattenStarters } from "@/lib/starters";
 import { ControlNotation } from "./notation";
 import { LevelBadge, NotTranslatedBadge, OutdatedBadge, Tag } from "./badges";
 import { SegmentGauge } from "./gauges";
@@ -38,7 +39,10 @@ export function ComboCard({
   const notes = combo.notes ? pickLocalized(combo.notes, locale) : null;
   const outdated = latestPatchId !== null && combo.patch_id !== latestPatchId;
   const position = dict.position[combo.position_start] ?? combo.position_start;
-  const starters = combo.starters ?? [];
+  const groups = (combo.starters ?? []).filter((g) => g.starters.length > 0);
+  const starters = flattenStarters(groups);
+  // 그룹마다 앞 그룹들의 시동기 수 (번호를 이어 매기기 위해)
+  const groupOffsets = groups.map((_, g) => groups.slice(0, g).reduce((sum, x) => sum + x.starters.length, 0));
   const hasMedia = !!combo.media_url || !!parseYouTube(combo.youtube_url);
 
   return (
@@ -68,21 +72,38 @@ export function ComboCard({
           {starters.length > 0 && (
             <div className="grid gap-2 px-3 py-3 sm:grid-cols-[4.5rem_1fr]">
               <span className="eyebrow pt-1.5">{dict.combo.starter}</span>
-              <ol className="flex flex-col gap-2">
-                {starters.map((s, i) => (
-                  <li key={i} className="flex items-start gap-2.5">
-                    <span
-                      className={`display w-4 pt-1 text-right text-base ${i === 0 ? "text-highlight-text" : "text-muted"}`}
-                      title={i === 0 ? dict.combo.damageBasis : undefined}
-                    >
-                      {i + 1}
-                    </span>
-                    <div className="min-w-0">
-                      <ControlNotation classic={s.classic} modern={s.modern} classicOnlyLabel={dict.combo.classicOnly} />
-                    </div>
-                  </li>
+              <div className="flex flex-col gap-3">
+                {groups.map((group, g) => (
+                  <div key={g} className="flex flex-col gap-2">
+                    {/* 그룹 이름 (프리셋 이름 등). 이름 없는 그룹은 제목 없이 */}
+                    {group.name && (
+                      <span className="flex items-center gap-2 text-xs font-bold text-muted">
+                        <span aria-hidden className="h-px w-3 bg-border-strong" />
+                        {group.name}
+                      </span>
+                    )}
+                    <ol className="flex flex-col gap-2">
+                      {group.starters.map((s, i) => {
+                        // 번호는 그룹을 넘어 이어진다. 1번(첫 그룹의 첫 시동기)이 데미지 기준
+                        const n = groupOffsets[g] + i + 1;
+                        return (
+                          <li key={i} className="flex items-start gap-2.5">
+                            <span
+                              className={`display w-4 pt-1 text-right text-base ${n === 1 ? "text-highlight-text" : "text-muted"}`}
+                              title={n === 1 ? dict.combo.damageBasis : undefined}
+                            >
+                              {n}
+                            </span>
+                            <div className="min-w-0">
+                              <ControlNotation classic={s.classic} modern={s.modern} classicOnlyLabel={dict.combo.classicOnly} />
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ol>
+                  </div>
                 ))}
-              </ol>
+              </div>
             </div>
           )}
           <div className={`grid gap-2 px-3 py-3 ${starters.length > 0 ? "border-t border-border sm:grid-cols-[4.5rem_1fr]" : ""}`}>

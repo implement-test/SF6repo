@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { findUnknownTokens, parseNotation } from "@/lib/notation/parse";
 import { supabaseBrowser } from "@/lib/supabase/browser";
-import type { ComboStarter } from "@/lib/types";
+import type { ComboStarter, StarterGroup } from "@/lib/types";
 import { NotationImage } from "../notation";
 import { useAdmin } from "./admin-context";
 
@@ -54,7 +54,7 @@ export function StartersInput({
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-xs font-semibold text-muted">{label}</span>
+      {label && <span className="text-xs font-semibold text-muted">{label}</span>}
       {characterId !== undefined && (
         <PresetPicker
           characterId={characterId}
@@ -111,6 +111,108 @@ export function StartersInput({
         className="self-start border border-dashed border-border-strong px-3 py-1.5 text-sm font-semibold text-muted hover:border-accent hover:text-accent"
       >
         + 시동기 직접 추가
+      </button>
+      {help && <span className="text-xs text-muted">{help}</span>}
+    </div>
+  );
+}
+
+/** 저장 전 정리: 그룹마다 시동기를 정리하고, 빈 그룹은 버린다 */
+export function cleanStarterGroups(groups: StarterGroup[] | null | undefined): StarterGroup[] {
+  return (groups ?? [])
+    .map((g) => ({ name: g.name?.trim() || null, starters: cleanStarters(g.starters) }))
+    .filter((g) => g.starters.length > 0);
+}
+
+/**
+ * 콤보의 시동기 그룹 편집.
+ * 프리셋을 불러오면 프리셋 이름의 그룹 하나로 들어가고, 빈 그룹을 만들어 직접 채울 수도 있다.
+ * 첫 그룹의 첫 시동기가 데미지 기준.
+ */
+export function StarterGroupsInput({
+  label,
+  help,
+  value,
+  onChange,
+  characterId,
+}: {
+  label: string;
+  help?: string;
+  value: StarterGroup[];
+  onChange: (v: StarterGroup[]) => void;
+  characterId?: number;
+}) {
+  const update = (g: number, patch: Partial<StarterGroup>) =>
+    onChange(value.map((x, i) => (i === g ? { ...x, ...patch } : x)));
+  const move = (g: number, dir: -1 | 1) => {
+    const next = [...value];
+    [next[g], next[g + dir]] = [next[g + dir], next[g]];
+    onChange(next);
+  };
+  const iconButton =
+    "grid size-7 place-items-center border border-border-strong text-sm text-muted hover:text-fg disabled:opacity-30";
+
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="text-xs font-semibold text-muted">{label}</span>
+      {characterId !== undefined && (
+        <PresetPicker
+          characterId={characterId}
+          onPick={(preset) => onChange([...value, { name: preset.name, starters: cleanStarters(preset.starters) }])}
+        />
+      )}
+      {value.length === 0 && (
+        <p className="border border-dashed border-border px-3 py-3 text-xs text-muted">
+          시동기가 없으면 루트만 표시됩니다. 프리셋을 불러오거나 그룹을 추가하세요.
+        </p>
+      )}
+      {value.map((group, g) => (
+        <div key={g} className="flex flex-col gap-2 border border-border-strong bg-surface p-2.5">
+          <div className="flex items-center gap-2">
+            <span className="shrink-0 text-xs font-bold text-muted">그룹</span>
+            <input
+              value={group.name ?? ""}
+              onChange={(e) => update(g, { name: e.target.value })}
+              placeholder="그룹 이름 (선택, 예: 약 시동)"
+              className={inputClass}
+            />
+            <span className="flex shrink-0 gap-1">
+              <button type="button" className={iconButton} disabled={g === 0} onClick={() => move(g, -1)} aria-label="그룹 위로">
+                ↑
+              </button>
+              <button
+                type="button"
+                className={iconButton}
+                disabled={g === value.length - 1}
+                onClick={() => move(g, 1)}
+                aria-label="그룹 아래로"
+              >
+                ↓
+              </button>
+              <button
+                type="button"
+                className={`${iconButton} hover:border-warn hover:text-warn`}
+                onClick={() => onChange(value.filter((_, i) => i !== g))}
+                aria-label="그룹 삭제"
+              >
+                ×
+              </button>
+            </span>
+          </div>
+          <StartersInput
+            label=""
+            value={group.starters}
+            onChange={(starters) => update(g, { starters })}
+            damageBasis={g === 0}
+          />
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={() => onChange([...value, { name: null, starters: [{ classic: "", modern: null }] }])}
+        className="self-start border border-dashed border-border-strong px-3 py-1.5 text-sm font-semibold text-muted hover:border-accent hover:text-accent"
+      >
+        + 빈 그룹 추가
       </button>
       {help && <span className="text-xs text-muted">{help}</span>}
     </div>

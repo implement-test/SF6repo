@@ -76,12 +76,15 @@ export type Move = ContentBase &
 /** 시동 기본기. 같은 루트에 여러 개를 붙일 수 있다. */
 export type ComboStarter = { classic: string; modern: string | null };
 
+/** 시동기 그룹. 프리셋을 불러오면 프리셋 이름으로 그룹 하나가 된다. name 이 없으면 이름 없는 그룹 */
+export type StarterGroup = { name: string | null; starters: ComboStarter[] };
+
 export type Combo = ContentBase &
   Media & {
     character_id: number;
     title: Localized | null;
-    /** 첫 번째가 데미지 기준 */
-    starters: ComboStarter[];
+    /** 시동기 그룹. 첫 그룹의 첫 시동기가 데미지 기준 */
+    starters: StarterGroup[];
     /** 루트 */
     notation_classic: string;
     notation_modern: string | null;

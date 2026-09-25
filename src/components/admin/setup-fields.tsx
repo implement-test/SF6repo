@@ -20,6 +20,7 @@ import {
   type SetupSituation,
 } from "@/lib/types";
 import { normalizeDriveReversal } from "@/lib/setup";
+import { flattenStarters, normalizeStarterGroups } from "@/lib/starters";
 import { NotationImage } from "../notation";
 import { inputClass, NotationRow } from "./starters-input";
 import { ClockInput } from "./clock-input";
@@ -85,7 +86,7 @@ type ComboRow = {
   id: number;
   title: { ko: string } | null;
   notation_classic: string;
-  starters: { classic: string }[] | null;
+  starters: unknown;
   frame_after: string | null;
   is_published: boolean;
 };
@@ -123,7 +124,7 @@ export function ComboLinksInput({
     ? combos
         .filter((c) => !value.includes(c.id))
         .filter((c) =>
-          [c.title?.ko ?? "", c.notation_classic, ...(c.starters ?? []).map((s) => s.classic)]
+          [c.title?.ko ?? "", c.notation_classic, ...flattenStarters(normalizeStarterGroups(c.starters)).map((s) => s.classic)]
             .join(" ")
             .toLowerCase()
             .includes(q),

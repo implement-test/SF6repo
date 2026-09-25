@@ -16,6 +16,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-09-26",
     items: [
       {
+        kind: "changed",
+        text: {
+          ko: "콤보 시동기를 그룹으로 묶어 표시 (프리셋을 불러오면 그룹으로)",
+          en: "Combo starters grouped (loading a preset adds it as a group)",
+          ja: "コンボの始動技をグループ表示（プリセットを読み込むとグループに）",
+        },
+      },
+      {
         kind: "added",
         text: {
           ko: "콤보 퍼가기 (링크 · 블로그용 임베드 코드)",
