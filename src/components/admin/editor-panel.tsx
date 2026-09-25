@@ -639,6 +639,10 @@ function buildPayload(fields: Field[], values: Values): { payload: Values; probl
       case "situations":
         payload[field.key] = (raw as string[] | null) ?? [];
         break;
+      case "checkbox":
+        // 한 번도 누르지 않은 체크박스도 false 로 (DB 칼럼이 not null)
+        payload[field.key] = raw === true;
+        break;
       case "comboLinks":
         // 칼럼이 아니라 setup_combos 에 따로 저장한다 (syncComboLinks)
         break;

@@ -16,6 +16,15 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-09-26",
     items: [
       {
+        kind: "changed",
+        adminOnly: true,
+        text: {
+          ko: "새 콤보·셋업 저장 시 '구간 반복' 오류 수정",
+          en: "Fixed a 'segment loop' error when saving new combos and setups",
+          ja: "新規コンボ・セットプレイ保存時の「区間リピート」エラーを修正",
+        },
+      },
+      {
         kind: "added",
         adminOnly: true,
         text: {
