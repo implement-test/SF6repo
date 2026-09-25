@@ -99,8 +99,8 @@ export function SetupCard({
       {(setup.notation_classic || description) && (
         <section className="flex flex-col gap-2">
           {setup.notation_classic && (
-            <div className="grid gap-2 border-l-2 border-accent bg-inset px-3 py-3 sm:grid-cols-[4.5rem_1fr]">
-              <span className="eyebrow pt-1.5">{t.input}</span>
+            <div className="grid gap-x-4 gap-y-2 border-l-2 border-accent bg-inset px-3 py-3 sm:grid-cols-[max-content_1fr]">
+              <span className="eyebrow whitespace-nowrap pt-1.5">{t.input}</span>
               <ControlNotation
                 classic={setup.notation_classic}
                 modern={setup.notation_modern}

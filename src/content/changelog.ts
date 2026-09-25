@@ -16,6 +16,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-09-26",
     items: [
       {
+        kind: "changed",
+        text: {
+          ko: "셋업의 '셋업' 항목 이름을 '셋업 초반 공통 루트'로",
+          en: "Setup field renamed to 'Common opening route'",
+          ja: "セットプレイの項目名を「序盤の共通ルート」に",
+        },
+      },
+      {
         kind: "added",
         text: { ko: "딜레이 아이콘 (delay)", en: "Delay icon (delay)", ja: "ディレイのアイコン（delay）" },
       },
