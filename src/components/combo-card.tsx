@@ -131,6 +131,8 @@ export function ComboCard({
             youtubeStart={combo.youtube_start}
             mediaUrl={combo.media_url}
             title={title?.text ?? combo.notation_classic}
+            showLabel={dict.video.show}
+            hideLabel={dict.video.hide}
           />
         </div>
       )}

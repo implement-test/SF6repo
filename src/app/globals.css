@@ -130,13 +130,16 @@ body {
   color: var(--muted);
 }
 
-/* 평행사변형: 바깥은 기울이고 안쪽 글자는 바로 세운다 */
-.skew {
-  transform: skewX(-14deg);
-}
-.skew > * {
-  display: inline-block;
-  transform: skewX(14deg);
+/* 평행사변형: 바깥은 기울이고 안쪽 글자는 바로 세운다.
+   components 레이어에 둬서 안쪽 요소에 준 Tailwind 유틸리티(inline-flex 등)가 이기게 한다. */
+@layer components {
+  .skew {
+    transform: skewX(-14deg);
+  }
+  .skew > * {
+    display: inline-block;
+    transform: skewX(14deg);
+  }
 }
 
 /* 사선 줄무늬 배경 */

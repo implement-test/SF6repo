@@ -56,6 +56,7 @@ const ko = {
   },
   patch: { outdated: "이전 패치 기준" },
   created: "작성일",
+  video: { show: "영상 보기", hide: "영상 접기" },
   notationPage: {
     title: "콤보 표기법",
     intro: "방향은 키보드 숫자 패드 기준 숫자로, 버튼은 영문 약자로 표기합니다.",
@@ -122,6 +123,7 @@ const en: Dictionary = {
   },
   patch: { outdated: "Older patch" },
   created: "Added",
+  video: { show: "Show video", hide: "Hide video" },
   notationPage: {
     title: "Combo notation",
     intro: "Directions use numpad notation, and buttons use their abbreviations.",
@@ -186,6 +188,7 @@ const ja: Dictionary = {
   },
   patch: { outdated: "旧パッチ基準" },
   created: "作成日",
+  video: { show: "動画を見る", hide: "動画を閉じる" },
   notationPage: {
     title: "コンボ表記",
     intro: "方向はテンキー表記の数字、ボタンは略称で表記します。",
