@@ -17,6 +17,15 @@ export const CHANGELOG: ChangelogEntry[] = [
     items: [
       {
         kind: "changed",
+        adminOnly: true,
+        text: {
+          ko: "콤보·셋업 순서를 숫자 대신 '순서 변경' 창에서 끌어서 또는 ▲▼로 변경",
+          en: "Reorder combos and setups by dragging or ▲▼ in a 'Reorder' dialog instead of numbers",
+          ja: "コンボ・セットプレイの並び順を数字ではなく「並び替え」画面でドラッグや▲▼で変更",
+        },
+      },
+      {
+        kind: "changed",
         text: {
           ko: "콤보 데미지 기준 시동기를 직접 골라 강조 표시",
           en: "Combos now highlight a chosen damage-basis starter",

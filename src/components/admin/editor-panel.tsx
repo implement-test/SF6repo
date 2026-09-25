@@ -146,9 +146,20 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
     };
 
     if (isNew) {
+      // 콤보·셋업은 새 항목을 목록 맨 아래에 둔다 (순서는 '순서 변경'에서 바꾼다)
+      const order: Values = {};
+      if (typeof request.defaults?.character_id === "number" && (entity.table === "combos" || entity.table === "setups")) {
+        const { data: last } = await sb
+          .from(entity.table)
+          .select("sort_order")
+          .eq("character_id", request.defaults.character_id)
+          .order("sort_order", { ascending: false })
+          .limit(1);
+        order.sort_order = (last?.[0]?.sort_order ?? -1) + 1;
+      }
       const { data: inserted, error } = await sb
         .from(entity.table)
-        .insert({ ...request.defaults, ...payload })
+        .insert({ ...request.defaults, ...order, ...payload })
         .select("id")
         .single();
       if (error) return fail(describeError(error));

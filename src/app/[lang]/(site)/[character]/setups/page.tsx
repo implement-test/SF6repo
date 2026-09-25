@@ -15,6 +15,7 @@ import { SetupCard } from "@/components/setup-card";
 import { SetupFilters } from "@/components/setup-filters";
 import { AddButton } from "@/components/admin/admin-context";
 import { DraftItems } from "@/components/admin/drafts";
+import { ReorderButton } from "@/components/admin/reorder-button";
 
 export const revalidate = 3600;
 
@@ -39,7 +40,8 @@ export default async function SetupsPage({ params }: PageProps<"/[lang]/[charact
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-end empty:hidden">
+      <div className="flex justify-end gap-2 empty:hidden">
+        <ReorderButton table="setups" characterId={character.id} label="셋업" />
         <AddButton entity="setup" label="셋업 추가" scope={character.id} defaults={{ character_id: character.id }} />
       </div>
       <DraftItems table="setups" entity="setup" characterId={character.id} label="셋업" />

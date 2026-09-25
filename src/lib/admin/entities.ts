@@ -82,7 +82,6 @@ const META_GROUP: FieldGroup = {
     { key: "target_level", label: "대상", type: "select", options: LEVELS },
     { key: "patch_id", label: "기준 패치", type: "patch" },
     { key: "created_date", label: "작성일", type: "date" },
-    { key: "sort_order", label: "정렬 순서", type: "number", step: 1, help: "작을수록 위" },
     { key: "is_published", label: "공개", type: "checkbox" },
   ],
 };
@@ -111,7 +110,6 @@ const MEDIA_GROUP: FieldGroup = {
 const metaDefaults = () => ({
   target_level: "beginner",
   created_date: today(),
-  sort_order: 0,
   is_published: true,
 });
 

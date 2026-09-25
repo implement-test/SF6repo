@@ -69,7 +69,7 @@ export async function getAuthorNames(): Promise<Record<string, string>> {
 export async function getCombos(characterId: number): Promise<Combo[]> {
   const c = db();
   if (!c) return sampleCombos.filter((combo) => combo.character_id === characterId);
-  const list = await rows<Combo>(c.from("combos").select("*").eq("character_id", characterId).order("sort_order"));
+  const list = await rows<Combo>(c.from("combos").select("*").eq("character_id", characterId).order("sort_order").order("id"));
   // 예전 형식(시동기 목록)도 그룹 목록으로 맞춘다.
   return list.map((cb) => ({ ...cb, starters: normalizeStarterGroups(cb.starters) }));
 }
