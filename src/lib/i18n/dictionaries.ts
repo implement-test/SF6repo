@@ -44,6 +44,9 @@ const ko = {
   position: { midscreen: "필드", corner: "코너", other: "기타" },
   combo: {
     damage: "데미지",
+    damageBasis: "첫 번째 시동기 기준",
+    starter: "시동기",
+    route: "루트",
     drive: "드라이브",
     sa: "SA",
     difficulty: "입력 난이도",
@@ -107,6 +110,9 @@ const en: Dictionary = {
   position: { midscreen: "Midscreen", corner: "Corner", other: "Other" },
   combo: {
     damage: "Damage",
+    damageBasis: "Based on the first starter",
+    starter: "Starters",
+    route: "Route",
     drive: "Drive",
     sa: "SA",
     difficulty: "Execution",
@@ -168,6 +174,9 @@ const ja: Dictionary = {
   position: { midscreen: "画面中央", corner: "画面端", other: "その他" },
   combo: {
     damage: "ダメージ",
+    damageBasis: "1つ目の始動技基準",
+    starter: "始動技",
+    route: "ルート",
     drive: "ドライブ",
     sa: "SA",
     difficulty: "入力難度",

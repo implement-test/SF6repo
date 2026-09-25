@@ -8,6 +8,9 @@ npm run dev
 ```
 
 Supabase 환경변수가 없으면 `src/lib/data/sample.ts` 의 예시 데이터로 화면이 뜬다.
+DB 가 연결돼 있어도 `SF6_SAMPLE_DATA=1` 로 실행하면 예시 데이터로 확인할 수 있다.
+
+DB 스키마가 바뀌면 `supabase/migrations` 에 번호순으로 파일이 추가된다. 아직 실행하지 않은 파일만 SQL Editor 에서 차례로 실행한다.
 
 ```bash
 npm test        # 표기법 파서 테스트
@@ -20,6 +23,7 @@ npm run lint
 2. SQL Editor 에서 차례로 실행
    - `supabase/migrations/0001_init.sql`
    - `supabase/migrations/0002_seed.sql`
+   - `supabase/migrations/0003_combo_starters.sql`
 3. Authentication → Sign In / Providers → **Allow new users to sign up 끄기**
 4. Authentication → Users → Add user 로 관리자 계정(이메일+비밀번호) 생성
 5. SQL Editor 에서 관리자 등록

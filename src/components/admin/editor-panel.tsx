@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import { ENTITIES, type Field } from "@/lib/admin/entities";
 import { findUnknownTokens, parseNotation } from "@/lib/notation/parse";
 import { revalidateSite, supabaseBrowser } from "@/lib/supabase/browser";
-import type { Localized, Patch } from "@/lib/types";
+import type { ComboStarter, Localized, Patch } from "@/lib/types";
+import { parseYouTube } from "@/lib/youtube";
 import { NotationImage } from "../notation";
 import { useAdmin, type EditorRequest } from "./admin-context";
+import { formatPatchVersion } from "@/lib/patch";
 
 type Values = Record<string, unknown>;
 const LANGS = [
@@ -257,18 +259,33 @@ function FieldInput({
       );
     }
 
+    case "starters":
+      return <StartersInput field={field} value={(value as ComboStarter[] | null) ?? []} onChange={onChange} />;
+
     case "text":
-    case "url":
+    case "url": {
+      const text = (value as string | null) ?? "";
+      const yt = field.type === "url" ? parseYouTube(text) : null;
       return (
         <Label field={field}>
           <input
             type={field.type === "url" ? "url" : "text"}
-            value={(value as string | null) ?? ""}
+            value={text}
             onChange={(e) => onChange(e.target.value)}
             className={inputClass}
           />
+          {yt && (
+            <span className="flex items-center gap-3 text-xs text-muted">
+              {/* eslint-disable-next-line @next/next/no-img-element -- 관리자 미리보기용 썸네일 */}
+              <img src={`https://i.ytimg.com/vi/${yt.id}/mqdefault.jpg`} alt="" className="h-14 border border-border" />
+              <span>
+                YouTube 영상 확인됨{yt.start ? ` · ${yt.start}초부터` : ""}
+              </span>
+            </span>
+          )}
         </Label>
       );
+    }
 
     case "number":
       return (
@@ -359,13 +376,131 @@ function FieldInput({
             <option value="">— (지정 안 함)</option>
             {patches.map((p) => (
               <option key={p.id} value={p.id}>
-                Ver. {p.version} ({p.released_on})
+                {formatPatchVersion(p.version)} ({p.released_on})
               </option>
             ))}
           </select>
         </Label>
       );
   }
+}
+
+/** 시동 기본기 목록: 추가 / 삭제 / 순서 변경. 첫 번째가 데미지 기준 */
+function StartersInput({
+  field,
+  value,
+  onChange,
+}: {
+  field: Field;
+  value: ComboStarter[];
+  onChange: (v: ComboStarter[]) => void;
+}) {
+  const update = (i: number, patch: Partial<ComboStarter>) =>
+    onChange(value.map((s, j) => (j === i ? { ...s, ...patch } : s)));
+  const move = (i: number, dir: -1 | 1) => {
+    const next = [...value];
+    [next[i], next[i + dir]] = [next[i + dir], next[i]];
+    onChange(next);
+  };
+  const iconButton =
+    "grid size-7 place-items-center border border-border-strong text-sm text-muted hover:text-fg disabled:opacity-30";
+
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="text-xs font-semibold text-muted">{field.label}</span>
+      {value.length === 0 && (
+        <p className="border border-dashed border-border px-3 py-3 text-xs text-muted">
+          시동기가 없으면 루트만 표시됩니다.
+        </p>
+      )}
+      <ol className="flex flex-col gap-2">
+        {value.map((s, i) => (
+          <li key={i} className="flex flex-col gap-2 border border-border bg-surface-2 p-3">
+            <div className="flex items-center gap-2">
+              <span className={`display text-lg ${i === 0 ? "text-highlight-text" : "text-muted"}`}>{i + 1}</span>
+              {i === 0 && <span className="text-xs text-muted">데미지 기준</span>}
+              <span className="ml-auto flex gap-1">
+                <button type="button" className={iconButton} disabled={i === 0} onClick={() => move(i, -1)} aria-label="위로">
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  className={iconButton}
+                  disabled={i === value.length - 1}
+                  onClick={() => move(i, 1)}
+                  aria-label="아래로"
+                >
+                  ↓
+                </button>
+                <button
+                  type="button"
+                  className={`${iconButton} hover:border-warn hover:text-warn`}
+                  onClick={() => onChange(value.filter((_, j) => j !== i))}
+                  aria-label="삭제"
+                >
+                  ×
+                </button>
+              </span>
+            </div>
+            <NotationRow
+              label="클래식"
+              value={s.classic}
+              onChange={(classic) => update(i, { classic })}
+              placeholder="예: 2LP → 2LP"
+            />
+            <NotationRow
+              label="모던"
+              value={s.modern ?? ""}
+              onChange={(modern) => update(i, { modern })}
+              placeholder="비우면 클래식 전용"
+            />
+          </li>
+        ))}
+      </ol>
+      <button
+        type="button"
+        onClick={() => onChange([...value, { classic: "", modern: null }])}
+        className="self-start border border-dashed border-border-strong px-3 py-1.5 text-sm font-semibold text-muted hover:border-accent hover:text-accent"
+      >
+        + 시동기 추가
+      </button>
+      {field.help && <span className="text-xs text-muted">{field.help}</span>}
+    </div>
+  );
+}
+
+function NotationRow({
+  label,
+  value,
+  onChange,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+}) {
+  const unknown = value ? findUnknownTokens(parseNotation(value)) : [];
+  return (
+    <div className="grid grid-cols-[3.2rem_1fr] items-start gap-2">
+      <span className="pt-1.5 text-xs font-bold text-muted">{label}</span>
+      <div className="flex flex-col gap-1.5">
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          spellCheck={false}
+          placeholder={placeholder}
+          className={`${inputClass} font-mono`}
+        />
+        {value && (
+          <div className="flex min-h-10 items-center bg-inset px-2 py-1.5">
+            <NotationImage notation={value} />
+          </div>
+        )}
+        {unknown.length > 0 && <span className="text-xs text-warn">해석할 수 없는 부분: {unknown.join(", ")}</span>}
+      </div>
+    </div>
+  );
 }
 
 // ───────────────────────── 저장 데이터 정리 ─────────────────────────
@@ -399,6 +534,13 @@ function buildPayload(fields: Field[], values: Values): { payload: Values; probl
       case "number":
         payload[field.key] = raw === null || raw === undefined ? (field.nullable ? null : 0) : raw;
         break;
+      case "starters": {
+        // 클래식 표기가 빈 줄은 버리고, 모던이 비어 있으면 null(클래식 전용)
+        payload[field.key] = ((raw as ComboStarter[] | null) ?? [])
+          .map((s) => ({ classic: s.classic.trim(), modern: s.modern?.trim() || null }))
+          .filter((s) => s.classic);
+        break;
+      }
       case "date":
         // 비워 두면 보내지 않는다 (DB 기본값 = 오늘)
         if (raw) payload[field.key] = raw;

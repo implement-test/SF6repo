@@ -9,6 +9,7 @@ export type Option = { value: string; label: string };
 export type Field = { key: string; label: string; help?: string; required?: boolean; wide?: boolean } & (
   | { type: "localized"; multiline?: boolean }
   | { type: "notation" }
+  | { type: "starters" }
   | { type: "text" | "url" }
   | { type: "number"; step?: number; min?: number; max?: number; nullable?: boolean }
   | { type: "select"; options: Option[]; nullable?: boolean }
@@ -77,8 +78,16 @@ const MEDIA_GROUP: FieldGroup = {
   title: "영상",
   fields: [
     { key: "media_url", label: "짧은 영상 URL (R2)", type: "url", wide: true },
-    { key: "youtube_url", label: "YouTube URL", type: "url", wide: true },
-    { key: "youtube_start", label: "YouTube 시작 (초)", type: "number", step: 1, min: 0, nullable: true },
+    { key: "youtube_url", label: "YouTube URL", type: "url", wide: true, help: "링크에 t= 가 있으면 그 시점부터 재생합니다." },
+    {
+      key: "youtube_start",
+      label: "YouTube 시작 (초)",
+      type: "number",
+      step: 1,
+      min: 0,
+      nullable: true,
+      help: "입력하면 링크의 t= 보다 우선합니다.",
+    },
   ],
 };
 
@@ -98,10 +107,17 @@ export const ENTITIES: Record<EntityType, Entity> = {
         title: "콤보",
         fields: [
           { key: "title", label: "제목", type: "localized" },
-          { key: "notation_classic", label: "클래식 표기", type: "notation", required: true, wide: true },
+          {
+            key: "starters",
+            label: "시동 기본기",
+            type: "starters",
+            wide: true,
+            help: "같은 루트로 이어지는 시동기를 필요한 만큼 추가합니다. 첫 번째 시동기가 데미지 기준입니다.",
+          },
+          { key: "notation_classic", label: "루트 (클래식)", type: "notation", required: true, wide: true },
           {
             key: "notation_modern",
-            label: "모던 표기",
+            label: "루트 (모던)",
             type: "notation",
             wide: true,
             help: "비워 두면 '클래식 전용'으로 표시됩니다.",
@@ -119,7 +135,15 @@ export const ENTITIES: Record<EntityType, Entity> = {
       {
         title: "수치",
         fields: [
-          { key: "damage", label: "데미지", type: "number", step: 1, min: 0, nullable: true },
+          {
+            key: "damage",
+            label: "데미지",
+            type: "number",
+            step: 1,
+            min: 0,
+            nullable: true,
+            help: "첫 번째 시동기 기준",
+          },
           { key: "drive_cost", label: "드라이브 소모 (칸)", type: "number", step: 0.5, min: 0, max: 6 },
           { key: "sa_cost", label: "SA 소모 (칸)", type: "number", step: 1, min: 0, max: 3 },
           { key: "difficulty", label: "입력 난이도", type: "select", options: DIFFICULTY },
@@ -131,6 +155,7 @@ export const ENTITIES: Record<EntityType, Entity> = {
     ],
     defaults: () => ({
       ...metaDefaults(),
+      starters: [],
       hit_states: ["normal"],
       position_start: "midscreen",
       position_end: null,

@@ -34,7 +34,6 @@ export function DraftCombos({ characterId }: { characterId: number }) {
       <ul className="flex flex-col divide-y divide-border">
         {drafts.map((d) => (
           <li key={d.id} className="flex items-center gap-3 py-2">
-            <span className="display text-muted">#{String(d.id).padStart(3, "0")}</span>
             <span className="font-semibold">{d.title?.ko}</span>
             <span className="min-w-0 truncate text-sm text-muted">
               <NotationText notation={d.notation_classic} />

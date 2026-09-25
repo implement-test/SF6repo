@@ -60,13 +60,18 @@ export type Move = ContentBase &
     notes: Localized | null;
   };
 
+/** 시동 기본기. 같은 루트에 여러 개를 붙일 수 있다. */
+export type ComboStarter = { classic: string; modern: string | null };
+
 export type Combo = ContentBase &
   Media & {
     character_id: number;
     title: Localized | null;
+    /** 첫 번째가 데미지 기준 */
+    starters: ComboStarter[];
+    /** 루트 */
     notation_classic: string;
     notation_modern: string | null;
-    starter_move_id: number | null;
     hit_states: HitState[];
     position_start: ScreenPosition;
     position_end: ScreenPosition | null;

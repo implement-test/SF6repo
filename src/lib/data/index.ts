@@ -15,7 +15,9 @@ function db(): SupabaseClient | null {
   if (client !== undefined) return client;
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  client = url && key ? createClient(url, key, { auth: { persistSession: false } }) : null;
+  // SF6_SAMPLE_DATA=1 이면 DB 가 연결돼 있어도 예시 데이터로 화면을 확인한다 (개발용).
+  const useSample = process.env.SF6_SAMPLE_DATA === "1";
+  client = url && key && !useSample ? createClient(url, key, { auth: { persistSession: false } }) : null;
   return client;
 }
 

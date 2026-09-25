@@ -5,6 +5,7 @@ import Link from "next/link";
 import { checkIsAdmin, supabaseBrowser } from "@/lib/supabase/browser";
 import type { Patch } from "@/lib/types";
 import { ADMIN_FLAG, AddButton, EditButton, useAdmin } from "./admin-context";
+import { formatPatchVersion } from "@/lib/patch";
 
 type Status = "loading" | "signed-out" | "not-admin" | "admin";
 
@@ -158,7 +159,7 @@ function PatchManager() {
         <ul className="divide-y divide-border border border-border bg-surface">
           {patches.map((p, i) => (
             <li key={p.id} className="flex items-center gap-3 px-4 py-2.5">
-              <span className="display text-lg">Ver. {p.version}</span>
+              <span className="display text-lg">{formatPatchVersion(p.version)}</span>
               {i === 0 && (
                 <span className="skew bg-highlight px-2 py-0.5 text-xs font-bold text-highlight-fg">
                   <span>LATEST</span>

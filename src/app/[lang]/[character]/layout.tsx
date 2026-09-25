@@ -5,6 +5,7 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import { pickLocalized } from "@/lib/i18n/localized";
 import { ContentFilters } from "@/components/prefs-controls";
 import { CharacterNav } from "@/components/character-nav";
+import { formatPatchVersion } from "@/lib/patch";
 
 export async function generateStaticParams() {
   const characters = await getCharacters();
@@ -45,7 +46,7 @@ export default async function CharacterLayout({ children, params }: LayoutProps<
           </div>
           {latest && (
             <div className="skew bg-highlight px-3 py-1 text-highlight-fg">
-              <span className="display text-sm not-italic">Ver. {latest.version}</span>
+              <span className="display text-sm not-italic">{formatPatchVersion(latest.version)}</span>
             </div>
           )}
         </div>
