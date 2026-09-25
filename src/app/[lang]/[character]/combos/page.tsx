@@ -25,7 +25,7 @@ function setupPreview(setup: Setup, locale: Locale, dict: Dictionary): string {
   if (setup.notation_classic) lines.push(`${dict.setup.input}: ${normalizeNotation(setup.notation_classic)}`);
   for (const o of setup.options) {
     const desc = o.description ? ` — ${pickLocalized(o.description, locale).text}` : "";
-    lines.push(`${dict.setup.option} ${o.label}: ${normalizeNotation(o.classic)}${desc}`);
+    lines.push(`${o.label}: ${normalizeNotation(o.classic)}${desc}`);
   }
   return lines.join("\n");
 }

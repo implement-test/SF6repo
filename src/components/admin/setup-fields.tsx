@@ -309,7 +309,7 @@ const addButton =
 
 // ───────────────────────── 옵션 1/2/... ─────────────────────────
 
-const nextLabel = (list: SetupOption[]) => String(list.length + 1);
+const nextLabel = (list: SetupOption[]) => `옵션 ${list.length + 1}`;
 const emptyBranch = (result: OptionResult = "hit"): OptionBranch => ({ result, classic: "", modern: null, note: null });
 
 export function OptionsInput({ value, onChange }: { value: SetupOption[]; onChange: (v: SetupOption[]) => void }) {
@@ -323,11 +323,11 @@ export function OptionsInput({ value, onChange }: { value: SetupOption[]; onChan
       {value.map((o, i) => (
         <div key={i} className="flex flex-col gap-2 border border-border bg-surface-2 p-3">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-muted">옵션</span>
+            <span className="text-xs font-bold text-muted">이름</span>
             <input
               value={o.label}
               onChange={(e) => update(i, { label: e.target.value })}
-              className={`${inputClass} w-16! text-center font-bold`}
+              className={`${inputClass} w-40! font-bold`}
               aria-label="옵션 이름"
             />
             <span className="ml-auto">
@@ -551,7 +551,7 @@ function cleanLocalized(v: Localized | null | undefined): Localized | null {
 export function cleanOptions(list: SetupOption[] | null | undefined): SetupOption[] {
   return (list ?? [])
     .map((o, i) => ({
-      label: o.label.trim() || String(i + 1),
+      label: o.label.trim() || `옵션 ${i + 1}`,
       classic: o.classic.trim(),
       modern: o.modern?.trim() || null,
       description: cleanLocalized(o.description),

@@ -221,7 +221,7 @@ export const ENTITIES: Record<EntityType, Entity> = {
       ...metaDefaults(),
       situations: [],
       options: [1, 2].map((n) => ({
-        label: String(n),
+        label: `옵션 ${n}`,
         classic: "",
         modern: null,
         description: null,

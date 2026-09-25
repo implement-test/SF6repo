@@ -42,7 +42,7 @@ export function normalizePractice(raw: unknown): PracticeConfig | null {
 export function normalizeOptions(raw: unknown): SetupOption[] {
   if (!Array.isArray(raw)) return [];
   return raw.map((o: Partial<SetupOption>, i) => ({
-    label: o.label ?? String(i + 1),
+    label: o.label ?? `옵션 ${i + 1}`,
     classic: o.classic ?? "",
     modern: o.modern ?? null,
     description: o.description ?? null,

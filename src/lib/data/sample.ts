@@ -122,7 +122,7 @@ export const sampleSetups: Setup[] = [
     sort_order: 1,
     options: [
       {
-        label: "1",
+        label: "옵션 1",
         classic: "(약간 끌어서) 5HP",
         modern: null,
         description: { ko: "HP가 2히트 되는 거리에서 써야 됨" },
@@ -135,7 +135,7 @@ export const sampleSetups: Setup[] = [
         youtube_url: null,
       },
       {
-        label: "2",
+        label: "입문자용",
         classic: "2LK",
         modern: null,
         description: { ko: "너무 깊게 넣으려고 하면 4F에 끊기므로 2LK 끝 부분 닿도록" },
@@ -172,7 +172,7 @@ export const sampleSetups: Setup[] = [
     description: null,
     target_level: "beginner",
     sort_order: 2,
-    options: [{ label: "1", classic: "5LP", modern: null, description: null, branches: [], youtube_url: null }],
+    options: [{ label: "옵션 1", classic: "5LP", modern: null, description: null, branches: [], youtube_url: null }],
     practice: null,
   },
 ];

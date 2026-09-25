@@ -130,13 +130,15 @@ export function SetupCard({
           {setup.options.map((option, i) => {
             const desc = option.description ? pickLocalized(option.description, locale) : null;
             return (
-              <div key={i} className="flex flex-col border border-border bg-surface-2">
+              // 머리 줄과 분기 줄이 같은 열 폭을 쓰도록 한 격자(subgrid)로 묶는다. 첫 열은 이름 길이에 맞춘다.
+              <div
+                key={i}
+                className="flex flex-col border border-border bg-surface-2 md:grid md:grid-cols-[minmax(5rem,max-content)_minmax(0,1fr)_minmax(0,1fr)]"
+              >
                 {/* 머리 줄: 옵션 이름 · 행동 · 설명 */}
-                <div className="grid gap-2 border-b border-border px-3 py-2.5 md:grid-cols-[6rem_minmax(0,1fr)_minmax(0,1fr)] md:items-center">
-                  <span className="skew self-start justify-self-start bg-highlight px-2 py-0.5 text-highlight-fg md:self-center">
-                    <span className="display text-sm">
-                      {t.option} {option.label}
-                    </span>
+                <div className="grid gap-2 border-b border-border px-3 py-2.5 md:col-span-3 md:grid-cols-subgrid md:items-center md:gap-x-4">
+                  <span className="skew self-start justify-self-start whitespace-nowrap bg-highlight px-2 py-0.5 text-highlight-fg md:self-center">
+                    <span className="display text-sm">{option.label}</span>
                   </span>
                   <div className="min-w-0">
                     {option.classic && (
@@ -155,13 +157,13 @@ export function SetupCard({
                 </div>
                 {/* 분기 줄: 히트/가드/헛침 · 이어지는 루트 · 메모 */}
                 {option.branches.length > 0 && (
-                  <ul className="divide-y divide-border">
+                  <ul className="divide-y divide-border md:col-span-3 md:grid md:grid-cols-subgrid">
                     {option.branches.map((b, j) => {
                       const note = b.note ? pickLocalized(b.note, locale) : null;
                       return (
                         <li
                           key={j}
-                          className="grid gap-2 px-3 py-2 md:grid-cols-[6rem_minmax(0,1fr)_minmax(0,1fr)] md:items-center"
+                          className="grid gap-2 px-3 py-2 md:col-span-3 md:grid-cols-subgrid md:items-center md:gap-x-4"
                         >
                           <span className="option-result justify-self-start" data-result={b.result}>
                             {t.result[b.result]}
@@ -182,12 +184,12 @@ export function SetupCard({
                   </ul>
                 )}
                 {option.youtube_url && (
-                  <div className="border-t border-border p-3">
+                  <div className="border-t border-border p-3 md:col-span-3">
                     <ItemMedia
                       youtubeUrl={option.youtube_url}
                       youtubeStart={null}
                       mediaUrl={null}
-                      title={`${title.text} ${t.option} ${option.label}`}
+                      title={`${title.text} ${option.label}`}
                       showLabel={dict.video.show}
                       hideLabel={dict.video.hide}
                     />
