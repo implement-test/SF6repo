@@ -18,6 +18,14 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         kind: "changed",
         text: {
+          ko: "Vs 가이드 상대 선택: 초기 로스터 한 줄 6명, 시즌별 한 줄 4명, 이미지·이름 크게",
+          en: "Vs opponent picker: 6 per row for the launch roster, 4 per row per season, larger images and names",
+          ja: "Vs相手選択：初期ロスターは1行6人、シーズンは1行4人、画像と名前を大きく",
+        },
+      },
+      {
+        kind: "changed",
+        text: {
           ko: "캐릭터 상단 배너를 공식 캐릭터 페이지 첫 화면과 같은 구도로",
           en: "Character banners now match the official character page layout",
           ja: "キャラクターのバナーを公式キャラページのファーストビューと同じ構図に",

@@ -64,11 +64,15 @@ export function VsOpponentPicker({ dict, locale }: { dict: Dictionary; locale: L
               {counts && ` (${Object.values(counts).reduce((a, b) => a + b, 0)})`}
             </span>
           </button>
-          <div className="flex flex-wrap gap-3">
+          {/* 초기 로스터는 전체 폭에 한 줄 6명, 시즌 1~4 는 그 아래 2×2 로 각각 한 줄 4명 */}
+          <div className="grid gap-3 md:grid-cols-2">
             {ROSTER_GROUPS.map((group) => (
-              <fieldset key={group.id} className="min-w-0 border border-border-strong px-2.5 pt-1 pb-2.5">
-                <legend className="px-1.5 text-xs font-bold text-muted">{pickLocalized(group.name, locale).text}</legend>
-                <div className="flex flex-wrap gap-1.5">
+              <fieldset
+                key={group.id}
+                className={`min-w-0 border border-border-strong px-3 pt-1 pb-3 ${group.id === "base" ? "md:col-span-2" : ""}`}
+              >
+                <legend className="px-1.5 text-sm font-bold text-muted">{pickLocalized(group.name, locale).text}</legend>
+                <div className={`grid gap-2 ${group.id === "base" ? "grid-cols-3 sm:grid-cols-6" : "grid-cols-4"}`}>
                   {ROSTER.filter((c) => c.group === group.id).map((c) => {
                     const on = opponent === c.slug;
                     const count = counts[c.slug] ?? 0;
@@ -79,14 +83,14 @@ export function VsOpponentPicker({ dict, locale }: { dict: Dictionary; locale: L
                         aria-pressed={on}
                         title={name(c.slug)}
                         onClick={() => pick(on ? null : c.slug)}
-                        className="group relative flex w-16 flex-col items-center gap-1 p-0.5 outline-2 -outline-offset-2 outline-transparent transition-colors hover:outline-border-strong aria-pressed:outline-accent"
+                        className="group relative flex min-w-0 flex-col items-center gap-1.5 p-1 outline-2 -outline-offset-2 outline-transparent transition-colors hover:outline-border-strong aria-pressed:outline-accent"
                       >
                         <Portrait slug={c.slug} label={name(c.slug)} className="aspect-[575/625] w-full" />
-                        <span className="w-full truncate text-center text-[0.65rem] font-semibold text-muted group-aria-pressed:text-accent">
+                        <span className="w-full truncate text-center text-sm font-bold text-muted group-hover:text-fg group-aria-pressed:text-accent">
                           {name(c.slug)}
                         </span>
                         {count > 0 && (
-                          <span className="absolute top-0 right-0 min-w-4 bg-accent px-1 text-center text-[0.6rem] leading-4 font-bold text-accent-fg">
+                          <span className="absolute top-1 right-1 min-w-5 bg-accent px-1.5 text-center text-xs leading-5 font-bold text-accent-fg">
                             {count}
                           </span>
                         )}
@@ -110,7 +114,7 @@ function Portrait({ slug, label, className }: { slug: string; label: string; cla
   if (broken || !src) {
     return (
       <span
-        className={`${className} skew grid place-items-center bg-surface-2 text-center text-[0.6rem] leading-tight font-bold text-muted`}
+        className={`${className} skew grid place-items-center bg-surface-2 text-center text-sm leading-tight font-bold text-muted`}
       >
         <span>{label}</span>
       </span>
