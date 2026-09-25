@@ -264,13 +264,32 @@ article[id] {
   flex: none;
 }
 
-/* 셋업 옵션의 결과 표시: 히트 / 가드 / 헛침 */
+/* 셋업 옵션의 결과 줄: 세로 안내선(ul 의 왼쪽 테두리)에서 뻗어 나온 └ 연결선 */
+.option-branch::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 1.05rem; /* 모바일: 위에 있는 결과 배지 높이 */
+  width: 0.9rem;
+  border-top: 2px solid var(--border-strong);
+}
+@media (min-width: 48rem) {
+  .option-branch::before {
+    top: 50%;
+  }
+}
+.option-branch + .option-branch {
+  border-top: 1px dashed var(--border);
+}
+
+/* 셋업 옵션의 결과 표시: 히트 / 가드 / 헛침 (옵션 이름보다 작게) */
 .option-result {
   display: inline-flex;
   align-items: center;
-  padding: 0.15rem 0.55rem;
+  padding: 0.1rem 0.45rem;
   border: 1px solid;
-  font-size: 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.7rem;
   font-weight: 700;
 }
 .option-result[data-result="hit"] {

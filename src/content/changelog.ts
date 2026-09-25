@@ -18,6 +18,14 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         kind: "changed",
         text: {
+          ko: "셋업 옵션: 옵션 이름과 결과(히트 · 가드 · 헛침) 줄을 들여쓰기로 구분",
+          en: "Setup options: result rows (hit / block / whiff) indented under the option name",
+          ja: "セットプレイの択：結果（ヒット・ガード・空振り）の行を択名の下にインデント",
+        },
+      },
+      {
+        kind: "changed",
+        text: {
           ko: "셋업의 '셋업' 항목 이름을 '셋업 초반 공통 루트'로",
           en: "Setup field renamed to 'Common opening route'",
           ja: "セットプレイの項目名を「序盤の共通ルート」に",
