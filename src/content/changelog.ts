@@ -18,6 +18,14 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         kind: "added",
         text: {
+          ko: "셋업 퍼가기 (링크 · 블로그용 임베드 코드)",
+          en: "Share setups (link and embed code for blogs)",
+          ja: "セットプレイの共有（リンク・ブログ用埋め込みコード）",
+        },
+      },
+      {
+        kind: "added",
+        text: {
           ko: "YouTube 영상 구간 반복 (구간 밖으로 옮기면 반복 멈춤)",
           en: "YouTube segment looping (stops when you seek outside it)",
           ja: "YouTube 動画の区間リピート（区間外へ移動すると停止）",

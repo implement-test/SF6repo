@@ -10,6 +10,7 @@ import { ItemMedia } from "./media";
 import { PracticeView } from "./practice-view";
 import { Collapsible } from "./collapsible";
 import { EditButton } from "./admin/admin-context";
+import { ShareButton } from "./share-button";
 
 export function SetupCard({
   setup,
@@ -20,6 +21,7 @@ export function SetupCard({
   latestPatchId,
   authors,
   characterSlug,
+  embedded = false,
 }: {
   setup: Setup;
   locale: Locale;
@@ -29,6 +31,8 @@ export function SetupCard({
   latestPatchId: number | null;
   authors: Record<string, string>;
   characterSlug: string;
+  /** 다른 사이트에 퍼간 화면: 퍼가기·수정 버튼을 빼고, 방문자의 대상 수준 숨김 설정도 무시한다 */
+  embedded?: boolean;
 }) {
   const t = dict.setup;
   const title = pickLocalized(setup.title, locale);
@@ -41,7 +45,7 @@ export function SetupCard({
   return (
     <article
       id={`setup-${setup.id}`}
-      data-level={setup.target_level}
+      data-level={embedded ? undefined : setup.target_level}
       className="setup-card relative flex scroll-mt-40 flex-col gap-4 border border-border bg-surface py-4 pl-5 pr-4 transition-colors"
     >
       <span aria-hidden className="absolute inset-y-0 left-0 w-1" style={{ background: `var(--lv-${setup.target_level})` }} />
@@ -56,9 +60,12 @@ export function SetupCard({
             {situationNames[s] ?? s}
           </Tag>
         ))}
-        <span className="ml-auto">
-          <EditButton entity="setup" id={setup.id} scope={setup.character_id} />
-        </span>
+        {!embedded && (
+          <span className="ml-auto flex items-center gap-1.5">
+            <ShareButton kind="setup" id={setup.id} labels={dict.share} />
+            <EditButton entity="setup" id={setup.id} scope={setup.character_id} />
+          </span>
+        )}
       </header>
 
       {linkedCombos.length > 0 && (

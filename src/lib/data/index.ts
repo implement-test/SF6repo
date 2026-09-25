@@ -87,6 +87,31 @@ export async function getSetups(characterId: number): Promise<Setup[]> {
   return list.map((s) => ({ ...s, options: normalizeOptions(s.options), practice: normalizePractice(s.practice) }));
 }
 
+/**
+ * 퍼가기(embed) 페이지용: 공개된 셋업 하나와, 카드에 필요한 캐릭터 · 연결 콤보.
+ * 없거나 비공개면 null.
+ */
+export async function getSetupForEmbed(
+  id: number,
+): Promise<{ setup: Setup; character: Character; linkedCombos: Combo[] } | null> {
+  const c = db();
+  let setup: Setup | undefined;
+  if (!c) {
+    setup = sampleSetups.find((s) => s.id === id);
+  } else {
+    const { data } = await c.from("setups").select("*").eq("id", id).maybeSingle();
+    if (data) setup = { ...data, options: normalizeOptions(data.options), practice: normalizePractice(data.practice) };
+  }
+  if (!setup || !setup.is_published) return null;
+
+  const character = (await getCharacters()).find((ch) => ch.id === setup.character_id);
+  if (!character) return null;
+  const [links, combos] = await Promise.all([getSetupComboLinks([setup.id]), getCombos(character.id)]);
+  const byId = new Map(combos.filter((cb) => cb.is_published).map((cb) => [cb.id, cb]));
+  const linkedCombos = links.map((l) => byId.get(l.combo_id)).filter((cb) => cb !== undefined);
+  return { setup, character, linkedCombos };
+}
+
 /** 셋업 ↔ 콤보 연결 (이 캐릭터의 셋업만). 연결 표가 없거나 실패해도 페이지는 그대로 보여 준다. */
 export async function getSetupComboLinks(setupIds: number[]): Promise<SetupComboLink[]> {
   const c = db();

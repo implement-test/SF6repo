@@ -57,6 +57,7 @@ const ko = {
   },
   patch: { outdated: "이전 패치 기준" },
   created: "작성일",
+  share: { button: "퍼가기", title: "셋업 퍼가기", note: "블로그나 커뮤니티 글에 링크나 임베드 코드를 붙여 넣으면 이 셋업이 지금 모습 그대로 보입니다.", link: "링크", embed: "임베드 코드 (iframe)", copy: "복사", copied: "복사됨", preview: "미리 보기", viewOnSite: "SF6 Repository에서 보기" },
   setup: {
     combos: "이 셋업으로 이어지는 콤보",
     route: "마무리 루트",
@@ -156,6 +157,7 @@ const en: Dictionary = {
   },
   patch: { outdated: "Older patch" },
   created: "Added",
+  share: { button: "Share", title: "Share setup", note: "Paste the link or embed code into a blog or forum post to show this setup as it looks here.", link: "Link", embed: "Embed code (iframe)", copy: "Copy", copied: "Copied", preview: "Preview", viewOnSite: "View on SF6 Repository" },
   setup: {
     combos: "Combos leading into this setup",
     route: "Ending route",
@@ -253,6 +255,7 @@ const ja: Dictionary = {
   },
   patch: { outdated: "旧パッチ基準" },
   created: "作成日",
+  share: { button: "共有", title: "セットプレイを共有", note: "ブログや掲示板にリンクか埋め込みコードを貼ると、このセットプレイがそのまま表示されます。", link: "リンク", embed: "埋め込みコード（iframe）", copy: "コピー", copied: "コピーしました", preview: "プレビュー", viewOnSite: "SF6 Repository で見る" },
   setup: {
     combos: "このセットプレイにつながるコンボ",
     route: "締めのルート",
