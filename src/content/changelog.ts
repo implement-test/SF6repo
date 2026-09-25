@@ -16,6 +16,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-09-26",
     items: [
       {
+        kind: "changed",
+        text: {
+          ko: "루트를 바꿀 때 카드 높이가 변해 화면이 떨리던 문제 수정",
+          en: "Fixed flickering when switching routes changed the card height",
+          ja: "ルート切り替えでカードの高さが変わり画面がちらつく問題を修正",
+        },
+      },
+      {
         kind: "added",
         text: {
           ko: "콤보 메모를 공용·루트별로 나눔. 마지막에 고른 루트의 정보를 계속 표시",

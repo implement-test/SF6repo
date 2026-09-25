@@ -35,9 +35,27 @@ export function RouteRow({ index, children, className }: { index: number; childr
   );
 }
 
-/** 루트별로 미리 그려 둔 수치 중 지금 루트의 것만 보인다 */
+/**
+ * 루트별로 미리 그려 둔 수치 중 지금 루트의 것만 보인다.
+ * 모든 패널을 같은 칸에 겹쳐 두고 나머지는 숨겨서, 루트를 바꿔도 카드 높이가 변하지 않게 한다.
+ * (높이가 변하면 페이지 맨 아래 카드에서 스크롤이 밀려 마우스 밑의 루트가 계속 바뀐다)
+ * 패널이 비어 있을 수도 있다 (메모 없는 루트).
+ */
 export function RoutePanels({ panels }: { panels: ReactNode[] }) {
   const { active } = useContext(RouteContext);
-  // 패널이 비어 있을 수도 있다 (메모 없는 루트)
-  return <>{active < panels.length ? panels[active] : panels[0]}</>;
+  const current = active < panels.length ? active : 0;
+  return (
+    <div className="grid">
+      {panels.map((panel, i) => (
+        <div
+          key={i}
+          aria-hidden={i !== current}
+          inert={i !== current}
+          className={`[grid-area:1/1] ${i === current ? "" : "invisible"}`}
+        >
+          {panel}
+        </div>
+      ))}
+    </div>
+  );
 }
