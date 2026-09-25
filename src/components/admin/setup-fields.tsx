@@ -22,6 +22,7 @@ import {
 import { normalizeDriveReversal } from "@/lib/setup";
 import { NotationImage } from "../notation";
 import { inputClass, NotationRow } from "./starters-input";
+import { ClockInput } from "./clock-input";
 
 const RESULT_LABELS: Record<OptionResult, string> = { hit: "히트", guard: "가드", whiff: "헛침" };
 
@@ -410,13 +411,42 @@ export function OptionsInput({ value, onChange }: { value: SetupOption[]; onChan
 
           <div className="grid grid-cols-[3.2rem_1fr] items-start gap-2">
             <span className="pt-1.5 text-xs font-bold text-muted">영상</span>
-            <input
-              type="url"
-              value={o.youtube_url ?? ""}
-              onChange={(e) => update(i, { youtube_url: e.target.value })}
-              placeholder="YouTube URL (선택)"
-              className={inputClass}
-            />
+            <div className="flex flex-col gap-1.5">
+              <input
+                type="url"
+                value={o.youtube_url ?? ""}
+                onChange={(e) => update(i, { youtube_url: e.target.value })}
+                placeholder="YouTube URL (선택)"
+                className={inputClass}
+              />
+              {o.youtube_url?.trim() && (
+                <div className="flex flex-wrap items-start gap-2 text-xs text-muted">
+                  <span className="pt-1.5">구간</span>
+                  <ClockInput
+                    value={o.youtube_start ?? null}
+                    onChange={(youtube_start) => update(i, { youtube_start })}
+                    placeholder="시작 1:23"
+                    className="w-24!"
+                  />
+                  <span className="pt-1.5">~</span>
+                  <ClockInput
+                    value={o.youtube_end ?? null}
+                    onChange={(youtube_end) => update(i, { youtube_end })}
+                    placeholder="끝 1:30"
+                    className="w-24!"
+                  />
+                  <label className="flex items-center gap-1.5 pt-1.5 font-semibold">
+                    <input
+                      type="checkbox"
+                      checked={!!o.youtube_loop}
+                      onChange={(e) => update(i, { youtube_loop: e.target.checked })}
+                      className="size-4 accent-[var(--accent)]"
+                    />
+                    구간 반복
+                  </label>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       ))}
@@ -677,6 +707,9 @@ export function cleanOptions(list: SetupOption[] | null | undefined): SetupOptio
         .map((b) => ({ result: b.result, classic: b.classic.trim(), modern: b.modern?.trim() || null, note: cleanLocalized(b.note) }))
         .filter((b) => b.classic || b.note),
       youtube_url: o.youtube_url?.trim() || null,
+      youtube_start: o.youtube_url?.trim() ? (o.youtube_start ?? null) : null,
+      youtube_end: o.youtube_url?.trim() && o.youtube_end && o.youtube_end > (o.youtube_start ?? 0) ? o.youtube_end : null,
+      youtube_loop: !!(o.youtube_url?.trim() && o.youtube_loop && o.youtube_end),
     }))
     .filter((o) => o.classic || o.description || o.branches.length > 0);
 }

@@ -46,7 +46,17 @@ describe("normalizePractice", () => {
 describe("normalizeOptions", () => {
   it("분기가 없던 옵션에 빈 분기를 채운다", () => {
     expect(normalizeOptions([{ label: "A", classic: "5LP", modern: null, description: null, youtube_url: null }])).toEqual([
-      { label: "A", classic: "5LP", modern: null, description: null, branches: [], youtube_url: null },
+      {
+        label: "A",
+        classic: "5LP",
+        modern: null,
+        description: null,
+        branches: [],
+        youtube_url: null,
+        youtube_start: null,
+        youtube_end: null,
+        youtube_loop: false,
+      },
     ]);
   });
 });

@@ -13,6 +13,7 @@ import { useAdmin, type EditorRequest } from "./admin-context";
 import { formatPatchVersion } from "@/lib/patch";
 import { History, useAuthorNames } from "./history";
 import { StartersInput, cleanStarters, inputClass } from "./starters-input";
+import { ClockInput } from "./clock-input";
 import {
   ComboLinksInput,
   OptionsInput,
@@ -541,15 +542,25 @@ function FieldInput({
 
     case "checkbox":
       return (
-        <label className="flex h-full items-center gap-2 pt-5 text-sm font-semibold">
-          <input
-            type="checkbox"
-            checked={!!value}
-            onChange={(e) => onChange(e.target.checked)}
-            className="size-4 accent-[var(--accent)]"
-          />
-          {field.label}
-        </label>
+        <div className="flex h-full flex-col justify-center gap-1 pt-5">
+          <label className="flex items-center gap-2 text-sm font-semibold">
+            <input
+              type="checkbox"
+              checked={!!value}
+              onChange={(e) => onChange(e.target.checked)}
+              className="size-4 accent-[var(--accent)]"
+            />
+            {field.label}
+          </label>
+          {field.help && <span className="text-xs text-muted">{field.help}</span>}
+        </div>
+      );
+
+    case "clock":
+      return (
+        <Label field={field}>
+          <ClockInput value={(value as number | null) ?? null} onChange={onChange} />
+        </Label>
       );
 
     case "patch":
@@ -625,6 +636,15 @@ function buildPayload(fields: Field[], values: Values): { payload: Values; probl
       default:
         payload[field.key] = raw ?? null;
     }
+  }
+  // 영상 구간 확인
+  const start = typeof payload.youtube_start === "number" ? payload.youtube_start : 0;
+  const end = payload.youtube_end;
+  if (typeof end === "number" && end <= start) {
+    return { payload, problem: "구간 끝은 구간 시작보다 뒤여야 합니다." };
+  }
+  if (payload.youtube_loop && typeof end !== "number") {
+    return { payload, problem: "구간 반복을 쓰려면 구간 끝을 입력하세요." };
   }
   return { payload };
 }

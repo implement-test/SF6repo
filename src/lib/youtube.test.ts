@@ -1,5 +1,30 @@
 import { describe, expect, it } from "vitest";
-import { parseYouTube, youTubeEmbedUrl } from "./youtube";
+import { formatClock, parseClock, parseYouTube, youTubeEmbedUrl } from "./youtube";
+
+describe("parseClock / formatClock", () => {
+  it("초, 분:초, 시:분:초를 읽는다", () => {
+    expect(parseClock("83")).toBe(83);
+    expect(parseClock("1:23")).toBe(83);
+    expect(parseClock(" 0:05 ")).toBe(5);
+    expect(parseClock("1:02:03")).toBe(3723);
+  });
+
+  it("잘못된 값은 null", () => {
+    expect(parseClock("")).toBeNull();
+    expect(parseClock("1:75")).toBeNull();
+    expect(parseClock("abc")).toBeNull();
+  });
+
+  it("초를 분:초로 보여 준다", () => {
+    expect(formatClock(83)).toBe("1:23");
+    expect(formatClock(5)).toBe("0:05");
+    expect(formatClock(3723)).toBe("1:02:03");
+  });
+
+  it("구간 끝을 임베드 주소에 넣는다", () => {
+    expect(youTubeEmbedUrl("dQw4w9WgXcQ", 10, 20)).toContain("end=20");
+  });
+});
 
 describe("parseYouTube", () => {
   it("여러 형태의 링크에서 ID 를 뽑는다", () => {

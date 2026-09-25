@@ -96,5 +96,8 @@ export function normalizeOptions(raw: unknown): SetupOption[] {
       note: b.note ?? null,
     })),
     youtube_url: o.youtube_url ?? null,
+    youtube_start: o.youtube_start ?? null,
+    youtube_end: o.youtube_end ?? null,
+    youtube_loop: !!o.youtube_loop,
   }));
 }

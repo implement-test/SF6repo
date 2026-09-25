@@ -41,8 +41,30 @@ function parseTime(value: string | null): number | null {
  * vq=hd720 은 720p 를 요청하지만 YouTube 가 무시할 수 있다. 실제 화질은 플레이어 크기로 정해지므로
  * 플레이어를 720p 가 선택되는 크기로 둔다 (src/components/media.tsx).
  */
-export function youTubeEmbedUrl(id: string, start: number | null): string {
+export function youTubeEmbedUrl(id: string, start: number | null, end: number | null = null): string {
   const params = new URLSearchParams({ rel: "0", modestbranding: "1", vq: "hd720" });
   if (start) params.set("start", String(start));
+  if (end) params.set("end", String(end));
   return `https://www.youtube-nocookie.com/embed/${id}?${params}`;
+}
+
+/** "83", "1:23", "1:02:03" → 초. 해석할 수 없으면 null */
+export function parseClock(text: string): number | null {
+  const s = text.trim();
+  if (!s) return null;
+  if (/^\d+$/.test(s)) return Number(s);
+  const m = /^(?:(\d+):)?(\d{1,2}):(\d{1,2})$/.exec(s);
+  if (!m) return null;
+  const [, h, min, sec] = m;
+  if (Number(sec) >= 60 || (h !== undefined && Number(min) >= 60)) return null;
+  return Number(h ?? 0) * 3600 + Number(min) * 60 + Number(sec);
+}
+
+/** 초 → "1:23" (1시간 넘으면 "1:02:03") */
+export function formatClock(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return h ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
 }

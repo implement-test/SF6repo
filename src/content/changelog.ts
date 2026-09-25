@@ -16,6 +16,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-09-26",
     items: [
       {
+        kind: "added",
+        text: {
+          ko: "YouTube 영상 구간 반복 (구간 밖으로 옮기면 반복 멈춤)",
+          en: "YouTube segment looping (stops when you seek outside it)",
+          ja: "YouTube 動画の区間リピート（区間外へ移動すると停止）",
+        },
+      },
+      {
         kind: "changed",
         text: {
           ko: "YouTube 영상 기본 화질 720p (플레이어 확대)",

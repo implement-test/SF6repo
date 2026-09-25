@@ -88,7 +88,7 @@ const ko = {
   },
   changelog: { button: "업데이트 내역", title: "업데이트 내역", added: "추가", changed: "수정", removed: "삭제", adminOnly: "관리자" },
   author: { created: "작성", updated: "수정" },
-  video: { show: "영상 보기", hide: "영상 접기" },
+  video: { show: "영상 보기", hide: "영상 접기", looping: "구간 반복", paused: "반복 멈춤", resume: "다시 반복", stop: "반복 끄기" },
   notationPage: {
     title: "콤보 표기법",
     intro: "방향은 키보드 숫자 패드 기준 숫자로, 버튼은 영문 약자로 표기합니다.",
@@ -187,7 +187,7 @@ const en: Dictionary = {
   },
   changelog: { button: "Updates", title: "Update history", added: "Added", changed: "Changed", removed: "Removed", adminOnly: "Admin" },
   author: { created: "By", updated: "Edited by" },
-  video: { show: "Show video", hide: "Hide video" },
+  video: { show: "Show video", hide: "Hide video", looping: "Looping", paused: "Loop paused", resume: "Loop again", stop: "Stop loop" },
   notationPage: {
     title: "Combo notation",
     intro: "Directions use numpad notation, and buttons use their abbreviations.",
@@ -284,7 +284,7 @@ const ja: Dictionary = {
   },
   changelog: { button: "更新履歴", title: "更新履歴", added: "追加", changed: "変更", removed: "削除", adminOnly: "管理者" },
   author: { created: "作成", updated: "更新" },
-  video: { show: "動画を見る", hide: "動画を閉じる" },
+  video: { show: "動画を見る", hide: "動画を閉じる", looping: "区間リピート", paused: "リピート停止", resume: "もう一度リピート", stop: "リピートを止める" },
   notationPage: {
     title: "コンボ表記",
     intro: "方向はテンキー表記の数字、ボタンは略称で表記します。",

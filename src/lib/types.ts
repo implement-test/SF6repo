@@ -31,7 +31,14 @@ type Media = {
   media_url: string | null;
   youtube_url: string | null;
   youtube_start: number | null;
+  /** 구간 끝 (초). 비우면 끝까지 */
+  youtube_end?: number | null;
+  /** 시작~끝 구간 반복 */
+  youtube_loop?: boolean;
 };
+
+/** YouTube 재생 구간 (링크의 t= 보다 start 가 우선) */
+export type YouTubeClip = { url: string | null; start: number | null; end: number | null; loop: boolean };
 
 export type Patch = { id: number; version: string; released_on: string };
 
@@ -115,6 +122,9 @@ export type SetupOption = {
   description: Localized | null;
   branches: OptionBranch[];
   youtube_url: string | null;
+  youtube_start?: number | null;
+  youtube_end?: number | null;
+  youtube_loop?: boolean;
 };
 
 /**

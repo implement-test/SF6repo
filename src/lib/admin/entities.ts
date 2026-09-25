@@ -16,6 +16,8 @@ export type Field = { key: string; label: string; help?: string; required?: bool
   | { type: "multiselect"; options: Option[] }
   | { type: "date" }
   | { type: "checkbox" }
+  /** 영상 시각: "1:23" 또는 초로 입력, 초로 저장 */
+  | { type: "clock" }
   | { type: "patch" }
   /** 셋업 상황 태그 (setup_situations 에서 불러온다) */
   | { type: "situations" }
@@ -92,12 +94,16 @@ const MEDIA_GROUP: FieldGroup = {
     { key: "youtube_url", label: "YouTube URL", type: "url", wide: true, help: "링크에 t= 가 있으면 그 시점부터 재생합니다." },
     {
       key: "youtube_start",
-      label: "YouTube 시작 (초)",
-      type: "number",
-      step: 1,
-      min: 0,
-      nullable: true,
-      help: "입력하면 링크의 t= 보다 우선합니다.",
+      label: "구간 시작",
+      type: "clock",
+      help: "예: 1:23 또는 83(초). 입력하면 링크의 t= 보다 우선합니다.",
+    },
+    { key: "youtube_end", label: "구간 끝", type: "clock", help: "비우면 영상 끝까지 재생합니다." },
+    {
+      key: "youtube_loop",
+      label: "구간 반복",
+      type: "checkbox",
+      help: "구간 시작~끝을 계속 반복합니다 (구간 끝이 있어야 합니다).",
     },
   ],
 };

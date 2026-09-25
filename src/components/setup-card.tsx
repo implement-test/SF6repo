@@ -180,11 +180,12 @@ export function SetupCard({
                   <div className="border-t border-border p-3">
                     <ItemMedia
                       youtubeUrl={option.youtube_url}
-                      youtubeStart={null}
+                      youtubeStart={option.youtube_start ?? null}
+                      youtubeEnd={option.youtube_end}
+                      youtubeLoop={option.youtube_loop}
                       mediaUrl={null}
                       title={`${title.text} ${option.label}`}
-                      showLabel={dict.video.show}
-                      hideLabel={dict.video.hide}
+                      labels={dict.video}
                     />
                   </div>
                 )}
@@ -198,10 +199,11 @@ export function SetupCard({
         <ItemMedia
           youtubeUrl={setup.youtube_url}
           youtubeStart={setup.youtube_start}
+          youtubeEnd={setup.youtube_end}
+          youtubeLoop={setup.youtube_loop}
           mediaUrl={setup.media_url}
           title={title.text}
-          showLabel={dict.video.show}
-          hideLabel={dict.video.hide}
+          labels={dict.video}
         />
       )}
 

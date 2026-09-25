@@ -173,10 +173,11 @@ export function ComboCard({
           <ItemMedia
             youtubeUrl={combo.youtube_url}
             youtubeStart={combo.youtube_start}
+            youtubeEnd={combo.youtube_end}
+            youtubeLoop={combo.youtube_loop}
             mediaUrl={combo.media_url}
             title={title?.text ?? combo.notation_classic}
-            showLabel={dict.video.show}
-            hideLabel={dict.video.hide}
+            labels={dict.video}
           />
         </div>
       )}
