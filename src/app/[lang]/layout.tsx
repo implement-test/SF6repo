@@ -6,6 +6,7 @@ import { LOCALES, hasLocale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { PREFS_INLINE_SCRIPT } from "@/lib/prefs";
 import { SitePrefs } from "@/components/prefs-controls";
+import { AdminProvider } from "@/components/admin/admin-context";
 import "../globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -45,6 +46,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
         <script dangerouslySetInnerHTML={{ __html: PREFS_INLINE_SCRIPT }} />
       </head>
       <body className="flex min-h-full flex-col font-sans">
+        <AdminProvider>
         <header className="sticky top-0 z-30 border-b border-border bg-bg/90 backdrop-blur">
           <div className="brand-bar h-[3px]" />
           <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-1 px-4 py-2.5">
@@ -74,6 +76,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
             <p>{dict.footer.disclaimer}</p>
           </div>
         </footer>
+        </AdminProvider>
       </body>
     </html>
   );

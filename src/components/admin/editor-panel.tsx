@@ -1,0 +1,411 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { ENTITIES, type Field } from "@/lib/admin/entities";
+import { findUnknownTokens, parseNotation } from "@/lib/notation/parse";
+import { revalidateSite, supabaseBrowser } from "@/lib/supabase/browser";
+import type { Localized, Patch } from "@/lib/types";
+import { NotationImage } from "../notation";
+import { useAdmin, type EditorRequest } from "./admin-context";
+
+type Values = Record<string, unknown>;
+const LANGS = [
+  { key: "ko", label: "한국어" },
+  { key: "en", label: "English" },
+  { key: "ja", label: "日本語" },
+] as const;
+
+/** 관리자 편집 패널. entities.ts 의 필드 정의대로 폼을 그린다. */
+export default function EditorPanel({ request, onClose }: { request: EditorRequest; onClose: () => void }) {
+  const entity = ENTITIES[request.entity];
+  const router = useRouter();
+  const { bumpData } = useAdmin();
+  const sb = supabaseBrowser();
+  const isNew = request.id === undefined;
+  const usesPatch = entity.groups.some((g) => g.fields.some((f) => f.type === "patch"));
+
+  const [values, setValues] = useState<Values | null>(null);
+  const [patches, setPatches] = useState<Patch[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const patchList = usesPatch
+        ? ((await sb.from("patches").select("*").order("released_on", { ascending: false })).data ?? [])
+        : [];
+      let initial: Values;
+      if (isNew) {
+        initial = { ...entity.defaults(), patch_id: patchList[0]?.id ?? null, ...request.defaults };
+      } else {
+        const { data, error } = await sb.from(entity.table).select("*").eq("id", request.id).single();
+        if (error) {
+          if (!cancelled) setError(error.message);
+          return;
+        }
+        initial = data;
+      }
+      if (cancelled) return;
+      setPatches(patchList);
+      setValues(initial);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [sb, entity, isNew, request.id, request.defaults, usesPatch]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const set = (key: string, value: unknown) => setValues((v) => ({ ...v, [key]: value }));
+
+  async function finish() {
+    await revalidateSite(sb);
+    bumpData();
+    router.refresh();
+    onClose();
+  }
+
+  async function save() {
+    if (!values) return;
+    const { payload, problem } = buildPayload(entity.groups.flatMap((g) => g.fields), values);
+    if (problem) {
+      setError(problem);
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    const result = isNew
+      ? await sb.from(entity.table).insert({ ...request.defaults, ...payload })
+      : await sb.from(entity.table).update(payload).eq("id", request.id);
+    if (result.error) {
+      setBusy(false);
+      setError(result.error.message);
+      return;
+    }
+    await finish();
+  }
+
+  async function remove() {
+    if (!confirm(`이 ${entity.label}을(를) 삭제할까요? 되돌릴 수 없습니다.`)) return;
+    setBusy(true);
+    const { error } = await sb.from(entity.table).delete().eq("id", request.id);
+    if (error) {
+      setBusy(false);
+      setError(error.message);
+      return;
+    }
+    await finish();
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end">
+      <button type="button" aria-label="닫기" onClick={onClose} className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
+      <section
+        role="dialog"
+        aria-modal="true"
+        aria-label={`${entity.label} ${isNew ? "추가" : "수정"}`}
+        className="relative flex h-full w-full max-w-2xl flex-col border-l-2 border-accent bg-surface shadow-2xl"
+      >
+        <header className="flex items-center gap-3 border-b border-border px-5 py-4">
+          <span className="eyebrow text-accent!">{isNew ? "New" : `Edit #${request.id}`}</span>
+          <h2 className="display text-2xl">
+            {entity.label} {isNew ? "추가" : "수정"}
+          </h2>
+          <button type="button" onClick={onClose} className="ml-auto text-2xl leading-none text-muted hover:text-fg" aria-label="닫기">
+            ×
+          </button>
+        </header>
+
+        <div className="flex-1 overflow-y-auto px-5 py-5">
+          {!values ? (
+            <p className="text-muted">{error ?? "불러오는 중…"}</p>
+          ) : (
+            <div className="flex flex-col gap-7">
+              {entity.groups.map((group) => (
+                <fieldset key={group.title} className="flex flex-col gap-3">
+                  <legend className="mb-3 flex w-full items-center gap-2 border-b border-border pb-1.5">
+                    <span aria-hidden className="skew inline-block h-3.5 w-1 bg-accent" />
+                    <span className="text-sm font-bold">{group.title}</span>
+                  </legend>
+                  <div className="grid gap-x-4 gap-y-4 sm:grid-cols-2">
+                    {group.fields.map((field) => (
+                      <div key={field.key} className={field.wide || field.type === "localized" ? "sm:col-span-2" : ""}>
+                        <FieldInput field={field} value={values[field.key]} onChange={(v) => set(field.key, v)} patches={patches} />
+                      </div>
+                    ))}
+                  </div>
+                </fieldset>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <footer className="flex flex-col gap-2 border-t border-border bg-surface-2 px-5 py-3">
+          {error && values && <p className="text-sm text-warn">{error}</p>}
+          <div className="flex items-center gap-2">
+            {!isNew && (
+              <button
+                type="button"
+                onClick={remove}
+                disabled={busy}
+                className="border border-warn/50 px-3 py-1.5 text-sm font-semibold text-warn hover:bg-warn/10 disabled:opacity-50"
+              >
+                삭제
+              </button>
+            )}
+            <button type="button" onClick={onClose} className="ml-auto px-3 py-1.5 text-sm font-semibold text-muted hover:text-fg">
+              취소
+            </button>
+            <button
+              type="button"
+              onClick={save}
+              disabled={busy || !values}
+              className="skew bg-accent px-5 py-1.5 text-sm font-bold text-accent-fg disabled:opacity-50"
+            >
+              <span>{busy ? "저장 중…" : "저장"}</span>
+            </button>
+          </div>
+        </footer>
+      </section>
+    </div>
+  );
+}
+
+// ───────────────────────── 필드 ─────────────────────────
+
+const inputClass =
+  "w-full border border-border-strong bg-inset px-2.5 py-1.5 text-sm outline-none transition-colors focus:border-accent";
+
+function Label({ field, children }: { field: Field; children: React.ReactNode }) {
+  return (
+    <label className="flex flex-col gap-1.5">
+      <span className="text-xs font-semibold text-muted">
+        {field.label}
+        {field.required && <span className="text-accent"> *</span>}
+      </span>
+      {children}
+      {field.help && <span className="text-xs text-muted">{field.help}</span>}
+    </label>
+  );
+}
+
+function FieldInput({
+  field,
+  value,
+  onChange,
+  patches,
+}: {
+  field: Field;
+  value: unknown;
+  onChange: (v: unknown) => void;
+  patches: Patch[];
+}) {
+  switch (field.type) {
+    case "localized": {
+      const loc = (value as Partial<Localized> | null) ?? {};
+      return (
+        <div className="flex flex-col gap-1.5">
+          <span className="text-xs font-semibold text-muted">
+            {field.label}
+            {field.required && <span className="text-accent"> *</span>}
+          </span>
+          {LANGS.map((lang) => {
+            const common = {
+              value: loc[lang.key] ?? "",
+              onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+                onChange({ ...loc, [lang.key]: e.target.value }),
+              placeholder: lang.key === "ko" ? "한국어 (필수)" : `${lang.label} (선택)`,
+              className: inputClass,
+              "aria-label": `${field.label} ${lang.label}`,
+            };
+            return (
+              <div key={lang.key} className="grid grid-cols-[3.2rem_1fr] items-start gap-2">
+                <span className="pt-1.5 text-xs font-bold uppercase text-muted">{lang.key}</span>
+                {field.multiline ? <textarea rows={3} {...common} /> : <input {...common} />}
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    case "notation": {
+      const text = (value as string | null) ?? "";
+      const unknown = text ? findUnknownTokens(parseNotation(text)) : [];
+      return (
+        <Label field={field}>
+          <input
+            value={text}
+            onChange={(e) => onChange(e.target.value)}
+            spellCheck={false}
+            placeholder="예: 2MK → 236HP"
+            className={`${inputClass} font-mono`}
+          />
+          {text && (
+            <div className="flex min-h-11 items-center border-l-2 border-accent bg-inset px-3 py-2">
+              <NotationImage notation={text} />
+            </div>
+          )}
+          {unknown.length > 0 && <span className="text-xs text-warn">해석할 수 없는 부분: {unknown.join(", ")}</span>}
+        </Label>
+      );
+    }
+
+    case "text":
+    case "url":
+      return (
+        <Label field={field}>
+          <input
+            type={field.type === "url" ? "url" : "text"}
+            value={(value as string | null) ?? ""}
+            onChange={(e) => onChange(e.target.value)}
+            className={inputClass}
+          />
+        </Label>
+      );
+
+    case "number":
+      return (
+        <Label field={field}>
+          <input
+            type="number"
+            step={field.step}
+            min={field.min}
+            max={field.max}
+            value={value === null || value === undefined ? "" : String(value)}
+            onChange={(e) => onChange(e.target.value === "" ? null : Number(e.target.value))}
+            className={`${inputClass} tabular-nums`}
+          />
+        </Label>
+      );
+
+    case "select":
+      return (
+        <Label field={field}>
+          <select
+            value={(value as string | null) ?? ""}
+            onChange={(e) => onChange(e.target.value === "" ? null : e.target.value)}
+            className={inputClass}
+          >
+            {field.nullable && <option value="">—</option>}
+            {field.options.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </Label>
+      );
+
+    case "multiselect": {
+      const list = (value as string[] | null) ?? [];
+      return (
+        <div className="flex flex-col gap-1.5">
+          <span className="text-xs font-semibold text-muted">{field.label}</span>
+          <div className="flex flex-wrap gap-1">
+            {field.options.map((o) => {
+              const on = list.includes(o.value);
+              return (
+                <button
+                  key={o.value}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => onChange(on ? list.filter((v) => v !== o.value) : [...list, o.value])}
+                  className="skew border border-border-strong px-3 py-1 text-sm font-bold text-muted aria-pressed:border-accent aria-pressed:bg-accent aria-pressed:text-accent-fg"
+                >
+                  <span>{o.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    case "date":
+      return (
+        <Label field={field}>
+          <input type="date" value={(value as string | null) ?? ""} onChange={(e) => onChange(e.target.value)} className={inputClass} />
+        </Label>
+      );
+
+    case "checkbox":
+      return (
+        <label className="flex h-full items-center gap-2 pt-5 text-sm font-semibold">
+          <input
+            type="checkbox"
+            checked={!!value}
+            onChange={(e) => onChange(e.target.checked)}
+            className="size-4 accent-[var(--accent)]"
+          />
+          {field.label}
+        </label>
+      );
+
+    case "patch":
+      return (
+        <Label field={field}>
+          <select
+            value={value === null || value === undefined ? "" : String(value)}
+            onChange={(e) => onChange(e.target.value === "" ? null : Number(e.target.value))}
+            className={inputClass}
+          >
+            <option value="">— (지정 안 함)</option>
+            {patches.map((p) => (
+              <option key={p.id} value={p.id}>
+                Ver. {p.version} ({p.released_on})
+              </option>
+            ))}
+          </select>
+        </Label>
+      );
+  }
+}
+
+// ───────────────────────── 저장 데이터 정리 ─────────────────────────
+
+function buildPayload(fields: Field[], values: Values): { payload: Values; problem?: string } {
+  const payload: Values = {};
+  for (const field of fields) {
+    const raw = values[field.key];
+    switch (field.type) {
+      case "localized": {
+        const loc = (raw as Partial<Localized> | null) ?? {};
+        const cleaned: Partial<Localized> = {};
+        for (const { key } of LANGS) {
+          const text = loc[key]?.trim();
+          if (text) cleaned[key] = text;
+        }
+        const hasAny = Object.keys(cleaned).length > 0;
+        if (hasAny && !cleaned.ko) return { payload, problem: `${field.label}: 한국어는 필수입니다.` };
+        if (!hasAny && field.required) return { payload, problem: `${field.label}을(를) 입력하세요.` };
+        payload[field.key] = hasAny ? cleaned : null;
+        break;
+      }
+      case "notation":
+      case "text":
+      case "url": {
+        const text = typeof raw === "string" ? raw.trim() : "";
+        if (!text && field.required) return { payload, problem: `${field.label}을(를) 입력하세요.` };
+        payload[field.key] = text || null;
+        break;
+      }
+      case "number":
+        payload[field.key] = raw === null || raw === undefined ? (field.nullable ? null : 0) : raw;
+        break;
+      case "date":
+        // 비워 두면 보내지 않는다 (DB 기본값 = 오늘)
+        if (raw) payload[field.key] = raw;
+        break;
+      default:
+        payload[field.key] = raw ?? null;
+    }
+  }
+  return { payload };
+}

@@ -5,6 +5,7 @@ import { pickLocalized } from "@/lib/i18n/localized";
 import { ControlNotation } from "./notation";
 import { LevelBadge, NotTranslatedBadge, OutdatedBadge, Tag } from "./badges";
 import { SegmentGauge } from "./gauges";
+import { EditButton } from "./admin/admin-context";
 
 export function ComboCard({
   combo,
@@ -41,6 +42,9 @@ export function ComboCard({
           {title && <h2 className="font-bold">{title.text}</h2>}
           {title && !title.translated && <NotTranslatedBadge label={dict.notTranslated} />}
           {outdated && <OutdatedBadge label={dict.patch.outdated} />}
+          <span className="ml-auto">
+            <EditButton entity="combo" id={combo.id} />
+          </span>
         </header>
 
         <div className="border-l-2 border-accent bg-inset px-3 py-3">
