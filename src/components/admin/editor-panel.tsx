@@ -152,7 +152,7 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
     if (isNew) {
       // 콤보·셋업은 새 항목을 목록 맨 아래에 둔다 (순서는 '순서 변경'에서 바꾼다)
       const order: Values = {};
-      if (typeof request.defaults?.character_id === "number" && (entity.table === "combos" || entity.table === "setups")) {
+      if (typeof request.defaults?.character_id === "number" && ["combos", "setups", "vs_guides"].includes(entity.table)) {
         const { data: last } = await sb
           .from(entity.table)
           .select("sort_order")
@@ -525,7 +525,8 @@ function FieldInput({
             onChange={(e) => onChange(e.target.value === "" ? null : e.target.value)}
             className={inputClass}
           >
-            {field.nullable && <option value="">—</option>}
+            {/* 아직 고르지 않은 필수 칸도 빈 선택지를 보여 준다 */}
+            {(field.nullable || value === null || value === undefined || value === "") && <option value="">—</option>}
             {field.options.map((o) => (
               <option key={o.value} value={o.value}>
                 {o.label}
@@ -671,6 +672,12 @@ function buildPayload(fields: Field[], values: Values): { payload: Values; probl
       case "date":
         // 비워 두면 보내지 않는다 (DB 기본값 = 오늘)
         if (raw) payload[field.key] = raw;
+        break;
+      case "select":
+        // 필수 선택 칸을 비워 두면 DB 오류 대신 알려 준다
+        if ((raw === null || raw === undefined || raw === "") && field.required)
+          return { payload, problem: `${field.label}을(를) 고르세요.` };
+        payload[field.key] = raw ?? null;
         break;
       default:
         payload[field.key] = raw ?? null;

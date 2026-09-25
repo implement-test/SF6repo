@@ -8,6 +8,7 @@ import { CharacterNav } from "@/components/character-nav";
 import { formatPatchVersion } from "@/lib/patch";
 import { PresetButton } from "@/components/admin/preset-button";
 import { HashHighlight } from "@/components/hash-highlight";
+import { VsOpponentPicker } from "@/components/vs-opponent-picker";
 
 export async function generateStaticParams() {
   const characters = await getCharacters();
@@ -62,6 +63,8 @@ export default async function CharacterLayout({ children, params }: LayoutProps<
         <CharacterNav slug={slug} labels={dict.nav} />
       </div>
 
+      {/* Vs 탭에서만 보이는 상대 캐릭터 선택 (필터 바 위) */}
+      <VsOpponentPicker dict={dict} locale={lang} />
       <ContentFilters dict={dict} />
 
       <div>{children}</div>

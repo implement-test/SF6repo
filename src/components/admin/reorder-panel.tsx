@@ -24,7 +24,7 @@ export default function ReorderPanel({
   label,
   onClose,
 }: {
-  table: "combos" | "setups";
+  table: "combos" | "setups" | "vs_guides";
   characterId: number;
   label: string;
   onClose: () => void;

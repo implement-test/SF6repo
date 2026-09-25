@@ -1,6 +1,6 @@
 import "server-only";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import type { Character, Combo, Patch, Setup, SetupComboLink, SetupSituation } from "@/lib/types";
+import type { Character, Combo, Patch, Setup, SetupComboLink, SetupSituation, VsGuide } from "@/lib/types";
 import { normalizeOptions, normalizePractice } from "@/lib/setup";
 import { normalizeStarterGroups } from "@/lib/starters";
 import {
@@ -10,6 +10,7 @@ import {
   sampleSetupLinks,
   sampleSetups,
   sampleSituations,
+  sampleVsGuides,
 } from "./sample";
 
 /**
@@ -145,4 +146,17 @@ export async function getSetupComboLinks(setupIds: number[]): Promise<SetupCombo
   if (setupIds.length === 0) return [];
   const { data } = await c.from("setup_combos").select("*").in("setup_id", setupIds).order("sort_order");
   return (data ?? []) as SetupComboLink[];
+}
+
+/** Vs 가이드 (이 캐릭터가 상대를 만났을 때). 표가 아직 없으면(0014 실행 전) 빈 목록 */
+export async function getVsGuides(characterId: number): Promise<VsGuide[]> {
+  const c = db();
+  if (!c) return sampleVsGuides.filter((g) => g.character_id === characterId);
+  const { data } = await c
+    .from("vs_guides")
+    .select("*")
+    .eq("character_id", characterId)
+    .order("sort_order")
+    .order("id");
+  return (data ?? []) as VsGuide[];
 }

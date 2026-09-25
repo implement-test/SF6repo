@@ -201,3 +201,22 @@ export type Setup = ContentBase &
   };
 
 export type SetupComboLink = { id: number; setup_id: number; combo_id: number; sort_order: number };
+
+// ───────────────────────── Vs 가이드 ─────────────────────────
+
+/** 전체적인 운영 팁 / 윕퍼 노릴 만한 동작 / 가드 후 확정 딜캐 / 압박 중 끼어드는 지점 / 기타 */
+export type VsTopic = "general" | "whiff_punish" | "block_punish" | "pressure_gap" | "other";
+export const VS_TOPICS: VsTopic[] = ["general", "whiff_punish", "block_punish", "pressure_gap", "other"];
+
+export type VsGuide = ContentBase &
+  Media & {
+    character_id: number;
+    /** 상대 캐릭터 (로스터 slug, src/lib/roster.ts) */
+    opponent: string;
+    topic: VsTopic;
+    title: Localized | null;
+    body: Localized | null;
+    /** 관련 동작·대응 표기 (선택) */
+    notation_classic: string | null;
+    notation_modern: string | null;
+  };

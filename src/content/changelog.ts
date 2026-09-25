@@ -16,6 +16,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-09-26",
     items: [
       {
+        kind: "added",
+        text: {
+          ko: "Vs 가이드: 상대 캐릭터 선택(32명, 분류별) 과 주제 태그 5가지 (운영 팁 · 윕퍼 · 확정 딜캐 · 끼어들기 · 기타)",
+          en: "Vs guides: pick an opponent (32 characters by release group) and filter by 5 topics",
+          ja: "Vsガイド：対戦相手の選択（32キャラ、区分別）と5つのトピック",
+        },
+      },
+      {
         kind: "removed",
         text: {
           ko: "프랙티스 세팅 탭 삭제 (셋업 안의 프랙티스 설정으로 통합)",

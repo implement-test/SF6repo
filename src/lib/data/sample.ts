@@ -1,4 +1,4 @@
-import type { Character, Combo, Patch, Setup, SetupComboLink, SetupSituation } from "@/lib/types";
+import type { Character, Combo, Patch, Setup, SetupComboLink, SetupSituation, VsGuide } from "@/lib/types";
 
 /**
  * Supabase 환경변수가 없을 때 쓰는 예시 데이터.
@@ -189,4 +189,48 @@ export const sampleSetups: Setup[] = [
 export const sampleSetupLinks: SetupComboLink[] = [
   { id: 1, setup_id: 1, combo_id: 2, sort_order: 0 },
   { id: 2, setup_id: 1, combo_id: 3, sort_order: 1 },
+];
+const vsBase = {
+  character_id: 1,
+  patch_id: 1,
+  is_published: true,
+  media_url: null,
+  youtube_url: null,
+  youtube_start: null,
+  notation_classic: null,
+  notation_modern: null,
+  target_level: "beginner",
+  created_date: "2026-09-26",
+} as const;
+
+export const sampleVsGuides: VsGuide[] = [
+  {
+    ...vsBase,
+    id: 1,
+    opponent: "ryu",
+    topic: "general",
+    title: { ko: "[예시] 거리 싸움 기본" },
+    body: { ko: "장풍은 점프로 넘기보다 중거리에서 드라이브 임팩트로 받아친다.\n근거리에서는 무리하지 말고 잡기 심리." },
+    sort_order: 1,
+  },
+  {
+    ...vsBase,
+    id: 2,
+    opponent: "ryu",
+    topic: "block_punish",
+    title: { ko: "[예시] 승룡권 가드 후" },
+    body: null,
+    notation_classic: "5HP → 236HP",
+    target_level: "intermediate",
+    sort_order: 2,
+  },
+  {
+    ...vsBase,
+    id: 3,
+    opponent: "ken",
+    topic: "pressure_gap",
+    title: { ko: "[예시] 용권선풍각 후 틈" },
+    body: { ko: "가드 후 약간 멀어지므로 2MK 로 끼어든다." },
+    sort_order: 3,
+  },
 ];

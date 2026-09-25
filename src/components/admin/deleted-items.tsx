@@ -16,6 +16,7 @@ const TABLE_LABELS: Record<string, string> = {
   practice_settings: "프랙티스 세팅",
   vs_punishes: "확정 반격",
   vs_patterns: "패턴 대응",
+  vs_guides: "Vs 가이드",
   glossary: "용어",
   patches: "패치",
   starter_presets: "시동기 프리셋",

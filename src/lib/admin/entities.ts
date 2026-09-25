@@ -1,3 +1,5 @@
+import { ROSTER, ROSTER_GROUPS } from "@/lib/roster";
+
 /**
  * 관리자 편집 폼 정의. 필드 목록만 쓰면 편집 패널이 폼을 그린다.
  * 새 콘텐츠 종류(커맨드 리스트, 셋업 …)를 추가할 때는 여기에 항목을 추가한다.
@@ -33,7 +35,7 @@ export type Field = { key: string; label: string; help?: string; required?: bool
 
 export type FieldGroup = { title: string; fields: Field[] };
 
-export type EntityType = "combo" | "patch" | "setup";
+export type EntityType = "combo" | "patch" | "setup" | "vs";
 
 export type Entity = {
   table: string;
@@ -63,6 +65,20 @@ const POSITIONS: Option[] = [
   { value: "other", label: "기타" },
 ];
 
+
+/** 상대 캐릭터 (로스터 순서, 분류 이름을 붙여서) */
+const OPPONENTS: Option[] = ROSTER.map((c) => ({
+  value: c.slug,
+  label: `${c.name.ko} (${ROSTER_GROUPS.find((g) => g.id === c.group)!.name.ko})`,
+}));
+
+const VS_TOPICS: Option[] = [
+  { value: "general", label: "전체적인 운영 팁" },
+  { value: "whiff_punish", label: "윕퍼 노릴 만한 동작" },
+  { value: "block_punish", label: "가드 후 확정 딜캐" },
+  { value: "pressure_gap", label: "압박 중 끼어드는 지점" },
+  { value: "other", label: "기타" },
+];
 
 const HIT_STATES: Option[] = [
   { value: "normal", label: "노멀" },
@@ -208,6 +224,33 @@ export const ENTITIES: Record<EntityType, Entity> = {
       practice: null,
       combo_links: [],
     }),
+  },
+
+  vs: {
+    table: "vs_guides",
+    label: "Vs 가이드",
+    groups: [
+      {
+        title: "Vs 가이드",
+        fields: [
+          { key: "opponent", label: "상대 캐릭터", type: "select", options: OPPONENTS, required: true },
+          { key: "topic", label: "주제", type: "select", options: VS_TOPICS },
+          { key: "title", label: "제목", type: "localized" },
+          { key: "body", label: "내용", type: "localized", multiline: true },
+          {
+            key: "notation_classic",
+            label: "관련 동작·대응 (클래식)",
+            type: "notation",
+            wide: true,
+            help: "상대 기술이나 대응 콤보를 표기로 보여 줄 때 (없으면 비움)",
+          },
+          { key: "notation_modern", label: "관련 동작·대응 (모던)", type: "notation", wide: true },
+        ],
+      },
+      MEDIA_GROUP,
+      META_GROUP,
+    ],
+    defaults: () => ({ ...metaDefaults(), opponent: null, topic: "general" }),
   },
 
   patch: {
