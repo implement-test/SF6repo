@@ -20,7 +20,7 @@ export function PracticeView({ config, locale, dict }: { config: PracticeConfig;
         <ReversalTable title={t.afterHit} rows={config.after_hit} locale={locale} dict={dict} />
       </div>
       {notes && (
-        <p className="text-sm text-muted">
+        <p className="text-sm whitespace-pre-line text-muted">
           {notes.text} {!notes.translated && <NotTranslatedBadge label={dict.notTranslated} />}
         </p>
       )}

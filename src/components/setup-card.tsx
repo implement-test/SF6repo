@@ -112,7 +112,7 @@ export function SetupCard({
             </div>
           )}
           {description && (
-            <p className="text-sm text-muted">
+            <p className="text-sm whitespace-pre-line text-muted">
               {description.text} {!description.translated && <NotTranslatedBadge label={dict.notTranslated} />}
             </p>
           )}
@@ -148,7 +148,7 @@ export function SetupCard({
                     )}
                   </div>
                   {desc && (
-                    <p className="text-sm text-muted">
+                    <p className="text-sm whitespace-pre-line text-muted">
                       {desc.text} {!desc.translated && <NotTranslatedBadge label={dict.notTranslated} />}
                     </p>
                   )}
@@ -172,7 +172,7 @@ export function SetupCard({
                             )}
                           </div>
                           {note && (
-                            <p className="text-sm text-muted">
+                            <p className="text-sm whitespace-pre-line text-muted">
                               {note.text} {!note.translated && <NotTranslatedBadge label={dict.notTranslated} />}
                             </p>
                           )}

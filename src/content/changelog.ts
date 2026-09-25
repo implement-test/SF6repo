@@ -13,6 +13,19 @@ export type ChangelogEntry = { date: string; items: ChangelogItem[] };
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    date: "2026-09-26",
+    items: [
+      {
+        kind: "changed",
+        text: {
+          ko: "설명 · 메모의 줄바꿈이 화면에도 그대로 표시",
+          en: "Line breaks in descriptions and notes are kept on the page",
+          ja: "説明・メモの改行をそのまま表示",
+        },
+      },
+    ],
+  },
+  {
     date: "2026-09-25",
     items: [
       {

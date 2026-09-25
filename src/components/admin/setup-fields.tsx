@@ -217,23 +217,40 @@ export function ComboLinksInput({
 
 const LANGS = ["ko", "en", "ja"] as const;
 
-/** 한국어 입력칸 하나 + 필요할 때 펼치는 영어·일본어 칸 */
+/**
+ * 한국어 입력칸 하나 + 필요할 때 펼치는 영어·일본어 칸.
+ * multiline 이면 줄바꿈(Enter / Shift+Enter)을 그대로 저장하고, 내용에 맞춰 높이가 늘어난다.
+ */
 function LocalizedLine({
   value,
   onChange,
   placeholder,
+  multiline = false,
 }: {
   value: Localized | null;
   onChange: (v: Localized | null) => void;
   placeholder: string;
+  multiline?: boolean;
 }) {
   const [open, setOpen] = useState(!!(value?.en || value?.ja));
   const set = (lang: (typeof LANGS)[number], text: string) =>
     onChange({ ...(value ?? { ko: "" }), [lang]: text } as Localized);
+  const field = (lang: (typeof LANGS)[number], ph: string) =>
+    multiline ? (
+      <textarea
+        rows={1}
+        value={value?.[lang] ?? ""}
+        onChange={(e) => set(lang, e.target.value)}
+        placeholder={ph}
+        className={`${inputClass} field-sizing-content resize-y`}
+      />
+    ) : (
+      <input value={value?.[lang] ?? ""} onChange={(e) => set(lang, e.target.value)} placeholder={ph} className={inputClass} />
+    );
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-1">
-      <div className="flex gap-1">
-        <input value={value?.ko ?? ""} onChange={(e) => set("ko", e.target.value)} placeholder={placeholder} className={inputClass} />
+      <div className="flex items-start gap-1">
+        {field("ko", placeholder)}
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
@@ -246,9 +263,9 @@ function LocalizedLine({
       </div>
       {open &&
         (["en", "ja"] as const).map((lang) => (
-          <div key={lang} className="flex items-center gap-1">
-            <span className="w-6 text-[0.65rem] font-bold uppercase text-muted">{lang}</span>
-            <input value={value?.[lang] ?? ""} onChange={(e) => set(lang, e.target.value)} placeholder="(선택)" className={inputClass} />
+          <div key={lang} className="flex items-start gap-1">
+            <span className="w-6 pt-1.5 text-[0.65rem] font-bold uppercase text-muted">{lang}</span>
+            {field(lang, "(선택)")}
           </div>
         ))}
     </div>
@@ -328,6 +345,7 @@ export function OptionsInput({ value, onChange }: { value: SetupOption[]; onChan
           <div className="grid grid-cols-[3.2rem_1fr] items-start gap-2">
             <span className="pt-1.5 text-xs font-bold text-muted">설명</span>
             <LocalizedLine
+              multiline
               value={o.description}
               onChange={(description) => update(i, { description })}
               placeholder="예: HP가 2히트 되는 거리에서 써야 됨"
@@ -368,7 +386,7 @@ export function OptionsInput({ value, onChange }: { value: SetupOption[]; onChan
                   <NotationRow label="모던" value={b.modern ?? ""} onChange={(modern) => setBranch({ modern })} placeholder="비우면 클래식 전용" />
                   <div className="grid grid-cols-[3.2rem_1fr] items-start gap-2">
                     <span className="pt-1.5 text-xs font-bold text-muted">메모</span>
-                    <LocalizedLine value={b.note} onChange={(note) => setBranch({ note })} placeholder="예: HP가 1타만 맞아도 이어짐" />
+                    <LocalizedLine multiline value={b.note} onChange={(note) => setBranch({ note })} placeholder="예: HP가 1타만 맞아도 이어짐" />
                   </div>
                 </div>
               );
@@ -446,7 +464,7 @@ export function PracticeInput({ value, onChange }: { value: PracticeConfig | nul
       <RowList label="데미지 복귀 리버설" rows={value.after_hit} onChange={(after_hit) => set({ after_hit })} />
       <div className="flex flex-col gap-1.5">
         <span className="text-xs font-semibold text-muted">메모</span>
-        <LocalizedLine value={value.notes} onChange={(notes) => set({ notes })} placeholder="예: 더미 위치 코너" />
+        <LocalizedLine multiline value={value.notes} onChange={(notes) => set({ notes })} placeholder="예: 더미 위치 코너" />
       </div>
     </div>
   );

@@ -348,7 +348,12 @@ function FieldInput({
             return (
               <div key={lang.key} className="grid grid-cols-[3.2rem_1fr] items-start gap-2">
                 <span className="pt-1.5 text-xs font-bold uppercase text-muted">{lang.key}</span>
-                {field.multiline ? <textarea rows={3} {...common} /> : <input {...common} />}
+                {field.multiline ? (
+                  // 줄바꿈(Enter / Shift+Enter)이 그대로 저장·표시된다. 내용에 맞춰 높이가 늘어난다.
+                  <textarea rows={2} {...common} className={`${inputClass} field-sizing-content min-h-16 resize-y`} />
+                ) : (
+                  <input {...common} />
+                )}
               </div>
             );
           })}

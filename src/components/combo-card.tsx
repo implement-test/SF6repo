@@ -103,7 +103,7 @@ export function ComboCard({
         </div>
 
         {notes && (
-          <p className="text-sm text-muted">
+          <p className="text-sm whitespace-pre-line text-muted">
             {notes.text} {!notes.translated && <NotTranslatedBadge label={dict.notTranslated} />}
           </p>
         )}
