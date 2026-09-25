@@ -9,7 +9,7 @@ import { formatPatchVersion } from "@/lib/patch";
 import { PresetButton } from "@/components/admin/preset-button";
 import { HashHighlight } from "@/components/hash-highlight";
 import { VsOpponentPicker } from "@/components/vs-opponent-picker";
-import { rosterBanner } from "@/lib/roster";
+import { BANNER_LAYOUT, rosterBanner } from "@/lib/roster";
 
 export async function generateStaticParams() {
   const characters = await getCharacters();
@@ -29,33 +29,43 @@ export default async function CharacterLayout({ children, params }: LayoutProps<
   return (
     <div className="flex flex-col gap-5">
       <section
-        className={`relative -mx-4 overflow-hidden border-y border-border bg-surface px-4 sm:mx-0 sm:border-x ${banner ? "" : "stripes"}`}
+        className={`relative -mx-4 overflow-hidden border-y border-border bg-surface px-4 sm:mx-0 sm:border-x ${banner ? "h-44 sm:h-auto sm:aspect-[100/21.2]" : "stripes"}`}
       >
         {banner ? (
-          // 공식 사이트 캐릭터 페이지 상단처럼: 배경 그림 + 오른쪽에 캐릭터 (상반신만 보이게 잘림). 글자는 우리 것
+          // 공식 캐릭터 페이지 첫 화면에서 맨 위 메뉴를 뺀 구간을 그대로 옮긴다 (배치 값은 roster.ts 의 공식 값).
+          // 무대(stage)의 폭을 기준(cqw)으로 배경·캐릭터를 놓아, 화면 폭이 달라도 같은 구도가 된다.
+          // 좁은 화면에서는 무대를 52rem 로 두고 가운데를 보여 준다.
           <>
-            <div aria-hidden className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${banner.background})` }} />
-            {/* 캐릭터: 오른쪽 칸을 채우고 캐릭터마다 정한 높이(figureY)를 보여 준다. 왼쪽 가장자리는 흐리게 */}
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-y-0 right-0 w-[70%] sm:right-[4%] sm:w-[50%]"
-              style={{ maskImage: "linear-gradient(90deg, transparent, black 22%)" }}
+              className="pointer-events-none absolute inset-y-0 left-1/2 w-[max(100%,52rem)] -translate-x-1/2 overflow-hidden [container-type:inline-size]"
             >
               {/* eslint-disable-next-line @next/next/no-img-element -- 공식 사이트 이미지를 그대로 불러온다 */}
               <img
                 alt=""
+                src={banner.background}
+                className="absolute left-1/2 max-w-none -translate-x-1/2"
+                style={{ top: `-${BANNER_LAYOUT.menu}cqw`, width: `${BANNER_LAYOUT.backgroundWidth}cqw` }}
+              />
+              {/* eslint-disable-next-line @next/next/no-img-element -- 공식 사이트 이미지를 그대로 불러온다 */}
+              <img
+                alt=""
                 src={banner.figure}
-                className="h-full w-full object-cover"
-                style={{ objectPosition: `50% ${banner.figureY}%` }}
+                className="absolute max-w-none"
+                style={{
+                  left: `${banner.left}cqw`,
+                  top: `${banner.top - BANNER_LAYOUT.menu}cqw`,
+                  width: `${banner.width}cqw`,
+                }}
               />
             </div>
-            {/* 이름·버튼이 잘 보이도록 왼쪽과 아래를 어둡게 */}
+            {/* 이름·버튼이 잘 보이도록 왼쪽 아래만 살짝 어둡게 */}
             <div
               aria-hidden
               className="absolute inset-0"
               style={{
                 background:
-                  "linear-gradient(90deg, color-mix(in srgb, var(--bg-deep) 88%, transparent) 0%, color-mix(in srgb, var(--bg-deep) 45%, transparent) 38%, transparent 65%), linear-gradient(0deg, color-mix(in srgb, var(--bg-deep) 55%, transparent), transparent 45%)",
+                  "linear-gradient(90deg, color-mix(in srgb, var(--bg-deep) 70%, transparent) 0%, transparent 45%), linear-gradient(0deg, color-mix(in srgb, var(--bg-deep) 50%, transparent), transparent 40%)",
               }}
             />
           </>
@@ -79,7 +89,7 @@ export default async function CharacterLayout({ children, params }: LayoutProps<
           </>
         )}
         <div
-          className={`relative flex flex-wrap items-end justify-between gap-4 sm:px-4 ${banner ? "min-h-44 py-6 sm:min-h-56" : "py-7"}`}
+          className={`relative flex flex-wrap items-end justify-between gap-4 sm:px-4 ${banner ? "h-full py-5" : "py-7"}`}
         >
           <div>
             <p className="eyebrow">Character</p>

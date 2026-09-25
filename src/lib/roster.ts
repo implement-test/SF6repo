@@ -126,23 +126,55 @@ export function rosterImage(slug: string): string | null {
 }
 
 /**
- * 배너에서 캐릭터 이미지의 어느 높이를 보여 줄지 (object-position 의 세로 %, 0 = 맨 위).
- * 공식 이미지는 전신이라 배너에는 일부만 보인다. 자세가 달라 얼굴이 아래쪽에 있는 캐릭터만 따로 정한다.
+ * 공식 캐릭터 페이지(넓은 화면)의 배치를 그대로 옮긴 값. 모두 페이지 폭 대비 % (공식 폴더 이름 기준).
+ *   [캐릭터 이미지 왼쪽, 위, 폭]  — 높이는 이미지 비율대로
+ * 배경은 폭 105%, 가운데·위쪽 맞춤. 공식 페이지는 맨 위 메뉴가 폭의 5.08% 만큼 덮고,
+ * 그 아래 폭의 21.2% 높이가 첫 화면에 보인다 — 배너는 이 구간을 보여 준다.
  */
-const BANNER_Y: Record<string, number> = {
-  luke: 7, kimberly: 18, juri: 40, ken: 7, blanka: 28, dhalsim: 18, ehonda: 49, deejay: 18, manon: 18,
-  zangief: 7, lily: 35, chunli: 28, rashid: 12, aki: 28, ed: 8, terry: 14, mai: 18, elena: 62, sagat: 40,
-  alex: 18, ingrid: 28, yasmine: 12,
+export const BANNER_LAYOUT = { menu: 5.08, height: 21.2, backgroundWidth: 105.04 } as const;
+
+const FIGURE: Record<string, [number, number, number]> = {
+  aki: [3.78, -15.7, 78.78],
+  alex: [14.81, -11.5, 63.81],
+  arjun: [19.54, 4.79, 56.72],
+  blanka: [18.49, -3.9, 69.85],
+  cammy: [19.01, 5.25, 57.77],
+  chunli: [27.94, -5.72, 54.09],
+  cviper: [18.49, -0.21, 62.23],
+  deejay: [0.11, 2.1, 78.36],
+  dhalsim: [17.96, 1.58, 73.53],
+  ed: [13.76, 0.06, 60.66],
+  ehonda: [15.86, -16.69, 78.78],
+  elena: [-11.45, -36.71, 86.61],
+  gouki_akuma: [18.49, -5.2, 68.01],
+  guile: [21.64, 8.4, 51.47],
+  ingrid: [12.19, -11.5, 70.9],
+  jamie: [28.73, 2.1, 55.3],
+  jp: [25.74, 3.15, 47.69],
+  juri: [23.74, 0, 68.27],
+  ken: [13.24, 0, 68.27],
+  kimberly: [28.99, 0, 73.53],
+  lily: [9.56, -11.69, 78.36],
+  luke: [26.63, 3.68, 55.3],
+  mai: [21.12, -10.45, 61.87],
+  manon: [-0.78, 2.1, 97.37],
+  marisa: [23.22, 2.1, 61.97],
+  rashid: [10.09, -10.45, 100.83],
+  ryu: [23.74, 5.25, 55.3],
+  sagat: [11.66, -0.21, 70.9],
+  terry: [11.92, -5.2, 61.87],
+  vega_mbison: [23.74, -0.47, 56.3],
+  yasmine: [14.29, -17.01, 74.44],
+  zangief: [18.49, 3.68, 57.77],
 };
 
 /** 캐릭터 페이지 상단 배너: 배경 그림 + 캐릭터 이미지 (글자는 없음) */
-export function rosterBanner(slug: string): { background: string; figure: string; figureY: number } | null {
+export function rosterBanner(
+  slug: string,
+): { background: string; figure: string; left: number; top: number; width: number } | null {
   const r = rosterBySlug(slug);
   if (!r) return null;
   const dir = `${OFFICIAL_BASE}/${r.officialDir}`;
-  return {
-    background: `${dir}/bg_${r.officialDir}.jpg`,
-    figure: `${dir}/${r.officialDir}.png`,
-    figureY: BANNER_Y[slug] ?? 0,
-  };
+  const [left, top, width] = FIGURE[r.officialDir] ?? [20, 0, 60];
+  return { background: `${dir}/bg_${r.officialDir}.jpg`, figure: `${dir}/${r.officialDir}.png`, left, top, width };
 }

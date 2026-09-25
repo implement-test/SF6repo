@@ -16,6 +16,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-09-26",
     items: [
       {
+        kind: "changed",
+        text: {
+          ko: "캐릭터 상단 배너를 공식 캐릭터 페이지 첫 화면과 같은 구도로",
+          en: "Character banners now match the official character page layout",
+          ja: "キャラクターのバナーを公式キャラページのファーストビューと同じ構図に",
+        },
+      },
+      {
         kind: "added",
         text: {
           ko: "32명 전원의 캐릭터 페이지, 공식 이미지로 만든 상단 배너와 캐릭터 목록 이미지",
