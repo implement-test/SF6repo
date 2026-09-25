@@ -150,7 +150,7 @@ export function SetupCard({
                 </div>
                 {/* 결과 줄: 들여쓰고 세로 안내선 + └ 연결선으로 옵션 아래에 매달린 것처럼 */}
                 {option.branches.length > 0 && (
-                  <ul className="ml-5 border-l-2 border-border-strong py-1 md:ml-8 md:grid md:grid-cols-[max-content_minmax(0,1fr)_minmax(0,1fr)]">
+                  <ul className="ml-5 md:ml-8 md:grid md:grid-cols-[max-content_minmax(0,1fr)_minmax(0,1fr)]">
                     {option.branches.map((b, j) => {
                       const note = b.note ? pickLocalized(b.note, locale) : null;
                       return (
