@@ -85,8 +85,7 @@ export type Combo = ContentBase &
     damage: number | null;
     /** 콤보 후 프레임 (예: "+32", "다운 +30") */
     frame_after: string | null;
-    /** 콤보 후 위치 (셋업 화면용 정보) */
-    end_position: ScreenPosition | null;
+
     difficulty: Difficulty;
     notes: Localized | null;
   };

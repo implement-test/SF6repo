@@ -135,20 +135,10 @@ export function ComboCard({
             <p className="mt-1 text-xs text-muted">* {dict.combo.damageBasis}</p>
           )}
         </div>
-        {(combo.frame_after || combo.end_position) && (
-          <div className="flex flex-wrap gap-x-5 gap-y-2">
-            {combo.frame_after && (
-              <div>
-                <p className="eyebrow">{dict.combo.frameAfter}</p>
-                <p className="display text-2xl tabular-nums">{combo.frame_after}</p>
-              </div>
-            )}
-            {combo.end_position && (
-              <div>
-                <p className="eyebrow">{dict.setup.endPosition}</p>
-                <p className="display text-2xl">{dict.position[combo.end_position]}</p>
-              </div>
-            )}
+        {combo.frame_after && (
+          <div>
+            <p className="eyebrow">{dict.combo.frameAfter}</p>
+            <p className="display text-2xl tabular-nums">{combo.frame_after}</p>
           </div>
         )}
         <div className="flex flex-col gap-1.5">

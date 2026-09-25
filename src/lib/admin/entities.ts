@@ -65,10 +65,6 @@ const POSITIONS: Option[] = [
   { value: "other", label: "기타" },
 ];
 
-const END_POSITIONS: Option[] = [
-  { value: "midscreen", label: "필드" },
-  { value: "corner", label: "코너" },
-];
 
 const HIT_STATES: Option[] = [
   { value: "normal", label: "노멀" },
@@ -161,14 +157,6 @@ export const ENTITIES: Record<EntityType, Entity> = {
           { key: "drive_cost", label: "드라이브 소모 (칸)", type: "number", step: 0.5, min: 0, max: 6 },
           { key: "sa_cost", label: "SA 소모 (칸)", type: "number", step: 1, min: 0, max: 3 },
           { key: "frame_after", label: "콤보 후 프레임", type: "text", help: "예: +32, 다운 +30" },
-          {
-            key: "end_position",
-            label: "콤보 후 위치",
-            type: "select",
-            options: END_POSITIONS,
-            nullable: true,
-            help: "셋업 화면에 표시됩니다.",
-          },
           { key: "difficulty", label: "입력 난이도", type: "select", options: DIFFICULTY },
         ],
       },
@@ -182,7 +170,6 @@ export const ENTITIES: Record<EntityType, Entity> = {
       hit_states: ["normal"],
       position_start: "midscreen",
       frame_after: null,
-      end_position: null,
       drive_cost: 0,
       sa_cost: 0,
       damage: null,

@@ -78,12 +78,9 @@ type ComboRow = {
   title: { ko: string } | null;
   notation_classic: string;
   starters: { classic: string }[] | null;
-  end_position: string | null;
   frame_after: string | null;
   is_published: boolean;
 };
-
-const POSITION_KO: Record<string, string> = { midscreen: "필드", corner: "코너", near_corner: "코너 근처", any: "거리 무관", other: "기타" };
 
 /** 이 셋업으로 이어지는 콤보 고르기: 검색해서 추가, 순서 변경, 빼기 */
 export function ComboLinksInput({
@@ -106,7 +103,7 @@ export function ComboLinksInput({
     if (characterId === undefined) return;
     supabaseBrowser()
       .from("combos")
-      .select("id,title,notation_classic,starters,end_position,frame_after,is_published")
+      .select("id,title,notation_classic,starters,frame_after,is_published")
       .eq("character_id", characterId)
       .order("sort_order")
       .then(({ data }) => setCombos(data ?? []));
@@ -149,8 +146,7 @@ export function ComboLinksInput({
                   {c && <NotationImage notation={c.notation_classic} />}
                   {c && (
                     <span className="text-xs text-muted">
-                      콤보 후 위치 {c.end_position ? POSITION_KO[c.end_position] : "미입력"} · 콤보 후 프레임{" "}
-                      {c.frame_after ?? "미입력"}
+                      콤보 후 프레임 {c.frame_after ?? "미입력"}
                     </span>
                   )}
                 </div>

@@ -60,7 +60,6 @@ const ko = {
   setup: {
     combos: "이 셋업으로 이어지는 콤보",
     route: "마무리 루트",
-    endPosition: "콤보 후 위치",
     frameAfter: "콤보 후 프레임",
     input: "셋업",
     practice: "프랙티스 설정",
@@ -153,7 +152,6 @@ const en: Dictionary = {
   setup: {
     combos: "Combos leading into this setup",
     route: "Ending route",
-    endPosition: "Position after",
     frameAfter: "Frame adv. after",
     input: "Setup",
     practice: "Training settings",
@@ -244,7 +242,6 @@ const ja: Dictionary = {
   setup: {
     combos: "このセットプレイにつながるコンボ",
     route: "締めのルート",
-    endPosition: "コンボ後の位置",
     frameAfter: "コンボ後の有利F",
     input: "セットプレイ",
     practice: "トレーニング設定",

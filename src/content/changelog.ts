@@ -18,6 +18,26 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         kind: "changed",
         text: {
+          ko: "셋업의 이어지는 콤보: 줄 전체를 눌러 콤보로 이동",
+          en: "Setups: click anywhere on a leading combo row to open it",
+          ja: "セットプレイ：つながるコンボの行全体をクリックしてコンボへ移動",
+        },
+      },
+      {
+        kind: "removed",
+        text: { ko: "콤보 후 위치 표시", en: "Position after combo", ja: "コンボ後の位置の表示" },
+      },
+      {
+        kind: "changed",
+        text: {
+          ko: "셋업 옵션 이름을 입력한 그대로 표시",
+          en: "Setup option names shown as entered",
+          ja: "セットプレイの択名を入力どおりに表示",
+        },
+      },
+      {
+        kind: "changed",
+        text: {
           ko: "설명 · 메모의 줄바꿈이 화면에도 그대로 표시",
           en: "Line breaks in descriptions and notes are kept on the page",
           ja: "説明・メモの改行をそのまま表示",

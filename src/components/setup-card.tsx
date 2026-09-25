@@ -68,30 +68,27 @@ export function SetupCard({
             {linkedCombos.map((combo) => {
               const comboTitle = combo.title ? pickLocalized(combo.title, locale).text : null;
               return (
-                <li key={combo.id} className="grid gap-2 px-3 py-2.5 md:grid-cols-[1fr_auto] md:items-center">
-                  <div className="flex min-w-0 flex-col gap-1">
-                    <Link
-                      href={`/${characterSlug}/combos#combo-${combo.id}`}
-                      className="text-xs font-semibold text-muted hover:text-accent"
-                    >
-                      {comboTitle ?? t.route} ↗
-                    </Link>
-                    <ControlNotation
-                      classic={combo.notation_classic}
-                      modern={combo.notation_modern}
-                      classicOnlyLabel={dict.combo.classicOnly}
-                    />
-                  </div>
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-                    <span className="flex items-center gap-1.5">
-                      <span className="text-xs text-muted">{t.endPosition}</span>
-                      <b>{combo.end_position ? dict.position[combo.end_position] : "—"}</b>
-                    </span>
-                    <span className="flex items-center gap-1.5">
+                <li key={combo.id}>
+                  {/* 줄 전체가 콤보 페이지의 해당 콤보로 가는 링크 */}
+                  <Link
+                    href={`/${characterSlug}/combos#combo-${combo.id}`}
+                    className="group grid gap-2 px-3 py-2.5 transition-colors hover:bg-surface-2 md:grid-cols-[1fr_auto] md:items-center"
+                  >
+                    <div className="flex min-w-0 flex-col gap-1">
+                      <span className="text-xs font-semibold text-muted group-hover:text-accent">
+                        {comboTitle ?? t.route}
+                      </span>
+                      <ControlNotation
+                        classic={combo.notation_classic}
+                        modern={combo.notation_modern}
+                        classicOnlyLabel={dict.combo.classicOnly}
+                      />
+                    </div>
+                    <span className="flex items-center gap-1.5 text-sm">
                       <span className="text-xs text-muted">{t.frameAfter}</span>
                       <b className="display text-lg tabular-nums text-highlight-text">{combo.frame_after ?? "—"}</b>
                     </span>
-                  </div>
+                  </Link>
                 </li>
               );
             })}
