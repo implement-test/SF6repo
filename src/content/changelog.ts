@@ -18,6 +18,14 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         kind: "added",
         text: {
+          ko: "32명 전원의 캐릭터 페이지, 공식 이미지로 만든 상단 배너와 캐릭터 목록 이미지",
+          en: "Pages for all 32 characters, with official-art banners and roster images",
+          ja: "全32キャラのページ、公式イラストのバナーとキャラ一覧画像",
+        },
+      },
+      {
+        kind: "added",
+        text: {
           ko: "Vs 가이드: 상대 캐릭터 선택(32명, 분류별) 과 주제 태그 5가지 (운영 팁 · 윕퍼 · 확정 딜캐 · 끼어들기 · 기타)",
           en: "Vs guides: pick an opponent (32 characters by release group) and filter by 5 topics",
           ja: "Vsガイド：対戦相手の選択（32キャラ、区分別）と5つのトピック",

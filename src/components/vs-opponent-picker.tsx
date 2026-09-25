@@ -106,7 +106,8 @@ export function VsOpponentPicker({ dict, locale }: { dict: Dictionary; locale: L
 /** 캐릭터 이미지. 파일이 없으면 이름 카드로 대신한다 */
 function Portrait({ slug, label, className }: { slug: string; label: string; className: string }) {
   const [broken, setBroken] = useState(false);
-  if (broken) {
+  const src = rosterImage(slug);
+  if (broken || !src) {
     return (
       <span
         className={`${className} skew grid place-items-center bg-surface-2 text-center text-[0.6rem] leading-tight font-bold text-muted`}
@@ -116,9 +117,9 @@ function Portrait({ slug, label, className }: { slug: string; label: string; cla
     );
   }
   return (
-    // eslint-disable-next-line @next/next/no-img-element -- public/ 의 정적 이미지, 펼쳤을 때만 불러온다
+    // eslint-disable-next-line @next/next/no-img-element -- 공식 사이트 이미지, 펼쳤을 때만 불러온다
     <img
-      src={rosterImage(slug)}
+      src={src}
       alt={label}
       loading="lazy"
       onError={() => setBroken(true)}

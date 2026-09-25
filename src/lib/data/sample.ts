@@ -1,4 +1,5 @@
 import type { Character, Combo, Patch, Setup, SetupComboLink, SetupSituation, VsGuide } from "@/lib/types";
+import { ROSTER } from "@/lib/roster";
 
 /**
  * Supabase 환경변수가 없을 때 쓰는 예시 데이터.
@@ -7,16 +8,15 @@ import type { Character, Combo, Patch, Setup, SetupComboLink, SetupSituation, Vs
 
 export const samplePatches: Patch[] = [{ id: 1, version: "sample", released_on: "2026-09-01" }];
 
-export const sampleCharacters: Character[] = [
-  {
-    id: 1,
-    slug: "terry",
-    name: { ko: "테리", en: "Terry", ja: "テリー" },
-    portrait_url: null,
-    sort_order: 1,
-    is_published: true,
-  },
-];
+// 로스터 32명 전원 (테리는 예시 콤보·셋업이 붙은 id 1)
+export const sampleCharacters: Character[] = ROSTER.map((r, i) => ({
+  id: r.slug === "terry" ? 1 : i + 2,
+  slug: r.slug,
+  name: r.name,
+  portrait_url: null,
+  sort_order: i + 1,
+  is_published: true,
+}));
 
 const base = {
   character_id: 1,

@@ -35,6 +35,7 @@ npm run lint
    - `supabase/migrations/0012_combo_routes.sql`
    - `supabase/migrations/0013_route_notes.sql`
    - `supabase/migrations/0014_vs_guides.sql`
+   - `supabase/migrations/0015_all_characters.sql`
 3. Authentication → Sign In / Providers → **Allow new users to sign up 끄기**
 4. Authentication → Users → Add user 로 최고 관리자 계정(이메일+비밀번호) 생성 (Auto Confirm User 체크)
 5. SQL Editor 에서 최고 관리자 등록 (처음 한 번만)

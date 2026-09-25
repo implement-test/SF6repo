@@ -5,6 +5,7 @@ import { hasLocale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { pickLocalized } from "@/lib/i18n/localized";
 import { SectionTitle } from "@/components/headings";
+import { rosterImage } from "@/lib/roster";
 
 export const revalidate = 3600;
 
@@ -48,17 +49,19 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
           {characters.map((c, i) => {
             const name = pickLocalized(c.name, lang).text;
+            // 따로 정한 이미지가 없으면 공식 캐릭터 목록의 컬러 이미지
+            const portrait = c.portrait_url ?? rosterImage(c.slug);
             return (
               <li key={c.id}>
                 <Link
                   href={`/${c.slug}`}
                   className="group relative flex aspect-[3/4] flex-col justify-end overflow-hidden border border-border bg-surface-2 transition hover:-translate-y-0.5 hover:border-accent"
                 >
-                  {c.portrait_url ? (
+                  {portrait ? (
                     <div
                       aria-hidden
                       className="absolute inset-0 bg-cover bg-center transition duration-300 group-hover:scale-105"
-                      style={{ backgroundImage: `url(${c.portrait_url})` }}
+                      style={{ backgroundImage: `url(${portrait})` }}
                     />
                   ) : (
                     <div aria-hidden className="stripes absolute inset-0" />
