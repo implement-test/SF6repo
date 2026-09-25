@@ -4,7 +4,7 @@ import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { pickLocalized } from "@/lib/i18n/localized";
 import { parseYouTube } from "@/lib/youtube";
-import { flattenStarters } from "@/lib/starters";
+import { damageBasisIndex, flattenStarters } from "@/lib/starters";
 import { ControlNotation } from "./notation";
 import { LevelBadge, NotTranslatedBadge, OutdatedBadge, Tag } from "./badges";
 import { SegmentGauge } from "./gauges";
@@ -43,6 +43,9 @@ export function ComboCard({
   const starters = flattenStarters(groups);
   // 그룹마다 앞 그룹들의 시동기 수 (번호를 이어 매기기 위해)
   const groupOffsets = groups.map((_, g) => groups.slice(0, g).reduce((sum, x) => sum + x.starters.length, 0));
+  // 데미지 기준 시동기 (관리자가 고른 것, 없으면 첫 번째)
+  const basisIndex = damageBasisIndex(groups);
+  const basisNote = dict.combo.damageBasis.replace("{n}", String(basisIndex + 1));
   const hasMedia = !!combo.media_url || !!parseYouTube(combo.youtube_url);
 
   return (
@@ -84,18 +87,27 @@ export function ComboCard({
                     )}
                     <ol className="flex flex-col gap-2">
                       {group.starters.map((s, i) => {
-                        // 번호는 그룹을 넘어 이어진다. 1번(첫 그룹의 첫 시동기)이 데미지 기준
+                        // 번호는 그룹을 넘어 이어진다. 데미지 기준 시동기는 강조한다
                         const n = groupOffsets[g] + i + 1;
+                        const isBasis = combo.damage !== null && n - 1 === basisIndex;
                         return (
-                          <li key={i} className="flex items-start gap-2.5">
+                          <li
+                            key={i}
+                            className={`flex items-start gap-2.5 ${isBasis ? "-mx-2 border-l-2 border-highlight bg-highlight/10 px-2 py-1" : ""}`}
+                          >
                             <span
-                              className={`display w-4 pt-1 text-right text-base ${n === 1 ? "text-highlight-text" : "text-muted"}`}
-                              title={n === 1 ? dict.combo.damageBasis : undefined}
+                              className={`display w-4 pt-1 text-right text-base ${isBasis ? "text-highlight-text" : "text-muted"}`}
+                              title={isBasis ? basisNote : undefined}
                             >
                               {n}
                             </span>
-                            <div className="min-w-0">
+                            <div className="flex min-w-0 flex-wrap items-center gap-2">
                               <ControlNotation classic={s.classic} modern={s.modern} classicOnlyLabel={dict.combo.classicOnly} />
+                              {isBasis && (
+                                <span className="border border-highlight/60 px-1.5 py-0.5 text-[0.65rem] font-bold text-highlight-text">
+                                  {dict.combo.damageBasisTag}
+                                </span>
+                              )}
                             </div>
                           </li>
                         );
@@ -160,7 +172,7 @@ export function ComboCard({
             {combo.damage !== null ? combo.damage.toLocaleString() : "—"}
           </p>
           {starters.length > 0 && combo.damage !== null && (
-            <p className="mt-1 text-xs text-muted">* {dict.combo.damageBasis}</p>
+            <p className="mt-1 text-xs text-muted">* {basisNote}</p>
           )}
         </div>
         {combo.frame_after && (

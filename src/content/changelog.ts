@@ -17,6 +17,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     items: [
       {
         kind: "changed",
+        text: {
+          ko: "콤보 데미지 기준 시동기를 직접 골라 강조 표시",
+          en: "Combos now highlight a chosen damage-basis starter",
+          ja: "コンボのダメージ基準始動技を選んで強調表示",
+        },
+      },
+      {
+        kind: "changed",
         adminOnly: true,
         text: {
           ko: "시동기 프리셋도 그룹으로 구성 (불러오면 그룹 그대로 추가)",

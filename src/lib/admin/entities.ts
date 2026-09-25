@@ -129,7 +129,7 @@ export const ENTITIES: Record<EntityType, Entity> = {
             label: "시동 기본기",
             type: "starters",
             wide: true,
-            help: "같은 루트로 이어지는 시동기를 그룹으로 묶습니다. 프리셋을 불러오면 프리셋 이름의 그룹이 됩니다. 첫 그룹의 첫 시동기가 데미지 기준입니다.",
+            help: "같은 루트로 이어지는 시동기를 그룹으로 묶습니다. 프리셋을 불러오면 프리셋 이름의 그룹이 됩니다. 데미지 기준 시동기를 고르세요 (고르지 않으면 첫 번째).",
           },
           { key: "notation_classic", label: "루트 (클래식)", type: "notation", required: true, wide: true },
           {
@@ -158,7 +158,7 @@ export const ENTITIES: Record<EntityType, Entity> = {
             step: 1,
             min: 0,
             nullable: true,
-            help: "첫 번째 시동기 기준",
+            help: "시동기 칸에서 고른 데미지 기준 시동기로 잰 값",
           },
           { key: "drive_cost", label: "드라이브 소모 (칸)", type: "number", step: 0.5, min: 0, max: 6 },
           { key: "sa_cost", label: "SA 소모 (칸)", type: "number", step: 1, min: 0, max: 3 },

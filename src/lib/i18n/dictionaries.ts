@@ -44,7 +44,8 @@ const ko = {
   position: { any: "거리 무관", midscreen: "필드", near_corner: "코너 근처", corner: "코너", other: "기타" },
   combo: {
     damage: "데미지",
-    damageBasis: "첫 번째 시동기 기준",
+    damageBasis: "{n}번 시동기 기준",
+    damageBasisTag: "데미지 기준",
     frameAfter: "콤보 후 프레임",
     starter: "시동기",
     route: "루트",
@@ -144,7 +145,8 @@ const en: Dictionary = {
   position: { any: "Any range", midscreen: "Midscreen", near_corner: "Near corner", corner: "Corner", other: "Other" },
   combo: {
     damage: "Damage",
-    damageBasis: "Based on the first starter",
+    damageBasis: "Based on starter #{n}",
+    damageBasisTag: "Damage basis",
     frameAfter: "Frame adv. after",
     starter: "Starters",
     route: "Route",
@@ -242,7 +244,8 @@ const ja: Dictionary = {
   position: { any: "距離不問", midscreen: "画面中央", near_corner: "画面端付近", corner: "画面端", other: "その他" },
   combo: {
     damage: "ダメージ",
-    damageBasis: "1つ目の始動技基準",
+    damageBasis: "{n}番目の始動技基準",
+    damageBasisTag: "ダメージ基準",
     frameAfter: "コンボ後の有利F",
     starter: "始動技",
     route: "ルート",

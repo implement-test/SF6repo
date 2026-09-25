@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { findUnknownTokens, parseNotation } from "@/lib/notation/parse";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import type { ComboStarter, StarterGroup } from "@/lib/types";
-import { flattenStarters, normalizeStarterGroups } from "@/lib/starters";
+import { damageBasisIndex, flattenStarters, normalizeStarterGroups } from "@/lib/starters";
 import { NotationImage } from "../notation";
 import { useAdmin } from "./admin-context";
 
@@ -28,7 +28,11 @@ export function presetToGroups(preset: StarterPreset): StarterGroup[] {
 /** 저장 전 정리: 클래식 표기가 빈 줄은 버리고, 모던이 비어 있으면 null(클래식 전용) */
 export function cleanStarters(list: ComboStarter[] | null | undefined): ComboStarter[] {
   return (list ?? [])
-    .map((s) => ({ classic: s.classic.trim(), modern: s.modern?.trim() || null }))
+    .map((s) => {
+      const out: ComboStarter = { classic: s.classic.trim(), modern: s.modern?.trim() || null };
+      if (s.damage_basis) out.damage_basis = true;
+      return out;
+    })
     .filter((s) => s.classic);
 }
 
@@ -42,14 +46,17 @@ export function StartersInput({
   help,
   value,
   onChange,
-  damageBasis = true,
+  basisIndex = null,
+  onSelectBasis,
 }: {
   label: string;
   help?: string;
   value: ComboStarter[];
   onChange: (v: ComboStarter[]) => void;
-  /** 첫 번째 시동기에 '데미지 기준' 표시 (프리셋 편집에서는 끈다) */
-  damageBasis?: boolean;
+  /** 이 목록에서 데미지 기준인 시동기 번호 (없으면 null) */
+  basisIndex?: number | null;
+  /** 넘기면 줄마다 '데미지 기준' 선택 버튼이 나온다 (콤보 편집. 프리셋 편집에서는 넘기지 않는다) */
+  onSelectBasis?: (i: number) => void;
 }) {
   const update = (i: number, patch: Partial<ComboStarter>) =>
     onChange(value.map((s, j) => (j === i ? { ...s, ...patch } : s)));
@@ -66,15 +73,25 @@ export function StartersInput({
       {label && <span className="text-xs font-semibold text-muted">{label}</span>}
       {value.length === 0 && (
         <p className="border border-dashed border-border px-3 py-3 text-xs text-muted">
-          {damageBasis ? "시동기가 없으면 루트만 표시됩니다." : "시동기를 추가하세요."}
+          {onSelectBasis ? "시동기가 없으면 루트만 표시됩니다." : "시동기를 추가하세요."}
         </p>
       )}
       <ol className="flex flex-col gap-2">
         {value.map((s, i) => (
           <li key={i} className="flex flex-col gap-2 border border-border bg-surface-2 p-3">
             <div className="flex items-center gap-2">
-              <span className={`display text-lg ${damageBasis && i === 0 ? "text-highlight-text" : "text-muted"}`}>{i + 1}</span>
-              {damageBasis && i === 0 && <span className="text-xs text-muted">데미지 기준</span>}
+              <span className={`display text-lg ${basisIndex === i ? "text-highlight-text" : "text-muted"}`}>{i + 1}</span>
+              {onSelectBasis && (
+                <button
+                  type="button"
+                  aria-pressed={basisIndex === i}
+                  onClick={() => onSelectBasis(i)}
+                  title="이 시동기를 데미지 기준으로"
+                  className="border border-border-strong px-2 py-0.5 text-xs font-semibold text-muted hover:border-highlight hover:text-highlight-text aria-pressed:border-highlight aria-pressed:bg-highlight aria-pressed:text-highlight-fg"
+                >
+                  {basisIndex === i ? "★ 데미지 기준" : "데미지 기준으로"}
+                </button>
+              )}
               <span className="ml-auto flex gap-1">
                 <button type="button" className={iconButton} disabled={i === 0} onClick={() => move(i, -1)} aria-label="위로">
                   ↑
@@ -122,8 +139,18 @@ export function StartersInput({
 
 /** 저장 전 정리: 그룹마다 시동기를 정리하고, 빈 그룹은 버린다 */
 export function cleanStarterGroups(groups: StarterGroup[] | null | undefined): StarterGroup[] {
+  let seenBasis = false;
   return (groups ?? [])
-    .map((g) => ({ name: g.name?.trim() || null, starters: cleanStarters(g.starters) }))
+    .map((g) => ({
+      name: g.name?.trim() || null,
+      // 데미지 기준 표시는 전체에서 하나만 남긴다
+      starters: cleanStarters(g.starters).map((s) => {
+        if (!s.damage_basis) return s;
+        if (seenBasis) return { classic: s.classic, modern: s.modern };
+        seenBasis = true;
+        return s;
+      }),
+    }))
     .filter((g) => g.starters.length > 0);
 }
 
@@ -138,7 +165,7 @@ export function StarterGroupsInput({
   value,
   onChange,
   characterId,
-  damageBasis = true,
+  selectableBasis = true,
 }: {
   label: string;
   help?: string;
@@ -146,9 +173,22 @@ export function StarterGroupsInput({
   onChange: (v: StarterGroup[]) => void;
   /** 넘기면 그 캐릭터의 프리셋을 불러올 수 있다 */
   characterId?: number;
-  /** 첫 그룹의 첫 시동기에 '데미지 기준' 표시 (프리셋 편집에서는 끈다) */
-  damageBasis?: boolean;
+  /** 시동기 중 데미지 기준을 고를 수 있게 한다 (프리셋 편집에서는 끈다) */
+  selectableBasis?: boolean;
 }) {
+  // 데미지 기준: 전체에서 하나. 고른 것이 없으면 첫 번째
+  const basis = damageBasisIndex(value);
+  const offsets = value.map((_, g) => value.slice(0, g).reduce((sum, x) => sum + x.starters.length, 0));
+  const selectBasis = (g: number, i: number) =>
+    onChange(
+      value.map((group, gi) => ({
+        ...group,
+        starters: group.starters.map((s, si) => {
+          const rest = { classic: s.classic, modern: s.modern };
+          return gi === g && si === i ? { ...rest, damage_basis: true } : rest;
+        }),
+      })),
+    );
   const update = (g: number, patch: Partial<StarterGroup>) =>
     onChange(value.map((x, i) => (i === g ? { ...x, ...patch } : x)));
   const move = (g: number, dir: -1 | 1) => {
@@ -212,7 +252,8 @@ export function StarterGroupsInput({
             label=""
             value={group.starters}
             onChange={(starters) => update(g, { starters })}
-            damageBasis={damageBasis && g === 0}
+            basisIndex={selectableBasis && basis >= offsets[g] && basis < offsets[g] + group.starters.length ? basis - offsets[g] : null}
+            onSelectBasis={selectableBasis ? (i) => selectBasis(g, i) : undefined}
           />
         </div>
       ))}

@@ -19,10 +19,23 @@ export function normalizeStarterGroups(raw: unknown): StarterGroup[] {
 
 function toStarter(v: unknown): ComboStarter {
   const s = (v ?? {}) as Partial<ComboStarter>;
-  return { classic: typeof s.classic === "string" ? s.classic : "", modern: s.modern ?? null };
+  const out: ComboStarter = { classic: typeof s.classic === "string" ? s.classic : "", modern: s.modern ?? null };
+  if (s.damage_basis) out.damage_basis = true;
+  return out;
 }
 
 /** 모든 그룹의 시동기를 순서대로 (검색·미리보기용) */
 export function flattenStarters(groups: StarterGroup[]): ComboStarter[] {
   return groups.flatMap((g) => g.starters);
+}
+
+/**
+ * 데미지 기준 시동기의 위치 (그룹을 넘어 0부터 센 번호).
+ * 고른 것이 없으면 첫 번째(0). 시동기가 없으면 -1.
+ */
+export function damageBasisIndex(groups: StarterGroup[]): number {
+  const all = flattenStarters(groups);
+  if (all.length === 0) return -1;
+  const chosen = all.findIndex((s) => s.damage_basis);
+  return chosen >= 0 ? chosen : 0;
 }

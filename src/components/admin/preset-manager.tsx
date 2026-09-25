@@ -197,7 +197,7 @@ export default function PresetManager({
                       help="이름 없는 그룹은 콤보에 불러올 때 프리셋 이름으로 들어갑니다."
                       value={draft.starters}
                       onChange={(starters) => setDraft({ ...draft, starters })}
-                      damageBasis={false}
+                      selectableBasis={false}
                     />
                     {flattenStarters(cleanStarterGroups(draft.starters)).length > 0 && (
                       <div className="flex flex-col gap-1.5 border border-border bg-inset p-3">
