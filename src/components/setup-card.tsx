@@ -215,9 +215,6 @@ export function SetupCard({
       )}
 
       <footer className="flex flex-wrap items-center gap-x-3 text-xs text-muted">
-        <span>
-          {dict.combo.difficulty} <b className="text-fg">{dict.difficulty[setup.difficulty]}</b>
-        </span>
         <span>{setup.created_date}</span>
         {createdBy && (
           <span>

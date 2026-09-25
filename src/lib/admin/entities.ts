@@ -55,12 +55,6 @@ const LEVELS: Option[] = [
   { value: "advanced", label: "상급 (마스터 이상)" },
 ];
 
-const DIFFICULTY: Option[] = [
-  { value: "easy", label: "하" },
-  { value: "normal", label: "중" },
-  { value: "hard", label: "상" },
-];
-
 const POSITIONS: Option[] = [
   { value: "any", label: "거리 무관" },
   { value: "midscreen", label: "필드" },
@@ -194,7 +188,6 @@ export const ENTITIES: Record<EntityType, Entity> = {
       },
       { title: "셋업을 위한 프랙티스 설정", fields: [{ key: "practice", label: "트레이닝 모드 더미 설정", type: "practice", wide: true }] },
       { title: "옵션", fields: [{ key: "options", label: "옵션 1 / 2 / …", type: "setupOptions", wide: true }] },
-      { title: "기타", fields: [{ key: "difficulty", label: "입력 난이도", type: "select", options: DIFFICULTY }] },
       MEDIA_GROUP,
       META_GROUP,
     ],
@@ -213,7 +206,6 @@ export const ENTITIES: Record<EntityType, Entity> = {
         youtube_url: null,
       })),
       practice: null,
-      difficulty: "normal",
       combo_links: [],
     }),
   },

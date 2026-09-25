@@ -18,9 +18,9 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         kind: "removed",
         text: {
-          ko: "콤보의 입력 난이도 표시 삭제 (대상 수준으로 충분)",
-          en: "Removed execution difficulty from combos (target level covers it)",
-          ja: "コンボの入力難度表示を削除（対象レベルで十分）",
+          ko: "콤보·셋업의 입력 난이도 표시 삭제 (대상 수준으로 충분)",
+          en: "Removed execution difficulty from combos and setups (target level covers it)",
+          ja: "コンボ・セットプレイの入力難度表示を削除（対象レベルで十分）",
         },
       },
       {

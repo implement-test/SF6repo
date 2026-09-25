@@ -39,7 +39,6 @@ const ko = {
   },
   level: { beginner: "초급", intermediate: "중급", advanced: "상급" },
   levelHint: { beginner: "플래티넘 이하", intermediate: "다이아", advanced: "마스터 이상" },
-  difficulty: { easy: "하", normal: "중", hard: "상" },
   hitState: { normal: "노멀", punish_counter: "퍼니시 카운터", corner_impact_guard: "구석 임팩트 가드", corner_impact_stun: "구석 임팩트 스턴" },
   position: { any: "거리 무관", midscreen: "필드", near_corner: "코너 근처", corner: "코너", other: "기타" },
   combo: {
@@ -51,7 +50,6 @@ const ko = {
     route: "루트",
     drive: "드라이브",
     sa: "SA",
-    difficulty: "입력 난이도",
     classicOnly: "클래식 전용",
     empty: "조건에 맞는 콤보가 없습니다.",
     none: "아직 등록된 콤보가 없습니다.",
@@ -140,7 +138,6 @@ const en: Dictionary = {
   },
   level: { beginner: "Beginner", intermediate: "Intermediate", advanced: "Advanced" },
   levelHint: { beginner: "Platinum and below", intermediate: "Diamond", advanced: "Master and above" },
-  difficulty: { easy: "Easy", normal: "Medium", hard: "Hard" },
   hitState: { normal: "Normal", punish_counter: "Punish counter", corner_impact_guard: "Corner DI (blocked)", corner_impact_stun: "Corner DI (stun)" },
   position: { any: "Any range", midscreen: "Midscreen", near_corner: "Near corner", corner: "Corner", other: "Other" },
   combo: {
@@ -152,7 +149,6 @@ const en: Dictionary = {
     route: "Route",
     drive: "Drive",
     sa: "SA",
-    difficulty: "Execution",
     classicOnly: "Classic only",
     empty: "No combos match the current filters.",
     none: "No combos have been added yet.",
@@ -239,7 +235,6 @@ const ja: Dictionary = {
   },
   level: { beginner: "初級", intermediate: "中級", advanced: "上級" },
   levelHint: { beginner: "プラチナ以下", intermediate: "ダイヤ", advanced: "マスター以上" },
-  difficulty: { easy: "低", normal: "中", hard: "高" },
   hitState: { normal: "ノーマル", punish_counter: "パニッシュカウンター", corner_impact_guard: "画面端インパクト（ガード）", corner_impact_stun: "画面端インパクト（スタン）" },
   position: { any: "距離不問", midscreen: "画面中央", near_corner: "画面端付近", corner: "画面端", other: "その他" },
   combo: {
@@ -251,7 +246,6 @@ const ja: Dictionary = {
     route: "ルート",
     drive: "ドライブ",
     sa: "SA",
-    difficulty: "入力難度",
     classicOnly: "クラシック専用",
     empty: "条件に合うコンボがありません。",
     none: "まだコンボが登録されていません。",
