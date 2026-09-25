@@ -1,10 +1,22 @@
 "use client";
 
-import { useRef, useState, type ReactNode } from "react";
+import { useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { TARGET_LEVELS, type TargetLevel } from "@/lib/types";
 import { useAdmin } from "./admin-context";
 
-type Item = { id: number; card: ReactNode };
+type Item = { id: number; level: TargetLevel; card: ReactNode };
+
+/** 방문자 설정의 대상 수준 숨김 (<html data-hide-*>) 을 따라간다 */
+function subscribeHtml(onChange: () => void) {
+  const observer = new MutationObserver(onChange);
+  observer.observe(document.documentElement, { attributes: true });
+  return () => observer.disconnect();
+}
+function hiddenLevelsSnapshot() {
+  const html = document.documentElement;
+  return TARGET_LEVELS.filter((l) => html.hasAttribute(`data-hide-${l}`)).join(",");
+}
 type Status = { kind: "saving" | "saved" | "error"; message?: string } | null;
 
 /**
@@ -38,6 +50,7 @@ export function SortableCards({
   const [over, setOver] = useState<{ id: number; after: boolean } | null>(null);
   const [status, setStatus] = useState<Status>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hiddenLevels = useSyncExternalStore(subscribeHtml, hiddenLevelsSnapshot, () => "");
 
   // 서버에서 받은 순서가 바뀌면 (저장 후 새로 고침, '순서 변경' 창) 그 순서를 따른다
   const itemsKey = items.map((i) => i.id).join(",");
@@ -52,17 +65,24 @@ export function SortableCards({
   const ids = order
     ? [...order.filter((id) => byId.has(id)), ...items.map((i) => i.id).filter((id) => !order.includes(id))]
     : items.map((i) => i.id);
-  const shown = ids.filter((id) => visibleIds.has(id));
 
   if (!editable) {
+    // 대상 수준 숨김은 CSS 가 data-level 로 처리한다 (정적 페이지 그대로)
     return (
       <div className={className}>
-        {shown.map((id) => (
-          <div key={id}>{byId.get(id)!.card}</div>
-        ))}
+        {ids
+          .filter((id) => visibleIds.has(id))
+          .map((id) => (
+            <div key={id} data-level={byId.get(id)!.level}>
+              {byId.get(id)!.card}
+            </div>
+          ))}
       </div>
     );
   }
+
+  // 관리자 화면: 방문자 설정으로 숨긴 대상 수준의 카드는 아예 그리지 않아, ▲▼ 가 보이는 카드끼리 움직이게 한다
+  const shown = ids.filter((id) => visibleIds.has(id) && !hiddenLevels.split(",").includes(byId.get(id)!.level));
 
   /** dragged 를 target 의 앞(after=false)이나 뒤로 옮긴다 */
   function move(dragged: number, target: number, after: boolean) {

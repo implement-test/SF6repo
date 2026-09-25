@@ -2,11 +2,12 @@
 
 import { useState, type ReactNode } from "react";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
-import { HIT_STATES, POSITIONS, type HitState, type ScreenPosition } from "@/lib/types";
+import { HIT_STATES, POSITIONS, type HitState, type ScreenPosition, type TargetLevel } from "@/lib/types";
 import { SortableCards } from "./admin/sortable-cards";
 
 export type ComboFilterItem = {
   id: number;
+  level: TargetLevel;
   hitStates: HitState[];
   positionStart: ScreenPosition;
   card: ReactNode;

@@ -51,6 +51,7 @@ export default async function SetupsPage({ params }: PageProps<"/[lang]/[charact
         situations={situations.map((s) => ({ slug: s.slug, name: situationNames[s.slug] }))}
         items={published.map((setup) => ({
           id: setup.id,
+          level: setup.target_level,
           situations: setup.situations,
           card: (
             <SetupCard

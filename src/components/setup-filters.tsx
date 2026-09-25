@@ -2,9 +2,10 @@
 
 import { useState, type ReactNode } from "react";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
+import type { TargetLevel } from "@/lib/types";
 import { SortableCards } from "./admin/sortable-cards";
 
-export type SetupFilterItem = { id: number; situations: string[]; card: ReactNode };
+export type SetupFilterItem = { id: number; level: TargetLevel; situations: string[]; card: ReactNode };
 
 /** 상황 태그 필터. 아무것도 고르지 않으면 전체를 보여 준다. */
 export function SetupFilters({

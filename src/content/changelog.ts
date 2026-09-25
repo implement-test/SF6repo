@@ -17,6 +17,15 @@ export const CHANGELOG: ChangelogEntry[] = [
     items: [
       {
         kind: "changed",
+        adminOnly: true,
+        text: {
+          ko: "대상 수준을 숨기면 순서 변경 버튼도 함께 숨김",
+          en: "Reorder controls now hide along with hidden target levels",
+          ja: "対象レベルを非表示にすると並び替えボタンも非表示に",
+        },
+      },
+      {
+        kind: "changed",
         text: {
           ko: "데미지를 아직 적지 않은 콤보도 고른 데미지 기준 시동기를 강조",
           en: "The chosen damage-basis starter is highlighted even before damage is filled in",

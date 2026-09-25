@@ -47,6 +47,7 @@ export default async function CombosPage({ params }: PageProps<"/[lang]/[charact
           .filter((c) => c.is_published)
           .map((combo) => ({
             id: combo.id,
+            level: combo.target_level,
             hitStates: combo.hit_states,
             positionStart: combo.position_start,
             card: (
