@@ -18,6 +18,7 @@ const TABLE_LABELS: Record<string, string> = {
   vs_patterns: "패턴 대응",
   glossary: "용어",
   patches: "패치",
+  starter_presets: "시동기 프리셋",
 };
 
 function summarize(data: Record<string, unknown> | null): string {
@@ -27,6 +28,7 @@ function summarize(data: Record<string, unknown> | null): string {
     pick(data.title) ??
     pick(data.name) ??
     pick(data.term) ??
+    (typeof data.name === "string" ? data.name : null) ??
     (typeof data.version === "string" ? data.version : null) ??
     (typeof data.notation_classic === "string" ? data.notation_classic : null) ??
     `#${data.id}`

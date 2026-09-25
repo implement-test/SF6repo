@@ -66,5 +66,7 @@ export async function revalidateSite(sb: SupabaseClient) {
 export function describeError(error: { code?: string; message: string }): string {
   if (error.code === "42501" || /row-level security/i.test(error.message)) return "이 작업을 할 권한이 없습니다.";
   if (error.code === "23505") return "이미 있는 값입니다.";
+  if (error.code === "PGRST205" || error.code === "42P01" || error.code === "42703")
+    return "DB 구조가 최신이 아닙니다. supabase/migrations 의 SQL 을 실행했는지 확인하세요.";
   return error.message;
 }

@@ -6,6 +6,7 @@ import { pickLocalized } from "@/lib/i18n/localized";
 import { ContentFilters } from "@/components/prefs-controls";
 import { CharacterNav } from "@/components/character-nav";
 import { formatPatchVersion } from "@/lib/patch";
+import { PresetButton } from "@/components/admin/preset-button";
 
 export async function generateStaticParams() {
   const characters = await getCharacters();
@@ -44,11 +45,15 @@ export default async function CharacterLayout({ children, params }: LayoutProps<
             <p className="eyebrow">Character</p>
             <h1 className="display mt-1 text-5xl uppercase sm:text-6xl">{name}</h1>
           </div>
-          {latest && (
-            <div className="skew bg-highlight px-3 py-1 text-highlight-fg">
-              <span className="display text-sm not-italic">{formatPatchVersion(latest.version)}</span>
-            </div>
-          )}
+          <div className="flex flex-wrap items-center gap-2">
+            {/* 관리자 도구: 이 캐릭터를 편집할 수 있는 관리자에게만 보인다 */}
+            <PresetButton characterId={character.id} characterName={pickLocalized(character.name, "ko").text} />
+            {latest && (
+              <div className="skew bg-highlight px-3 py-1 text-highlight-fg">
+                <span className="display text-sm not-italic">{formatPatchVersion(latest.version)}</span>
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
