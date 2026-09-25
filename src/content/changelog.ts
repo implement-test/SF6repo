@@ -17,6 +17,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     items: [
       {
         kind: "changed",
+        text: {
+          ko: "콤보·셋업 건수에 대상 수준 숨김도 반영",
+          en: "Combo and setup counts now reflect hidden target levels",
+          ja: "コンボ・セットプレイの件数に対象レベルの非表示も反映",
+        },
+      },
+      {
+        kind: "changed",
         adminOnly: true,
         text: {
           ko: "대상 수준을 숨기면 순서 변경 버튼도 함께 숨김",

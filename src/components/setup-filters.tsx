@@ -4,6 +4,7 @@ import { useState, type ReactNode } from "react";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { TargetLevel } from "@/lib/types";
 import { SortableCards } from "./admin/sortable-cards";
+import { useHiddenLevels } from "./use-hidden-levels";
 
 export type SetupFilterItem = { id: number; level: TargetLevel; situations: string[]; card: ReactNode };
 
@@ -24,6 +25,9 @@ export function SetupFilters({
   const visible = items.filter(
     (i) => selected.length === 0 || i.situations.includes("any") || i.situations.some((s) => selected.includes(s)),
   );
+  // 건수는 대상 수준 숨김까지 반영한다 (카드 자체는 CSS 가 숨긴다)
+  const isHidden = useHiddenLevels();
+  const shownCount = visible.filter((i) => !isHidden(i.level)).length;
 
   return (
     <div className="flex flex-col gap-4">
@@ -48,12 +52,12 @@ export function SetupFilters({
           </div>
         </div>
         <p className="ml-auto text-sm text-muted">
-          <span className="display text-2xl text-fg tabular-nums">{visible.length}</span> / {items.length}
+          <span className="display text-2xl text-fg tabular-nums">{shownCount}</span> / {items.length}
           {dict.filter.count}
         </p>
       </div>
 
-      {visible.length === 0 ? (
+      {shownCount === 0 ? (
         <p className="border border-dashed border-border py-12 text-center text-muted">
           {items.length === 0 ? dict.setup.empty : dict.setup.none}
         </p>

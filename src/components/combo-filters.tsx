@@ -4,6 +4,7 @@ import { useState, type ReactNode } from "react";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { HIT_STATES, POSITIONS, type HitState, type ScreenPosition, type TargetLevel } from "@/lib/types";
 import { SortableCards } from "./admin/sortable-cards";
+import { useHiddenLevels } from "./use-hidden-levels";
 
 export type ComboFilterItem = {
   id: number;
@@ -43,12 +44,16 @@ export function ComboFilters({
   const [hit, setHit] = useState<HitState[]>([]);
   const [pos, setPos] = useState<ScreenPosition[]>([]);
 
+  const isHidden = useHiddenLevels();
+
   const visible = items.filter(
     (item) =>
       (hit.length === 0 || item.hitStates.some((h) => hit.includes(h))) &&
       // '거리 무관' 콤보는 어떤 위치를 골라도 함께 보여 준다.
       (pos.length === 0 || pos.includes(item.positionStart) || item.positionStart === "any"),
   );
+  // 건수는 대상 수준 숨김까지 반영한다 (카드 자체는 CSS 가 숨긴다)
+  const shownCount = visible.filter((item) => !isHidden(item.level)).length;
 
   return (
     <div className="flex flex-col gap-4">
@@ -74,12 +79,12 @@ export function ComboFilters({
           </div>
         </div>
         <p className="ml-auto text-sm text-muted">
-          <span className="display text-2xl text-fg tabular-nums">{visible.length}</span> / {items.length}
+          <span className="display text-2xl text-fg tabular-nums">{shownCount}</span> / {items.length}
           {dict.filter.count}
         </p>
       </div>
 
-      {visible.length === 0 ? (
+      {shownCount === 0 ? (
         <p className="border border-dashed border-border py-12 text-center text-muted">
           {items.length === 0 ? dict.combo.none : dict.combo.empty}
         </p>
