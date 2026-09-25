@@ -33,12 +33,17 @@ export default async function CombosPage({ params }: PageProps<"/[lang]/[charact
   ]);
   const links = await getSetupComboLinks(setups.filter((s) => s.is_published).map((s) => s.id));
 
+  // 관리자 버튼: 목록 위와 아래에 같은 것을 둔다 (방문자에게는 비어서 숨는다)
+  const adminActions = (
+    <div className="flex justify-end gap-2 empty:hidden">
+      <ReorderButton table="combos" characterId={character.id} label="콤보" />
+      <AddButton entity="combo" label="콤보 추가" scope={character.id} defaults={{ character_id: character.id }} />
+    </div>
+  );
+
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-end gap-2 empty:hidden">
-        <ReorderButton table="combos" characterId={character.id} label="콤보" />
-        <AddButton entity="combo" label="콤보 추가" scope={character.id} defaults={{ character_id: character.id }} />
-      </div>
+      {adminActions}
       <DraftItems table="combos" entity="combo" characterId={character.id} label="콤보" />
       <ComboFilters
         dict={dict}
@@ -63,6 +68,7 @@ export default async function CombosPage({ params }: PageProps<"/[lang]/[charact
             ),
           }))}
       />
+      {adminActions}
     </div>
   );
 }

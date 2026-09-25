@@ -17,6 +17,15 @@ export const CHANGELOG: ChangelogEntry[] = [
     items: [
       {
         kind: "changed",
+        adminOnly: true,
+        text: {
+          ko: "콤보·셋업 목록 아래에도 추가·순서 변경 버튼",
+          en: "Add and Reorder buttons also at the bottom of combo and setup lists",
+          ja: "コンボ・セットプレイ一覧の下にも追加・並び替えボタン",
+        },
+      },
+      {
+        kind: "changed",
         text: {
           ko: "콤보 시작 위치를 대상 수준 배지 바로 옆에 표시",
           en: "Combo start position now shows right next to the level badge",

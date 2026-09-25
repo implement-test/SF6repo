@@ -38,12 +38,17 @@ export default async function SetupsPage({ params }: PageProps<"/[lang]/[charact
   const comboById = new Map(combos.filter((c) => c.is_published).map((c) => [c.id, c]));
   const situationNames = Object.fromEntries(situations.map((s) => [s.slug, pickLocalized(s.name, lang).text]));
 
+  // 관리자 버튼: 목록 위와 아래에 같은 것을 둔다 (방문자에게는 비어서 숨는다)
+  const adminActions = (
+    <div className="flex justify-end gap-2 empty:hidden">
+      <ReorderButton table="setups" characterId={character.id} label="셋업" />
+      <AddButton entity="setup" label="셋업 추가" scope={character.id} defaults={{ character_id: character.id }} />
+    </div>
+  );
+
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-end gap-2 empty:hidden">
-        <ReorderButton table="setups" characterId={character.id} label="셋업" />
-        <AddButton entity="setup" label="셋업 추가" scope={character.id} defaults={{ character_id: character.id }} />
-      </div>
+      {adminActions}
       <DraftItems table="setups" entity="setup" characterId={character.id} label="셋업" />
       <SetupFilters
         dict={dict}
@@ -70,6 +75,7 @@ export default async function SetupsPage({ params }: PageProps<"/[lang]/[charact
           ),
         }))}
       />
+      {adminActions}
     </div>
   );
 }
