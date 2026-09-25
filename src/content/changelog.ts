@@ -16,6 +16,10 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-09-26",
     items: [
       {
+        kind: "added",
+        text: { ko: "딜레이 아이콘 (delay)", en: "Delay icon (delay)", ja: "ディレイのアイコン（delay）" },
+      },
+      {
         kind: "changed",
         text: {
           ko: "셋업의 이어지는 콤보: 줄 전체를 눌러 콤보로 이동",

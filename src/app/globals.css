@@ -288,6 +288,25 @@ article[id] {
   border-color: var(--border-strong);
 }
 
+/* 딜레이 배지: 속이 빈 점선 알약 + 스톱워치 (타이밍 지시) */
+.notation-delay {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  height: 1.45rem;
+  padding: 0 0.55rem 0 0.45rem;
+  border: 1.5px dashed color-mix(in srgb, var(--fg) 55%, transparent);
+  border-radius: 999px;
+  color: var(--fg);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 800;
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  flex: none;
+}
+
 /* 히트 상황 배지: 왼쪽이 파이고 오른쪽이 뾰족한 리본. 커맨드 아이콘(원·방향키)과 모양부터 다르게 */
 .notation-situation {
   --sit-bg: #3ab8ff;

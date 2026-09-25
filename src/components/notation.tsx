@@ -49,20 +49,28 @@ function SituationBadge({ situation }: { situation: Situation }) {
   );
 }
 
-/** 수식어: 히트 상황은 배지, delay 는 글자 */
+/**
+ * 딜레이 배지. 커맨드(버튼·방향키·파란 판)도, 히트 상황(채워진 리본)도 아닌 타이밍 지시라서
+ * 속이 빈 점선 알약 + 스톱워치 모양으로 그린다.
+ */
+function DelayBadge() {
+  return (
+    <span className="notation-delay" title="delay">
+      <svg viewBox="0 0 16 16" aria-hidden className="size-3.5" fill="none" stroke="currentColor" strokeWidth="1.6">
+        <circle cx="8" cy="9.2" r="5.3" />
+        <path d="M8 9.2V6.3M6.4 1.6h3.2M12.3 4.2l1-1" strokeLinecap="round" />
+      </svg>
+      DELAY
+    </span>
+  );
+}
+
+/** 수식어: 히트 상황은 리본 배지, delay 는 딜레이 배지 */
 function Modifiers({ modifiers }: { modifiers: Modifier[] }) {
   if (modifiers.length === 0) return null;
   return (
     <>
-      {modifiers.map((m) =>
-        isSituation(m) ? (
-          <SituationBadge key={m} situation={m} />
-        ) : (
-          <span key={m} className="text-xs font-semibold uppercase tracking-wide text-muted">
-            {m}
-          </span>
-        ),
-      )}
+      {modifiers.map((m) => (isSituation(m) ? <SituationBadge key={m} situation={m} /> : <DelayBadge key={m} />))}
       <span className="w-0.5" />
     </>
   );
