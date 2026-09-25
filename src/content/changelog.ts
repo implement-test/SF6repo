@@ -17,6 +17,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     items: [
       {
         kind: "changed",
+        text: {
+          ko: "데미지를 아직 적지 않은 콤보도 고른 데미지 기준 시동기를 강조",
+          en: "The chosen damage-basis starter is highlighted even before damage is filled in",
+          ja: "ダメージ未入力のコンボでも選んだダメージ基準始動技を強調",
+        },
+      },
+      {
+        kind: "changed",
         adminOnly: true,
         text: {
           ko: "새 콤보·셋업 저장 시 '구간 반복' 오류 수정",

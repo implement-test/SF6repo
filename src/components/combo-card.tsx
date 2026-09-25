@@ -45,6 +45,8 @@ export function ComboCard({
   const groupOffsets = groups.map((_, g) => groups.slice(0, g).reduce((sum, x) => sum + x.starters.length, 0));
   // 데미지 기준 시동기 (관리자가 고른 것, 없으면 첫 번째)
   const basisIndex = damageBasisIndex(groups);
+  // 직접 고른 기준은 데미지가 아직 비어 있어도 강조한다 (고르지 않았으면 데미지가 있을 때만 첫 번째를 강조)
+  const basisChosen = starters.some((s) => s.damage_basis);
   const basisNote = dict.combo.damageBasis.replace("{n}", String(basisIndex + 1));
   const hasMedia = !!combo.media_url || !!parseYouTube(combo.youtube_url);
 
@@ -89,7 +91,7 @@ export function ComboCard({
                       {group.starters.map((s, i) => {
                         // 번호는 그룹을 넘어 이어진다. 데미지 기준 시동기는 강조한다
                         const n = groupOffsets[g] + i + 1;
-                        const isBasis = combo.damage !== null && n - 1 === basisIndex;
+                        const isBasis = (combo.damage !== null || basisChosen) && n - 1 === basisIndex;
                         return (
                           <li
                             key={i}
