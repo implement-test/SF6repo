@@ -13,6 +13,7 @@ import { SegmentGauge } from "./gauges";
 import { ItemMedia } from "./media";
 import { EditButton } from "./admin/admin-context";
 import { ShareButton } from "./share-button";
+import { FavoriteButton } from "./favorite-button";
 
 export function ComboCard({
   combo,
@@ -74,7 +75,8 @@ export function ComboCard({
           {outdated && <OutdatedBadge label={dict.patch.outdated} />}
           {!embedded && (
             <span className="ml-auto flex items-center gap-1.5">
-              <ShareButton kind="combo" id={combo.id} labels={dict.share} />
+              <FavoriteButton kind="combo" id={combo.id} labels={dict.favorite} />
+            <ShareButton kind="combo" id={combo.id} labels={dict.share} />
               <EditButton entity="combo" id={combo.id} scope={combo.character_id} />
             </span>
           )}

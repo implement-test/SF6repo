@@ -16,6 +16,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-09-26",
     items: [
       {
+        kind: "added",
+        text: {
+          ko: "콤보·셋업 즐겨찾기 (☆, 로그인 없이 이 브라우저에 저장) 와 '즐겨찾기만' 필터",
+          en: "Favorite combos and setups (☆, saved in this browser, no login) with a 'Favorites only' filter",
+          ja: "コンボ・セットプレイのお気に入り（☆、ログイン不要でこのブラウザに保存）と「お気に入りのみ」フィルター",
+        },
+      },
+      {
         kind: "removed",
         text: {
           ko: "콤보·셋업의 입력 난이도 표시 삭제 (대상 수준으로 충분)",

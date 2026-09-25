@@ -56,6 +56,7 @@ const ko = {
   },
   patch: { outdated: "이전 패치 기준" },
   created: "작성일",
+  favorite: { add: "즐겨찾기에 추가", remove: "즐겨찾기 해제", only: "즐겨찾기만", empty: "즐겨찾기한 항목이 없습니다. 카드의 ☆ 를 눌러 추가하세요." },
   share: { button: "퍼가기", titles: { setup: "셋업 퍼가기", combo: "콤보 퍼가기" }, note: "블로그나 커뮤니티 글에 링크나 임베드 코드를 붙여 넣으면 지금 모습 그대로 보입니다.", link: "링크", embed: "임베드 코드 (iframe)", copy: "복사", copied: "복사됨", preview: "미리 보기", viewOnSite: "SF6 Repository에서 보기" },
   setup: {
     combos: "이 셋업으로 이어지는 콤보",
@@ -155,6 +156,7 @@ const en: Dictionary = {
   },
   patch: { outdated: "Older patch" },
   created: "Added",
+  favorite: { add: "Add to favorites", remove: "Remove from favorites", only: "Favorites only", empty: "No favorites yet. Tap ☆ on a card to add one." },
   share: { button: "Share", titles: { setup: "Share setup", combo: "Share combo" }, note: "Paste the link or embed code into a blog or forum post to show it exactly as it looks here.", link: "Link", embed: "Embed code (iframe)", copy: "Copy", copied: "Copied", preview: "Preview", viewOnSite: "View on SF6 Repository" },
   setup: {
     combos: "Combos leading into this setup",
@@ -252,6 +254,7 @@ const ja: Dictionary = {
   },
   patch: { outdated: "旧パッチ基準" },
   created: "作成日",
+  favorite: { add: "お気に入りに追加", remove: "お気に入り解除", only: "お気に入りのみ", empty: "お気に入りはまだありません。カードの ☆ を押して追加してください。" },
   share: { button: "共有", titles: { setup: "セットプレイを共有", combo: "コンボを共有" }, note: "ブログや掲示板にリンクか埋め込みコードを貼ると、そのまま表示されます。", link: "リンク", embed: "埋め込みコード（iframe）", copy: "コピー", copied: "コピーしました", preview: "プレビュー", viewOnSite: "SF6 Repository で見る" },
   setup: {
     combos: "このセットプレイにつながるコンボ",

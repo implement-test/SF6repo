@@ -5,6 +5,8 @@ import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { TargetLevel } from "@/lib/types";
 import { SortableCards } from "./admin/sortable-cards";
 import { useHiddenLevels } from "./use-hidden-levels";
+import { FavoriteFilter } from "./favorite-button";
+import { useFavorites } from "@/lib/favorites";
 
 export type SetupFilterItem = { id: number; level: TargetLevel; situations: string[]; card: ReactNode };
 
@@ -21,9 +23,14 @@ export function SetupFilters({
   dict: Dictionary;
 }) {
   const [selected, setSelected] = useState<string[]>([]);
+  const [favOnly, setFavOnly] = useState(false);
+  const favorites = useFavorites("setup");
+  const favCount = items.filter((i) => favorites.has(i.id)).length;
   // '거리 무관' 셋업은 어떤 위치를 골라도 함께 보여 준다.
   const visible = items.filter(
-    (i) => selected.length === 0 || i.situations.includes("any") || i.situations.some((s) => selected.includes(s)),
+    (i) =>
+      (selected.length === 0 || i.situations.includes("any") || i.situations.some((s) => selected.includes(s))) &&
+      (!favOnly || favorites.has(i.id)),
   );
   // 건수는 대상 수준 숨김까지 반영한다 (카드 자체는 CSS 가 숨긴다)
   const isHidden = useHiddenLevels();
@@ -51,6 +58,7 @@ export function SetupFilters({
             })}
           </div>
         </div>
+        <FavoriteFilter on={favOnly} onToggle={() => setFavOnly(!favOnly)} count={favCount} label={dict.favorite.only} />
         <p className="ml-auto text-sm text-muted">
           <span className="display text-2xl text-fg tabular-nums">{shownCount}</span> / {items.length}
           {dict.filter.count}
@@ -59,7 +67,7 @@ export function SetupFilters({
 
       {shownCount === 0 ? (
         <p className="border border-dashed border-border py-12 text-center text-muted">
-          {items.length === 0 ? dict.setup.empty : dict.setup.none}
+          {items.length === 0 ? dict.setup.empty : favOnly && favCount === 0 ? dict.favorite.empty : dict.setup.none}
         </p>
       ) : (
         <SortableCards

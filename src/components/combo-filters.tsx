@@ -5,6 +5,8 @@ import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { HIT_STATES, POSITIONS, type HitState, type ScreenPosition, type TargetLevel } from "@/lib/types";
 import { SortableCards } from "./admin/sortable-cards";
 import { useHiddenLevels } from "./use-hidden-levels";
+import { FavoriteFilter } from "./favorite-button";
+import { useFavorites } from "@/lib/favorites";
 
 export type ComboFilterItem = {
   id: number;
@@ -43,6 +45,9 @@ export function ComboFilters({
 }) {
   const [hit, setHit] = useState<HitState[]>([]);
   const [pos, setPos] = useState<ScreenPosition[]>([]);
+  const [favOnly, setFavOnly] = useState(false);
+  const favorites = useFavorites("combo");
+  const favCount = items.filter((item) => favorites.has(item.id)).length;
 
   const isHidden = useHiddenLevels();
 
@@ -50,7 +55,8 @@ export function ComboFilters({
     (item) =>
       (hit.length === 0 || item.hitStates.some((h) => hit.includes(h))) &&
       // '거리 무관' 콤보는 어떤 위치를 골라도 함께 보여 준다.
-      (pos.length === 0 || pos.includes(item.positionStart) || item.positionStart === "any"),
+      (pos.length === 0 || pos.includes(item.positionStart) || item.positionStart === "any") &&
+      (!favOnly || favorites.has(item.id)),
   );
   // 건수는 대상 수준 숨김까지 반영한다 (카드 자체는 CSS 가 숨긴다)
   const shownCount = visible.filter((item) => !isHidden(item.level)).length;
@@ -78,6 +84,7 @@ export function ComboFilters({
             ))}
           </div>
         </div>
+        <FavoriteFilter on={favOnly} onToggle={() => setFavOnly(!favOnly)} count={favCount} label={dict.favorite.only} />
         <p className="ml-auto text-sm text-muted">
           <span className="display text-2xl text-fg tabular-nums">{shownCount}</span> / {items.length}
           {dict.filter.count}
@@ -86,7 +93,7 @@ export function ComboFilters({
 
       {shownCount === 0 ? (
         <p className="border border-dashed border-border py-12 text-center text-muted">
-          {items.length === 0 ? dict.combo.none : dict.combo.empty}
+          {items.length === 0 ? dict.combo.none : favOnly && favCount === 0 ? dict.favorite.empty : dict.combo.empty}
         </p>
       ) : (
         <SortableCards

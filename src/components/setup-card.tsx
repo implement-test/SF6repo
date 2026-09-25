@@ -11,6 +11,7 @@ import { PracticeView } from "./practice-view";
 import { Collapsible } from "./collapsible";
 import { EditButton } from "./admin/admin-context";
 import { ShareButton } from "./share-button";
+import { FavoriteButton } from "./favorite-button";
 
 export function SetupCard({
   setup,
@@ -62,6 +63,7 @@ export function SetupCard({
         ))}
         {!embedded && (
           <span className="ml-auto flex items-center gap-1.5">
+            <FavoriteButton kind="setup" id={setup.id} labels={dict.favorite} />
             <ShareButton kind="setup" id={setup.id} labels={dict.share} />
             <EditButton entity="setup" id={setup.id} scope={setup.character_id} />
           </span>
