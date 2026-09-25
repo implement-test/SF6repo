@@ -1,0 +1,240 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/*
+ * SF6 UI 에서 가져온 색
+ *   magenta  — 메인 포인트 (메뉴 선택, 강조)
+ *   yellow   — 하이라이트 (선택된 탭, 중요 수치)
+ *   drive    — 드라이브 게이지 초록
+ *   sa       — SA 게이지
+ * 대상 수준은 랭크 색: 플래티넘(청록) / 다이아(보라) / 마스터(금)
+ */
+
+:root {
+  --bg: #eef0f5;
+  --bg-deep: #e3e6ee;
+  --surface: #ffffff;
+  --surface-2: #f3f4f8;
+  --inset: #eceef4;
+  --border: #d6d9e3;
+  --border-strong: #b9bdcc;
+  --fg: #11121a;
+  --muted: #5f6378;
+  --accent: #e1126e;
+  --accent-2: #7b2ff7;
+  --accent-fg: #ffffff;
+  --highlight: #ffd21f;
+  --highlight-fg: #11121a;
+  --highlight-text: #9a6a00;
+  --drive: #2fb344;
+  --sa: #e0a100;
+  --lv-beginner: #0f9b8e;
+  --lv-intermediate: #7c4ddb;
+  --lv-advanced: #c28a00;
+  --warn: #b36b00;
+}
+
+[data-theme="dark"] {
+  --bg: #0a0b12;
+  --bg-deep: #06070c;
+  --surface: #12131d;
+  --surface-2: #191a27;
+  --inset: #0d0e16;
+  --border: #262839;
+  --border-strong: #3a3d55;
+  --fg: #f2f3f8;
+  --muted: #8a8ea8;
+  --accent: #ff2d87;
+  --accent-2: #8f4bff;
+  --accent-fg: #ffffff;
+  --highlight: #ffd21f;
+  --highlight-fg: #0a0b12;
+  --highlight-text: #ffd21f;
+  --drive: #5fe067;
+  --sa: #ffc233;
+  --lv-beginner: #3fd6c6;
+  --lv-intermediate: #b18cff;
+  --lv-advanced: #ffcb47;
+  --warn: #ffb547;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-deep: var(--bg-deep);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-inset: var(--inset);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-accent-fg: var(--accent-fg);
+  --color-highlight: var(--highlight);
+  --color-highlight-fg: var(--highlight-fg);
+  --color-highlight-text: var(--highlight-text);
+  --color-drive: var(--drive);
+  --color-sa: var(--sa);
+  --color-lv-beginner: var(--lv-beginner);
+  --color-lv-intermediate: var(--lv-intermediate);
+  --color-lv-advanced: var(--lv-advanced);
+  --color-warn: var(--warn);
+  --font-sans: var(--font-geist-sans), "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "Hiragino Sans",
+    "Yu Gothic UI", "Meiryo", system-ui, sans-serif;
+  --font-display: var(--font-barlow), var(--font-noto-kr), "Malgun Gothic", "Hiragino Sans", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+html {
+  color-scheme: light;
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+}
+
+/* 고정 헤더 높이 (캐릭터 탭이 그 아래에 붙는다). 모바일은 메뉴가 두 줄 */
+:root {
+  --header-h: 84px;
+}
+@media (min-width: 640px) {
+  :root {
+    --header-h: 60px;
+  }
+}
+
+/* ── SF6 스타일 요소 ── */
+
+/* 굵은 이탤릭 헤드라인 */
+.display {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  line-height: 0.95;
+}
+
+/* 작은 영문 라벨 (섹션 이름 등) */
+.eyebrow {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* 평행사변형: 바깥은 기울이고 안쪽 글자는 바로 세운다 */
+.skew {
+  transform: skewX(-14deg);
+}
+.skew > * {
+  display: inline-block;
+  transform: skewX(14deg);
+}
+
+/* 사선 줄무늬 배경 */
+.stripes {
+  background-image: repeating-linear-gradient(
+    -60deg,
+    transparent 0 14px,
+    color-mix(in srgb, var(--fg) 4%, transparent) 14px 28px
+  );
+}
+
+/* 오른쪽 위 모서리를 잘라낸 패널 */
+.cut-tr {
+  clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%);
+}
+
+/* 마젠타 → 보라 그라데이션 띠 */
+.brand-bar {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2) 55%, var(--highlight));
+}
+
+/* ── 개인 설정에 따른 표시 전환 (src/lib/prefs.ts) ── */
+
+html[data-notation="text"] .show-if-image,
+html:not([data-notation="text"]) .show-if-text {
+  display: none !important;
+}
+
+html[data-control="modern"] .show-if-classic,
+html:not([data-control="modern"]) .show-if-modern {
+  display: none !important;
+}
+
+html[data-hide-beginner] [data-level="beginner"],
+html[data-hide-intermediate] [data-level="intermediate"],
+html[data-hide-advanced] [data-level="advanced"] {
+  display: none !important;
+}
+
+/* 하이드레이션 전에도 설정 버튼의 선택 상태가 맞게 보이도록 CSS 로 표시한다 */
+html:not([data-notation="text"]) [data-pref="notation"][data-value="image"],
+html[data-notation="text"] [data-pref="notation"][data-value="text"],
+html:not([data-control="modern"]) [data-pref="control"][data-value="classic"],
+html[data-control="modern"] [data-pref="control"][data-value="modern"] {
+  background: var(--highlight);
+  color: var(--highlight-fg);
+}
+
+/* 대상 수준 칩: 켜짐 = 랭크 색으로 채움, 꺼짐 = 테두리만 */
+.level-chip {
+  --lv: var(--muted);
+  background: var(--lv);
+  color: var(--bg);
+  border: 1px solid var(--lv);
+}
+.level-chip[data-value="beginner"] {
+  --lv: var(--lv-beginner);
+}
+.level-chip[data-value="intermediate"] {
+  --lv: var(--lv-intermediate);
+}
+.level-chip[data-value="advanced"] {
+  --lv: var(--lv-advanced);
+}
+html[data-hide-beginner] .level-chip[data-value="beginner"],
+html[data-hide-intermediate] .level-chip[data-value="intermediate"],
+html[data-hide-advanced] .level-chip[data-value="advanced"] {
+  background: transparent;
+  color: var(--lv);
+  opacity: 0.7;
+}
+
+/* ── 콤보 아이콘 ── */
+
+.notation-icon {
+  height: 1.9rem;
+  width: 1.9rem;
+  object-fit: contain;
+  flex: none;
+}
+.notation-icon[data-wide] {
+  width: auto;
+  height: 1.6rem;
+}
+.notation-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #fff;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.5);
+  pointer-events: none;
+}
+.notation-icon[data-flip="x"] {
+  transform: scaleX(-1);
+}
+.notation-icon[data-flip="y"] {
+  transform: scaleY(-1);
+}

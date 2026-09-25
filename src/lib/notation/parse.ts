@@ -1,0 +1,120 @@
+/**
+ * 콤보 표기 파서.
+ *
+ * 규칙 (docs/SPEC.md "콤보 표기법" 참고)
+ *   2MK → 5HP → 236HP    `→` 연결/캔슬 (입력 편의상 `->`, `>` 도 허용)
+ *   MP·HP                 `·` 타겟 콤보 (`・` 도 허용)
+ *   236PP / 236KK         약중강 구분 없는 버튼 2개
+ *   air HP / delay 5HP    공중 / 딜레이 수식어
+ *   DR / DRC / DI         생 드라이브 러시 / 캔슬 드라이브 러시 / 드라이브 임팩트
+ *   L M H SP A            모던 버튼 (A = AUTO)
+ *   (텍스트)              괄호 안은 그대로 메모로 표시
+ */
+
+export type Modifier = "air" | "delay";
+
+export type ClassicButton = "LP" | "MP" | "HP" | "LK" | "MK" | "HK" | "P" | "K";
+export type ModernButton = "L" | "M" | "H" | "SP" | "A" | "ANY";
+export type Button = ClassicButton | ModernButton;
+
+export type Move =
+  | { kind: "input"; modifiers: Modifier[]; direction: string | null; buttons: Button[] }
+  | { kind: "system"; modifiers: Modifier[]; value: "DR" | "DRC" | "DI" }
+  | { kind: "note"; text: string }
+  | { kind: "unknown"; text: string };
+
+/** 타겟 콤보(·)로 묶인 기술 묶음 */
+export type Step = Move[];
+/** `→` 로 연결된 전체 콤보 */
+export type Combo = Step[];
+
+const MODIFIERS: Record<string, Modifier> = { air: "air", delay: "delay" };
+const SYSTEM = new Set(["DR", "DRC", "DI"]);
+
+// 길이가 긴 것부터 매칭해야 HP 가 H + P 로 쪼개지지 않는다.
+const BUTTON_TOKENS: [string, Button[]][] = [
+  ["ANY", ["ANY"]],
+  ["LP", ["LP"]],
+  ["MP", ["MP"]],
+  ["HP", ["HP"]],
+  ["LK", ["LK"]],
+  ["MK", ["MK"]],
+  ["HK", ["HK"]],
+  ["PP", ["P", "P"]],
+  ["KK", ["K", "K"]],
+  ["SP", ["SP"]],
+  ["P", ["P"]],
+  ["K", ["K"]],
+  ["L", ["L"]],
+  ["M", ["M"]],
+  ["H", ["H"]],
+  ["A", ["A"]],
+];
+
+/** 사용자가 편하게 입력한 기호를 표준 기호로 바꾼다. */
+export function normalizeNotation(src: string): string {
+  return src
+    .replace(/->|>/g, "→")
+    .replace(/[・•]/g, "·")
+    .replace(/\s*→\s*/g, " → ")
+    .replace(/\s*·\s*/g, "·")
+    .replace(/[ \t]+/g, " ")
+    .trim();
+}
+
+function parseButtons(src: string): Button[] | null {
+  const out: Button[] = [];
+  let rest = src.replace(/\+/g, "");
+  while (rest.length > 0) {
+    const hit = BUTTON_TOKENS.find(([tok]) => rest.startsWith(tok));
+    if (!hit) return null;
+    out.push(...hit[1]);
+    rest = rest.slice(hit[0].length);
+  }
+  return out.length > 0 ? out : null;
+}
+
+function parseMove(src: string): Move {
+  const text = src.trim();
+  if (/^\(.*\)$/.test(text)) return { kind: "note", text: text.slice(1, -1).trim() };
+
+  const words = text.split(" ").filter(Boolean);
+  const modifiers: Modifier[] = [];
+  while (words.length > 1 && MODIFIERS[words[0].toLowerCase()]) {
+    modifiers.push(MODIFIERS[words.shift()!.toLowerCase()]);
+  }
+  if (words.length !== 1) return { kind: "unknown", text };
+
+  const word = words[0];
+  const upper = word.toUpperCase();
+  if (SYSTEM.has(upper)) return { kind: "system", modifiers, value: upper as "DR" | "DRC" | "DI" };
+
+  const m = /^([1-9]*)(.*)$/.exec(word);
+  if (m) {
+    // 방향만 있는 입력(뒤로 걷기 4, 점프 8 등)도 허용한다.
+    const buttons = m[2] === "" ? (m[1] ? [] : null) : parseButtons(m[2].toUpperCase());
+    if (buttons) {
+      // 5(중립)는 방향 아이콘을 표시하지 않는다.
+      const direction = m[1] === "" || /^5+$/.test(m[1]) ? null : m[1];
+      return { kind: "input", modifiers, direction, buttons };
+    }
+  }
+  return { kind: "unknown", text };
+}
+
+export function parseNotation(src: string): Combo {
+  const normalized = normalizeNotation(src);
+  if (!normalized) return [];
+  return normalized.split("→").map((step) =>
+    step
+      .split("·")
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .map(parseMove),
+  );
+}
+
+/** 파싱 결과에 해석하지 못한 조각이 있는지 (관리자 입력 검증용) */
+export function findUnknownTokens(combo: Combo): string[] {
+  return combo.flat().flatMap((m) => (m.kind === "unknown" ? [m.text] : []));
+}

@@ -1,0 +1,190 @@
+import type { Locale } from "./config";
+
+const ko = {
+  siteName: "SF6 Repository",
+  selectCharacter: "캐릭터 선택",
+  comingSoon: "준비 중입니다.",
+  notTranslated: "Not translated",
+  home: {
+    tagline: "스트리트 파이터 6 공략 데이터베이스",
+    description: "콤보, 셋업, 프레임 데이터, 트레이닝 세팅을 캐릭터별로 정리합니다.",
+    features: ["콤보 · 셋업", "프레임 데이터", "트레이닝 세팅", "캐릭터 대책"],
+  },
+  footer: {
+    disclaimer:
+      "Street Fighter 6 는 CAPCOM 의 상표입니다. 이 사이트는 CAPCOM 과 관계없는 팬 사이트입니다.",
+  },
+  filter: { hitState: "히트 상태", position: "시작 위치", display: "표시", count: "건" },
+  nav: {
+    overview: "개요",
+    moves: "커맨드 리스트",
+    combos: "콤보",
+    setups: "셋업",
+    practice: "프랙티스 세팅",
+    vs: "Vs 가이드",
+    glossary: "용어집",
+    notation: "표기법",
+  },
+  prefs: {
+    level: "대상",
+    notation: "콤보 표시",
+    text: "텍스트",
+    image: "이미지",
+    control: "조작",
+    classic: "클래식",
+    modern: "모던",
+    theme: "테마",
+    light: "라이트",
+    dark: "다크",
+  },
+  level: { beginner: "초급", intermediate: "중급", advanced: "상급" },
+  levelHint: { beginner: "플래티넘 이하", intermediate: "다이아", advanced: "마스터 이상" },
+  difficulty: { easy: "하", normal: "중", hard: "상" },
+  hitState: { normal: "노멀", counter: "카운터", punish_counter: "퍼니시 카운터", impact: "임팩트" },
+  position: { midscreen: "필드", corner: "코너", other: "기타" },
+  combo: {
+    damage: "데미지",
+    drive: "드라이브",
+    sa: "SA",
+    difficulty: "입력 난이도",
+    classicOnly: "클래식 전용",
+    empty: "조건에 맞는 콤보가 없습니다.",
+  },
+  patch: { outdated: "이전 패치 기준" },
+  created: "작성일",
+  notationPage: {
+    title: "콤보 표기법",
+    intro: "방향은 키보드 숫자 패드 기준 숫자로, 버튼은 영문 약자로 표기합니다.",
+    tryIt: "직접 입력해 보기",
+    unknown: "해석할 수 없는 부분",
+    legend: "기호 설명",
+  },
+};
+
+export type Dictionary = typeof ko;
+
+const en: Dictionary = {
+  siteName: "SF6 Repository",
+  selectCharacter: "Select character",
+  comingSoon: "Coming soon.",
+  notTranslated: "Not translated",
+  home: {
+    tagline: "Street Fighter 6 knowledge base",
+    description: "Combos, setups, frame data and training settings, organized by character.",
+    features: ["Combos · Setups", "Frame data", "Training settings", "Matchups"],
+  },
+  footer: {
+    disclaimer: "Street Fighter 6 is a trademark of CAPCOM. This is a fan site not affiliated with CAPCOM.",
+  },
+  filter: { hitState: "Hit state", position: "Starting position", display: "Display", count: "" },
+  nav: {
+    overview: "Overview",
+    moves: "Command list",
+    combos: "Combos",
+    setups: "Setups",
+    practice: "Practice settings",
+    vs: "Vs guide",
+    glossary: "Glossary",
+    notation: "Notation",
+  },
+  prefs: {
+    level: "Level",
+    notation: "Combo display",
+    text: "Text",
+    image: "Image",
+    control: "Controls",
+    classic: "Classic",
+    modern: "Modern",
+    theme: "Theme",
+    light: "Light",
+    dark: "Dark",
+  },
+  level: { beginner: "Beginner", intermediate: "Intermediate", advanced: "Advanced" },
+  levelHint: { beginner: "Platinum and below", intermediate: "Diamond", advanced: "Master and above" },
+  difficulty: { easy: "Easy", normal: "Medium", hard: "Hard" },
+  hitState: { normal: "Normal", counter: "Counter", punish_counter: "Punish counter", impact: "Impact" },
+  position: { midscreen: "Midscreen", corner: "Corner", other: "Other" },
+  combo: {
+    damage: "Damage",
+    drive: "Drive",
+    sa: "SA",
+    difficulty: "Execution",
+    classicOnly: "Classic only",
+    empty: "No combos match the current filters.",
+  },
+  patch: { outdated: "Older patch" },
+  created: "Added",
+  notationPage: {
+    title: "Combo notation",
+    intro: "Directions use numpad notation, and buttons use their abbreviations.",
+    tryIt: "Try it",
+    unknown: "Couldn't read",
+    legend: "Legend",
+  },
+};
+
+const ja: Dictionary = {
+  siteName: "SF6 Repository",
+  selectCharacter: "キャラクター選択",
+  comingSoon: "準備中です。",
+  notTranslated: "Not translated",
+  home: {
+    tagline: "ストリートファイター6 攻略データベース",
+    description: "コンボ、セットプレイ、フレームデータ、トレーニング設定をキャラクター別にまとめています。",
+    features: ["コンボ · セットプレイ", "フレームデータ", "トレーニング設定", "キャラ対策"],
+  },
+  footer: {
+    disclaimer: "Street Fighter 6 は CAPCOM の商標です。本サイトは CAPCOM とは関係のないファンサイトです。",
+  },
+  filter: { hitState: "ヒット状況", position: "開始位置", display: "表示", count: "件" },
+  nav: {
+    overview: "概要",
+    moves: "コマンドリスト",
+    combos: "コンボ",
+    setups: "セットプレイ",
+    practice: "トレーニング設定",
+    vs: "キャラ対策",
+    glossary: "用語集",
+    notation: "表記法",
+  },
+  prefs: {
+    level: "対象",
+    notation: "コンボ表示",
+    text: "テキスト",
+    image: "画像",
+    control: "操作",
+    classic: "クラシック",
+    modern: "モダン",
+    theme: "テーマ",
+    light: "ライト",
+    dark: "ダーク",
+  },
+  level: { beginner: "初級", intermediate: "中級", advanced: "上級" },
+  levelHint: { beginner: "プラチナ以下", intermediate: "ダイヤ", advanced: "マスター以上" },
+  difficulty: { easy: "低", normal: "中", hard: "高" },
+  hitState: { normal: "ノーマル", counter: "カウンター", punish_counter: "パニッシュカウンター", impact: "インパクト" },
+  position: { midscreen: "画面中央", corner: "画面端", other: "その他" },
+  combo: {
+    damage: "ダメージ",
+    drive: "ドライブ",
+    sa: "SA",
+    difficulty: "入力難度",
+    classicOnly: "クラシック専用",
+    empty: "条件に合うコンボがありません。",
+  },
+  patch: { outdated: "旧パッチ基準" },
+  created: "作成日",
+  notationPage: {
+    title: "コンボ表記",
+    intro: "方向はテンキー表記の数字、ボタンは略称で表記します。",
+    tryIt: "入力してみる",
+    unknown: "読み取れない部分",
+    legend: "記号の説明",
+  },
+};
+
+const dictionaries: Record<Locale, Dictionary> = { ko, en, ja };
+
+export function getDictionary(locale: Locale): Dictionary {
+  return dictionaries[locale];
+}
