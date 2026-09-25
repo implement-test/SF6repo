@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 
 /**
- * 셋업 퍼가기: 단독 페이지 링크와 <iframe> 임베드 코드를 복사할 수 있는 팝업.
+ * 셋업 · 콤보 퍼가기: 단독 페이지 링크와 <iframe> 임베드 코드를 복사할 수 있는 팝업.
  * 주소는 지금 접속한 주소(origin) 기준이라, 배포하면 실제 도메인으로 만들어진다.
  * 임베드 높이는 지금 화면에 그려진 카드 높이로 채운다.
  */
-export function ShareButton({ kind, id, labels }: { kind: "setup"; id: number; labels: Dictionary["share"] }) {
+export function ShareButton({ kind, id, labels }: { kind: "setup" | "combo"; id: number; labels: Dictionary["share"] }) {
   const [open, setOpen] = useState(false);
   const [link, setLink] = useState("");
   const [code, setCode] = useState("");
@@ -63,13 +63,13 @@ export function ShareButton({ kind, id, labels }: { kind: "setup"; id: number; l
           <section
             role="dialog"
             aria-modal="true"
-            aria-label={labels.title}
+            aria-label={labels.titles[kind]}
             className="relative flex w-full max-w-xl flex-col border border-accent bg-surface shadow-2xl"
           >
             <div className="brand-bar h-[3px]" />
             <header className="flex items-center gap-3 border-b border-border px-5 py-3">
               <span className="eyebrow text-accent!">Share</span>
-              <h2 className="display text-2xl">{labels.title}</h2>
+              <h2 className="display text-2xl">{labels.titles[kind]}</h2>
               <button type="button" onClick={() => setOpen(false)} className="ml-auto text-2xl leading-none text-muted hover:text-fg" aria-label="Close">
                 ×
               </button>

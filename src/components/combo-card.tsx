@@ -9,6 +9,7 @@ import { LevelBadge, NotTranslatedBadge, OutdatedBadge, Tag } from "./badges";
 import { SegmentGauge } from "./gauges";
 import { ItemMedia } from "./media";
 import { EditButton } from "./admin/admin-context";
+import { ShareButton } from "./share-button";
 
 export function ComboCard({
   combo,
@@ -18,6 +19,7 @@ export function ComboCard({
   authors,
   characterSlug,
   linkedSetups = [],
+  embedded = false,
 }: {
   combo: Combo;
   locale: Locale;
@@ -27,6 +29,8 @@ export function ComboCard({
   characterSlug: string;
   /** 이 콤보에서 이어지는 셋업. preview 는 마우스를 올렸을 때 보여 줄 텍스트 */
   linkedSetups?: { id: number; title: string; preview: string }[];
+  /** 다른 사이트에 퍼간 화면: 퍼가기·수정 버튼을 빼고, 방문자의 대상 수준 숨김 설정도 무시한다 */
+  embedded?: boolean;
 }) {
   const createdBy = combo.created_by ? authors[combo.created_by] : undefined;
   const updatedBy = combo.updated_by ? authors[combo.updated_by] : undefined;
@@ -40,7 +44,7 @@ export function ComboCard({
   return (
     <article
       id={`combo-${combo.id}`}
-      data-level={combo.target_level}
+      data-level={embedded ? undefined : combo.target_level}
       className="group relative grid border border-border bg-surface transition-colors hover:border-border-strong md:grid-cols-[1fr_15rem]"
     >
       {/* 대상 수준 색 띠 */}
@@ -52,9 +56,12 @@ export function ComboCard({
           {title && <h2 className="font-bold">{title.text}</h2>}
           {title && !title.translated && <NotTranslatedBadge label={dict.notTranslated} />}
           {outdated && <OutdatedBadge label={dict.patch.outdated} />}
-          <span className="ml-auto">
-            <EditButton entity="combo" id={combo.id} scope={combo.character_id} />
-          </span>
+          {!embedded && (
+            <span className="ml-auto flex items-center gap-1.5">
+              <ShareButton kind="combo" id={combo.id} labels={dict.share} />
+              <EditButton entity="combo" id={combo.id} scope={combo.character_id} />
+            </span>
+          )}
         </header>
 
         <div className="flex flex-col border-l-2 border-accent bg-inset">

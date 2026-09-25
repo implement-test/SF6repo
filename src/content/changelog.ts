@@ -18,6 +18,14 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         kind: "added",
         text: {
+          ko: "콤보 퍼가기 (링크 · 블로그용 임베드 코드)",
+          en: "Share combos (link and embed code for blogs)",
+          ja: "コンボの共有（リンク・ブログ用埋め込みコード）",
+        },
+      },
+      {
+        kind: "added",
+        text: {
           ko: "셋업 퍼가기 (링크 · 블로그용 임베드 코드)",
           en: "Share setups (link and embed code for blogs)",
           ja: "セットプレイの共有（リンク・ブログ用埋め込みコード）",

@@ -112,6 +112,29 @@ export async function getSetupForEmbed(
   return { setup, character, linkedCombos };
 }
 
+/**
+ * 퍼가기(embed) 페이지용: 공개된 콤보 하나와, 카드에 필요한 캐릭터 · 이 콤보에서 이어지는 셋업.
+ * 없거나 비공개면 null.
+ */
+export async function getComboForEmbed(
+  id: number,
+): Promise<{ combo: Combo; character: Character; setups: Setup[]; links: SetupComboLink[] } | null> {
+  const c = db();
+  let combo: Combo | undefined;
+  if (!c) combo = sampleCombos.find((cb) => cb.id === id);
+  else {
+    const { data } = await c.from("combos").select("*").eq("id", id).maybeSingle();
+    combo = data ?? undefined;
+  }
+  if (!combo || !combo.is_published) return null;
+
+  const character = (await getCharacters()).find((ch) => ch.id === combo.character_id);
+  if (!character) return null;
+  const setups = (await getSetups(character.id)).filter((s) => s.is_published);
+  const links = (await getSetupComboLinks(setups.map((s) => s.id))).filter((l) => l.combo_id === combo.id);
+  return { combo, character, setups, links };
+}
+
 /** 셋업 ↔ 콤보 연결 (이 캐릭터의 셋업만). 연결 표가 없거나 실패해도 페이지는 그대로 보여 준다. */
 export async function getSetupComboLinks(setupIds: number[]): Promise<SetupComboLink[]> {
   const c = db();

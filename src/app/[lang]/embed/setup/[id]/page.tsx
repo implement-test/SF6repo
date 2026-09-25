@@ -5,6 +5,7 @@ import { hasLocale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { pickLocalized } from "@/lib/i18n/localized";
 import { SetupCard } from "@/components/setup-card";
+import { EmbedFooter } from "@/components/embed-footer";
 
 export const revalidate = 3600;
 
@@ -50,17 +51,7 @@ export default async function EmbedSetupPage({ params }: PageProps<"/[lang]/embe
         characterSlug={character.slug}
         embedded
       />
-      <a
-        href={`/${character.slug}/setups#setup-${setup.id}`}
-        target="_blank"
-        rel="noopener"
-        className="flex items-center justify-end gap-2 px-1 text-xs text-muted hover:text-accent"
-      >
-        <span className="display text-sm not-italic text-fg">
-          SF6 <span className="text-accent">REPOSITORY</span>
-        </span>
-        {dict.share.viewOnSite} ↗
-      </a>
+      <EmbedFooter href={`/${character.slug}/setups#setup-${setup.id}`} label={dict.share.viewOnSite} />
     </div>
   );
 }
