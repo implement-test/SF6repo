@@ -50,16 +50,18 @@ const DIFFICULTY: Option[] = [
 ];
 
 const POSITIONS: Option[] = [
+  { value: "any", label: "거리 무관" },
   { value: "midscreen", label: "필드" },
+  { value: "near_corner", label: "코너 근처" },
   { value: "corner", label: "코너" },
   { value: "other", label: "기타" },
 ];
 
 const HIT_STATES: Option[] = [
   { value: "normal", label: "노멀" },
-  { value: "counter", label: "카운터" },
   { value: "punish_counter", label: "퍼니시 카운터" },
-  { value: "impact", label: "임팩트" },
+  { value: "corner_impact_guard", label: "구석 임팩트 가드" },
+  { value: "corner_impact_stun", label: "구석 임팩트 스턴" },
 ];
 
 /** 콘텐츠 공통 필드 */
@@ -129,7 +131,6 @@ export const ENTITIES: Record<EntityType, Entity> = {
         fields: [
           { key: "hit_states", label: "히트 상태", type: "multiselect", options: HIT_STATES, wide: true },
           { key: "position_start", label: "시작 위치", type: "select", options: POSITIONS },
-          { key: "position_end", label: "종료 위치", type: "select", options: POSITIONS, nullable: true },
         ],
       },
       {
@@ -146,6 +147,7 @@ export const ENTITIES: Record<EntityType, Entity> = {
           },
           { key: "drive_cost", label: "드라이브 소모 (칸)", type: "number", step: 0.5, min: 0, max: 6 },
           { key: "sa_cost", label: "SA 소모 (칸)", type: "number", step: 1, min: 0, max: 3 },
+          { key: "frame_after", label: "콤보 후 프레임", type: "text", help: "예: +32, 다운 +30" },
           { key: "difficulty", label: "입력 난이도", type: "select", options: DIFFICULTY },
         ],
       },
@@ -158,7 +160,7 @@ export const ENTITIES: Record<EntityType, Entity> = {
       starters: [],
       hit_states: ["normal"],
       position_start: "midscreen",
-      position_end: null,
+      frame_after: null,
       drive_cost: 0,
       sa_cost: 0,
       damage: null,

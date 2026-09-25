@@ -27,10 +27,7 @@ export function ComboCard({
   const title = combo.title ? pickLocalized(combo.title, locale) : null;
   const notes = combo.notes ? pickLocalized(combo.notes, locale) : null;
   const outdated = latestPatchId !== null && combo.patch_id !== latestPatchId;
-  const position =
-    combo.position_end && combo.position_end !== combo.position_start
-      ? `${dict.position[combo.position_start]} → ${dict.position[combo.position_end]}`
-      : dict.position[combo.position_start];
+  const position = dict.position[combo.position_start] ?? combo.position_start;
   const starters = combo.starters ?? [];
   const hasMedia = !!combo.media_url || !!parseYouTube(combo.youtube_url);
 
@@ -93,7 +90,7 @@ export function ComboCard({
         <div className="flex flex-wrap gap-1.5">
           {combo.hit_states.map((h) => (
             <Tag key={h} tone={h === "normal" ? "default" : "accent"}>
-              {dict.hitState[h]}
+              {dict.hitState[h] ?? h}
             </Tag>
           ))}
           <Tag>{position}</Tag>
@@ -116,6 +113,12 @@ export function ComboCard({
             <p className="mt-1 text-xs text-muted">* {dict.combo.damageBasis}</p>
           )}
         </div>
+        {combo.frame_after && (
+          <div>
+            <p className="eyebrow">{dict.combo.frameAfter}</p>
+            <p className="display text-2xl tabular-nums">{combo.frame_after}</p>
+          </div>
+        )}
         <div className="flex flex-col gap-1.5">
           <SegmentGauge label="Drive" value={combo.drive_cost} max={6} color="var(--drive)" />
           <SegmentGauge label="SA" value={combo.sa_cost} max={3} color="var(--sa)" />

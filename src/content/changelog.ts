@@ -17,6 +17,22 @@ export const CHANGELOG: ChangelogEntry[] = [
     items: [
       {
         kind: "added",
+        text: { ko: "콤보 후 프레임 표시", en: "Frame advantage after combo", ja: "コンボ後の有利フレーム表示" },
+      },
+      {
+        kind: "changed",
+        text: {
+          ko: "콤보 태그 정리: 히트 상태(노멀 · 퍼니시 카운터 · 구석 임팩트 가드/스턴), 시작 위치(거리 무관 · 필드 · 코너 근처 · 코너 · 기타)",
+          en: "Combo tags: hit states (normal, punish counter, corner DI blocked/stun) and starting position (any, midscreen, near corner, corner, other)",
+          ja: "コンボタグ整理：ヒット状況（ノーマル・パニッシュカウンター・画面端インパクト ガード/スタン）、開始位置（距離不問・画面中央・画面端付近・画面端・その他）",
+        },
+      },
+      {
+        kind: "removed",
+        text: { ko: "콤보 종료 위치", en: "Combo ending position", ja: "コンボ終了位置" },
+      },
+      {
+        kind: "added",
         text: { ko: "업데이트 내역 버튼", en: "Update history button", ja: "更新履歴ボタン" },
       },
       {

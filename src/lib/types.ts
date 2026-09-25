@@ -4,13 +4,15 @@ export type Localized = { ko: string; en?: string; ja?: string };
 
 export type TargetLevel = "beginner" | "intermediate" | "advanced";
 export type Difficulty = "easy" | "normal" | "hard";
-export type ScreenPosition = "midscreen" | "corner" | "other";
-export type HitState = "normal" | "counter" | "punish_counter" | "impact";
+/** 거리 무관 / 필드 / 코너 근처 / 코너 / 기타 */
+export type ScreenPosition = "any" | "midscreen" | "near_corner" | "corner" | "other";
+/** 노멀 / 퍼니시 카운터 / 구석 임팩트 가드 / 구석 임팩트 스턴 */
+export type HitState = "normal" | "punish_counter" | "corner_impact_guard" | "corner_impact_stun";
 export type MoveCategory = "normal" | "unique" | "special" | "super" | "throw" | "drive";
 
 export const TARGET_LEVELS: TargetLevel[] = ["beginner", "intermediate", "advanced"];
-export const HIT_STATES: HitState[] = ["normal", "counter", "punish_counter", "impact"];
-export const POSITIONS: ScreenPosition[] = ["midscreen", "corner", "other"];
+export const HIT_STATES: HitState[] = ["normal", "punish_counter", "corner_impact_guard", "corner_impact_stun"];
+export const POSITIONS: ScreenPosition[] = ["any", "midscreen", "near_corner", "corner", "other"];
 
 type ContentBase = {
   id: number;
@@ -78,10 +80,11 @@ export type Combo = ContentBase &
     notation_modern: string | null;
     hit_states: HitState[];
     position_start: ScreenPosition;
-    position_end: ScreenPosition | null;
     drive_cost: number;
     sa_cost: number;
     damage: number | null;
+    /** 콤보 후 프레임 (예: "+32", "다운 +30") */
+    frame_after: string | null;
     difficulty: Difficulty;
     notes: Localized | null;
   };

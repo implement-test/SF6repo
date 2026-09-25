@@ -36,7 +36,8 @@ export function ComboFilters({ items, dict }: { items: ComboFilterItem[]; dict: 
   const visible = items.filter(
     (item) =>
       (hit.length === 0 || item.hitStates.some((h) => hit.includes(h))) &&
-      (pos.length === 0 || pos.includes(item.positionStart)),
+      // '거리 무관' 콤보는 어떤 위치를 골라도 함께 보여 준다.
+      (pos.length === 0 || pos.includes(item.positionStart) || item.positionStart === "any"),
   );
 
   return (
