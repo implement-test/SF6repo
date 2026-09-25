@@ -185,14 +185,17 @@ export function ComboCard({
               if (!route.note) return null;
               const note = pickLocalized(route.note, locale);
               return (
-                <p key={r} className="border-l-2 border-accent pl-2 text-sm whitespace-pre-line text-muted">
+                // 라벨과 본문을 나눠, 여러 줄이어도 본문 들여쓰기가 맞고 라벨은 본문 높이의 가운데에 온다
+                <div key={r} className="flex items-center gap-2 border-l-2 border-accent pl-2 text-sm text-muted">
                   {multiRoute && (
-                    <span className="mr-1.5 text-xs font-bold text-accent">
+                    <span className="shrink-0 text-xs font-bold whitespace-nowrap text-accent">
                       {dict.combo.route} {r + 1}
                     </span>
                   )}
-                  {note.text} {!note.translated && <NotTranslatedBadge label={dict.notTranslated} />}
-                </p>
+                  <p className="min-w-0 whitespace-pre-line">
+                    {note.text} {!note.translated && <NotTranslatedBadge label={dict.notTranslated} />}
+                  </p>
+                </div>
               );
             })}
           />
