@@ -121,16 +121,45 @@ export const sampleSetups: Setup[] = [
     target_level: "intermediate",
     sort_order: 1,
     options: [
-      { label: "A", classic: "2MK → DRC → 5HP", modern: null, description: { ko: "가드 시 이어서 압박" }, youtube_url: null },
-      { label: "B", classic: "LPLK", modern: "LM", description: { ko: "잡기" }, youtube_url: null },
+      {
+        label: "1",
+        classic: "(약간 끌어서) 5HP",
+        modern: null,
+        description: { ko: "HP가 2히트 되는 거리에서 써야 됨" },
+        branches: [
+          { result: "hit", classic: "5HP(2) → 236HK", modern: null, note: { ko: "(이건 어려우니 패스)" } },
+          { result: "hit", classic: "5HP(2) → 2MP", modern: null, note: { ko: "HP 가 1타만 맞아도 2MP 이어짐" } },
+          { result: "guard", classic: "2LK → 5LP → 623HP", modern: null, note: { ko: "2LK 후 2LP 는 안 들어감" } },
+          { result: "guard", classic: "(살짝 걸어) f.throw", modern: null, note: { ko: "4F 비벼도 잡힘" } },
+        ],
+        youtube_url: null,
+      },
+      {
+        label: "2",
+        classic: "2LK",
+        modern: null,
+        description: { ko: "너무 깊게 넣으려고 하면 4F에 끊기므로 2LK 끝 부분 닿도록" },
+        branches: [
+          { result: "hit", classic: "2MP", modern: null, note: null },
+          { result: "guard", classic: "2MP → 623MP", modern: null, note: { ko: "2LK 후 2LP 는 안 들어감" } },
+        ],
+        youtube_url: null,
+      },
     ],
     practice: {
-      guard: "all",
-      playback: "random",
-      wakeup: ["2LP", "LPLK"],
-      after_guard: { count: 1, slots: ["2LP", "4"] },
+      wakeup: [
+        { command: { ko: "4F 기본기" }, delay: 0 },
+        { command: { ko: "뒤로 걷기 (녹화)" }, delay: 0 },
+        { command: { ko: "하단 막기 (녹화)" }, delay: 0 },
+      ],
+      guard: [
+        { command: { ko: "4F 기본기" }, count: 0, delay: 0 },
+        { command: { ko: "뒤로 걷기 (녹화)" }, count: 0, delay: 0 },
+        { command: { ko: "하단 막기 (녹화)" }, count: 0, delay: 0 },
+        { command: { ko: "기본 잡기" }, count: 0, delay: 0 },
+      ],
       after_hit: [],
-      notes: { ko: "더미 위치: 코너" },
+      notes: { ko: "예시 데이터입니다." },
     },
   },
   {
@@ -143,7 +172,7 @@ export const sampleSetups: Setup[] = [
     description: null,
     target_level: "beginner",
     sort_order: 2,
-    options: [{ label: "A", classic: "5LP", modern: null, description: null, youtube_url: null }],
+    options: [{ label: "1", classic: "5LP", modern: null, description: null, branches: [], youtube_url: null }],
     practice: null,
   },
 ];

@@ -7,6 +7,7 @@ import { findUnknownTokens, parseNotation } from "@/lib/notation/parse";
 import { describeError, revalidateSite, supabaseBrowser } from "@/lib/supabase/browser";
 import type { ComboStarter, Localized, Patch, PracticeConfig, SetupOption } from "@/lib/types";
 import { parseYouTube } from "@/lib/youtube";
+import { normalizeOptions, normalizePractice } from "@/lib/setup";
 import { NotationImage } from "../notation";
 import { useAdmin, type EditorRequest } from "./admin-context";
 import { formatPatchVersion } from "@/lib/patch";
@@ -22,6 +23,14 @@ import {
 } from "./setup-fields";
 
 type Values = Record<string, unknown>;
+
+/** 이전 형식으로 저장된 셋업 옵션·프랙티스 설정을 현재 형식으로 맞춘다 */
+function normalizeValues(v: Values): Values {
+  const out = { ...v };
+  if ("options" in out) out.options = normalizeOptions(out.options);
+  if ("practice" in out) out.practice = normalizePractice(out.practice);
+  return out;
+}
 const LANGS = [
   { key: "ko", label: "한국어" },
   { key: "en", label: "English" },
@@ -76,7 +85,7 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
       }
       if (cancelled) return;
       setPatches(patchList);
-      setValues(initial);
+      setValues(normalizeValues(initial));
       setInitialLinks((initial.combo_links as number[] | undefined) ?? []);
       setBaseUpdatedAt((initial.updated_at as string | undefined) ?? null);
     })();
@@ -180,7 +189,9 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
   /** 변경 이력의 한 시점 내용을 폼에 불러온다 (저장해야 반영된다). */
   function loadVersion(snapshot: Values) {
     // 연결 콤보는 이력에 없는 따로 저장되는 값이라 지금 값을 유지한다.
-    setValues((current) => ({ ...snapshot, combo_links: current?.combo_links, updated_at: baseUpdatedAt }));
+    setValues((current) =>
+      normalizeValues({ ...snapshot, combo_links: current?.combo_links, updated_at: baseUpdatedAt }),
+    );
     setShowHistory(false);
     setError("과거 버전을 불러왔습니다. 확인 후 저장하면 되돌려집니다.");
   }

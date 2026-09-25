@@ -126,35 +126,72 @@ export function SetupCard({
       )}
 
       {setup.options.length > 0 && (
-        <section className="grid gap-2 md:grid-cols-2">
+        <section className="flex flex-col gap-3">
           {setup.options.map((option, i) => {
             const desc = option.description ? pickLocalized(option.description, locale) : null;
             return (
-              <div key={i} className="flex flex-col gap-2 border border-border bg-surface-2 p-3">
-                <div className="flex items-center gap-2">
-                  <span className="skew bg-highlight px-2 py-0.5 text-highlight-fg">
+              <div key={i} className="flex flex-col border border-border bg-surface-2">
+                {/* 머리 줄: 옵션 이름 · 행동 · 설명 */}
+                <div className="grid gap-2 border-b border-border px-3 py-2.5 md:grid-cols-[6rem_minmax(0,1fr)_minmax(0,1fr)] md:items-center">
+                  <span className="skew self-start justify-self-start bg-highlight px-2 py-0.5 text-highlight-fg md:self-center">
                     <span className="display text-sm">
                       {t.option} {option.label}
                     </span>
                   </span>
+                  <div className="min-w-0">
+                    {option.classic && (
+                      <ControlNotation
+                        classic={option.classic}
+                        modern={option.modern}
+                        classicOnlyLabel={dict.combo.classicOnly}
+                      />
+                    )}
+                  </div>
+                  {desc && (
+                    <p className="text-sm text-muted">
+                      {desc.text} {!desc.translated && <NotTranslatedBadge label={dict.notTranslated} />}
+                    </p>
+                  )}
                 </div>
-                {option.classic && (
-                  <ControlNotation classic={option.classic} modern={option.modern} classicOnlyLabel={dict.combo.classicOnly} />
-                )}
-                {desc && (
-                  <p className="text-sm text-muted">
-                    {desc.text} {!desc.translated && <NotTranslatedBadge label={dict.notTranslated} />}
-                  </p>
+                {/* 분기 줄: 히트/가드/헛침 · 이어지는 루트 · 메모 */}
+                {option.branches.length > 0 && (
+                  <ul className="divide-y divide-border">
+                    {option.branches.map((b, j) => {
+                      const note = b.note ? pickLocalized(b.note, locale) : null;
+                      return (
+                        <li
+                          key={j}
+                          className="grid gap-2 px-3 py-2 md:grid-cols-[6rem_minmax(0,1fr)_minmax(0,1fr)] md:items-center"
+                        >
+                          <span className="option-result justify-self-start" data-result={b.result}>
+                            {t.result[b.result]}
+                          </span>
+                          <div className="min-w-0">
+                            {b.classic && (
+                              <ControlNotation classic={b.classic} modern={b.modern} classicOnlyLabel={dict.combo.classicOnly} />
+                            )}
+                          </div>
+                          {note && (
+                            <p className="text-sm text-muted">
+                              {note.text} {!note.translated && <NotTranslatedBadge label={dict.notTranslated} />}
+                            </p>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
                 )}
                 {option.youtube_url && (
-                  <ItemMedia
-                    youtubeUrl={option.youtube_url}
-                    youtubeStart={null}
-                    mediaUrl={null}
-                    title={`${title.text} ${t.option} ${option.label}`}
-                    showLabel={dict.video.show}
-                    hideLabel={dict.video.hide}
-                  />
+                  <div className="border-t border-border p-3">
+                    <ItemMedia
+                      youtubeUrl={option.youtube_url}
+                      youtubeStart={null}
+                      mediaUrl={null}
+                      title={`${title.text} ${t.option} ${option.label}`}
+                      showLabel={dict.video.show}
+                      hideLabel={dict.video.hide}
+                    />
+                  </div>
                 )}
               </div>
             );

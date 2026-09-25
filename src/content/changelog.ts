@@ -16,6 +16,30 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-09-25",
     items: [
       {
+        kind: "changed",
+        text: {
+          ko: "셋업 프랙티스 설정을 표로 (다운 · 가드 · 데미지 복귀 리버설, 커맨드는 글자로)",
+          en: "Setup training settings as tables (wake-up / guard / hit recovery reversal, commands as text)",
+          ja: "セットプレイのトレーニング設定を表に（ダウン・ガード・ダメージ復帰リバーサル、コマンドは文字で）",
+        },
+      },
+      {
+        kind: "changed",
+        text: {
+          ko: "셋업 옵션에 결과별(히트 · 가드 · 헛침) 루트와 메모",
+          en: "Setup options with routes and notes per result (hit / block / whiff)",
+          ja: "セットプレイの択に結果別（ヒット・ガード・空振り）のルートとメモ",
+        },
+      },
+      {
+        kind: "added",
+        text: {
+          ko: "콤보 표기: 몇 번째 타격 5HP(2), 조각 앞뒤 괄호 메모",
+          en: "Notation: hit number like 5HP(2), inline notes in parentheses",
+          ja: "コンボ表記：5HP(2) のような段数、前後の括弧メモ",
+        },
+      },
+      {
         kind: "added",
         text: { ko: "앞대쉬 · 뒷대쉬 아이콘 (66 / 44)", en: "Forward / back dash icons (66 / 44)", ja: "前ステップ・バックステップのアイコン（66 / 44）" },
       },

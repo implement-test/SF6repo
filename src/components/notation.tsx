@@ -101,6 +101,11 @@ function MoveIcons({ move }: { move: Move }) {
           {move.buttons.map((b, i) => (
             <Icon key={`b${i}`} icon={BUTTON_ICONS[b]} />
           ))}
+          {move.hits && (
+            <span className="self-end text-xs font-bold text-muted" title={`${move.hits} hit`}>
+              ({move.hits})
+            </span>
+          )}
         </span>
       );
   }
@@ -117,7 +122,10 @@ export function NotationImage({ notation }: { notation: string }) {
           <span className="inline-flex items-center gap-1">
             {step.map((move, j) => (
               <Fragment key={j}>
-                {j > 0 && <span className="font-bold text-muted">·</span>}
+                {/* 타겟 콤보 구분점. 괄호 메모 앞뒤에는 찍지 않는다 */}
+                {j > 0 && move.kind !== "note" && step[j - 1].kind !== "note" && (
+                  <span className="font-bold text-muted">·</span>
+                )}
                 <MoveIcons move={move} />
               </Fragment>
             ))}

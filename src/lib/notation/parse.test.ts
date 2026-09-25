@@ -64,6 +64,29 @@ describe("parseNotation", () => {
     expect(parseNotation("punish b.throw")[0][0]).toEqual({ kind: "throw", modifiers: ["punish"], direction: "b" });
   });
 
+  it("5HP(2) 는 몇 번째 타격인지 읽는다", () => {
+    expect(parseNotation("5HP(2) → 236HK")[0][0]).toEqual({
+      kind: "input",
+      modifiers: [],
+      direction: null,
+      buttons: ["HP"],
+      hits: 2,
+    });
+  });
+
+  it("조각 앞뒤의 괄호 메모를 따로 읽는다", () => {
+    const combo = parseNotation("(약간 끌어서) 5HP → f.throw (4F 비벼도 잡힘)");
+    expect(combo[0]).toEqual([
+      { kind: "note", text: "약간 끌어서" },
+      { kind: "input", modifiers: [], direction: null, buttons: ["HP"] },
+    ]);
+    expect(combo[1]).toEqual([
+      { kind: "throw", modifiers: [], direction: "f" },
+      { kind: "note", text: "4F 비벼도 잡힘" },
+    ]);
+    expect(findUnknownTokens(combo)).toEqual([]);
+  });
+
   it("모던 버튼을 읽는다", () => {
     expect(parseNotation("A+M")[0][0]).toMatchObject({ buttons: ["A", "M"] });
     expect(parseNotation("6SP")[0][0]).toMatchObject({ direction: "6", buttons: ["SP"] });

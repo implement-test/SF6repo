@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Character, Combo, Patch, Setup, SetupComboLink, SetupSituation } from "@/lib/types";
+import { normalizeOptions, normalizePractice } from "@/lib/setup";
 import {
   sampleCharacters,
   sampleCombos,
@@ -82,8 +83,8 @@ export async function getSetups(characterId: number): Promise<Setup[]> {
   const list = await rows<Setup>(
     c.from("setups").select("*").eq("character_id", characterId).order("sort_order").order("id"),
   );
-  // 0007 마이그레이션 전 데이터도 보여 줄 수 있게 기본값을 채운다.
-  return list.map((s) => ({ ...s, options: s.options ?? [], practice: s.practice ?? null }));
+  // 이전 형식으로 저장된 옵션·프랙티스 설정도 현재 형식으로 맞춘다.
+  return list.map((s) => ({ ...s, options: normalizeOptions(s.options), practice: normalizePractice(s.practice) }));
 }
 
 /** 셋업 ↔ 콤보 연결 (이 캐릭터의 셋업만). 연결 표가 없거나 실패해도 페이지는 그대로 보여 준다. */

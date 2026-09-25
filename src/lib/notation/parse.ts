@@ -25,7 +25,8 @@ export type ModernButton = "L" | "M" | "H" | "SP" | "A" | "ANY";
 export type Button = ClassicButton | ModernButton;
 
 export type Move =
-  | { kind: "input"; modifiers: Modifier[]; direction: string | null; buttons: Button[] }
+  /** hits: "5HP(2)" 처럼 몇 번째 타격인지 */
+  | { kind: "input"; modifiers: Modifier[]; direction: string | null; buttons: Button[]; hits?: number }
   | { kind: "system"; modifiers: Modifier[]; value: "DR" | "DRC" | "DI" }
   /** 잡기: f.throw = 앞잡기, b.throw = 뒤잡기, throw = 방향 없음 */
   | { kind: "throw"; modifiers: Modifier[]; direction: "f" | "b" | null }
@@ -107,17 +108,33 @@ function parseMove(src: string): Move {
     return { kind: "input", modifiers: [...modifiers, alone], direction: null, buttons: [] };
   }
 
-  const m = /^([1-9]*)(.*)$/.exec(word);
+  // "5HP(2)" = 5HP 의 2타째
+  const hitMatch = /^(.+?)\((\d+)\)$/.exec(word);
+  const core = hitMatch ? hitMatch[1] : word;
+  const hits = hitMatch ? Number(hitMatch[2]) : undefined;
+
+  const m = /^([1-9]*)(.*)$/.exec(core);
   if (m) {
     // 방향만 있는 입력(뒤로 걷기 4, 점프 8 등)도 허용한다.
     const buttons = m[2] === "" ? (m[1] ? [] : null) : parseButtons(m[2].toUpperCase());
     if (buttons) {
       // 5(중립)는 방향 아이콘을 표시하지 않는다.
       const direction = m[1] === "" || /^5+$/.test(m[1]) ? null : m[1];
-      return { kind: "input", modifiers, direction, buttons };
+      return hits ? { kind: "input", modifiers, direction, buttons, hits } : { kind: "input", modifiers, direction, buttons };
     }
   }
   return { kind: "unknown", text };
+}
+
+/**
+ * 한 조각을 해석한다. 앞뒤에 괄호 메모가 붙을 수 있다: "(약간 끌어서) 5HP", "f.throw (4F 비벼도 잡힘)"
+ */
+function parsePart(part: string): Move[] {
+  const lead = /^\(([^)]*)\)\s+(.+)$/.exec(part);
+  if (lead) return [{ kind: "note", text: lead[1].trim() }, ...parsePart(lead[2])];
+  const trail = /^(.+?)\s+\(([^)]*)\)$/.exec(part);
+  if (trail) return [...parsePart(trail[1]), { kind: "note", text: trail[2].trim() }];
+  return [parseMove(part)];
 }
 
 export function parseNotation(src: string): Combo {
@@ -128,7 +145,7 @@ export function parseNotation(src: string): Combo {
       .split("·")
       .map((part) => part.trim())
       .filter(Boolean)
-      .map(parseMove),
+      .flatMap(parsePart),
   );
 }
 

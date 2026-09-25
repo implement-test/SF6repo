@@ -4,22 +4,19 @@ import { useEffect, useMemo, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { normalizeNotation } from "@/lib/notation/parse";
 import {
-  GUARD_SETTINGS,
-  type GuardSetting,
+  OPTION_RESULTS,
   type Localized,
+  type OptionBranch,
+  type OptionResult,
   type PracticeConfig,
+  type PracticeRow,
   type SetupOption,
   type SetupSituation,
 } from "@/lib/types";
 import { NotationImage } from "../notation";
 import { inputClass, NotationRow } from "./starters-input";
 
-const GUARD_LABELS: Record<GuardSetting, string> = {
-  all: "전부 가드",
-  none: "가드 안 함",
-  after_first: "첫 타 후 가드",
-  random: "랜덤 가드",
-};
+const RESULT_LABELS: Record<OptionResult, string> = { hit: "히트", guard: "가드", whiff: "헛침" };
 
 const iconButton =
   "grid size-7 place-items-center border border-border-strong text-sm text-muted hover:text-fg disabled:opacity-30";
@@ -216,21 +213,96 @@ export function ComboLinksInput({
   );
 }
 
-// ───────────────────────── 옵션 A/B/... ─────────────────────────
+// ───────────────────────── 다국어 한 줄 입력 ─────────────────────────
 
 const LANGS = ["ko", "en", "ja"] as const;
-const nextLabel = (list: SetupOption[]) => String.fromCharCode(65 + list.length); // A, B, C …
+
+/** 한국어 입력칸 하나 + 필요할 때 펼치는 영어·일본어 칸 */
+function LocalizedLine({
+  value,
+  onChange,
+  placeholder,
+}: {
+  value: Localized | null;
+  onChange: (v: Localized | null) => void;
+  placeholder: string;
+}) {
+  const [open, setOpen] = useState(!!(value?.en || value?.ja));
+  const set = (lang: (typeof LANGS)[number], text: string) =>
+    onChange({ ...(value ?? { ko: "" }), [lang]: text } as Localized);
+  return (
+    <div className="flex min-w-0 flex-1 flex-col gap-1">
+      <div className="flex gap-1">
+        <input value={value?.ko ?? ""} onChange={(e) => set("ko", e.target.value)} placeholder={placeholder} className={inputClass} />
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-pressed={open}
+          title="영어 / 일본어"
+          className="shrink-0 border border-border-strong px-1.5 text-[0.65rem] font-bold text-muted hover:text-fg aria-pressed:border-accent aria-pressed:text-accent"
+        >
+          EN/JA
+        </button>
+      </div>
+      {open &&
+        (["en", "ja"] as const).map((lang) => (
+          <div key={lang} className="flex items-center gap-1">
+            <span className="w-6 text-[0.65rem] font-bold uppercase text-muted">{lang}</span>
+            <input value={value?.[lang] ?? ""} onChange={(e) => set(lang, e.target.value)} placeholder="(선택)" className={inputClass} />
+          </div>
+        ))}
+    </div>
+  );
+}
+
+function RowButtons({
+  index,
+  length,
+  onMove,
+  onRemove,
+}: {
+  index: number;
+  length: number;
+  onMove: (dir: -1 | 1) => void;
+  onRemove: () => void;
+}) {
+  return (
+    <span className="flex shrink-0 gap-1">
+      <button type="button" className={iconButton} disabled={index === 0} onClick={() => onMove(-1)} aria-label="위로">
+        ↑
+      </button>
+      <button type="button" className={iconButton} disabled={index === length - 1} onClick={() => onMove(1)} aria-label="아래로">
+        ↓
+      </button>
+      <button type="button" className={`${iconButton} hover:border-warn hover:text-warn`} onClick={onRemove} aria-label="삭제">
+        ×
+      </button>
+    </span>
+  );
+}
+
+function moveItem<T>(list: T[], i: number, dir: -1 | 1): T[] {
+  const next = [...list];
+  [next[i], next[i + dir]] = [next[i + dir], next[i]];
+  return next;
+}
+
+const addButton =
+  "self-start border border-dashed border-border-strong px-2.5 py-1 text-xs font-semibold text-muted hover:border-accent hover:text-accent";
+
+// ───────────────────────── 옵션 1/2/... ─────────────────────────
+
+const nextLabel = (list: SetupOption[]) => String(list.length + 1);
+const emptyBranch = (result: OptionResult = "hit"): OptionBranch => ({ result, classic: "", modern: null, note: null });
 
 export function OptionsInput({ value, onChange }: { value: SetupOption[]; onChange: (v: SetupOption[]) => void }) {
   const update = (i: number, patch: Partial<SetupOption>) => onChange(value.map((o, j) => (j === i ? { ...o, ...patch } : o)));
-  const move = (i: number, dir: -1 | 1) => {
-    const next = [...value];
-    [next[i], next[i + dir]] = [next[i + dir], next[i]];
-    onChange(next);
-  };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
+      <p className="text-xs text-muted">
+        행동과 루트는 콤보 표기로 적습니다. 글자가 필요하면 괄호로 적으세요: <code>(약간 끌어서) 5HP</code>
+      </p>
       {value.map((o, i) => (
         <div key={i} className="flex flex-col gap-2 border border-border bg-surface-2 p-3">
           <div className="flex items-center gap-2">
@@ -241,44 +313,80 @@ export function OptionsInput({ value, onChange }: { value: SetupOption[]; onChan
               className={`${inputClass} w-16! text-center font-bold`}
               aria-label="옵션 이름"
             />
-            <span className="ml-auto flex gap-1">
-              <button type="button" className={iconButton} disabled={i === 0} onClick={() => move(i, -1)} aria-label="위로">
-                ↑
-              </button>
-              <button
-                type="button"
-                className={iconButton}
-                disabled={i === value.length - 1}
-                onClick={() => move(i, 1)}
-                aria-label="아래로"
-              >
-                ↓
-              </button>
-              <button
-                type="button"
-                className={`${iconButton} hover:border-warn hover:text-warn`}
-                onClick={() => onChange(value.filter((_, j) => j !== i))}
-                aria-label="삭제"
-              >
-                ×
-              </button>
+            <span className="ml-auto">
+              <RowButtons
+                index={i}
+                length={value.length}
+                onMove={(dir) => onChange(moveItem(value, i, dir))}
+                onRemove={() => onChange(value.filter((_, j) => j !== i))}
+              />
             </span>
           </div>
-          <NotationRow label="클래식" value={o.classic} onChange={(classic) => update(i, { classic })} placeholder="예: 2MK → DRC → 5HP" />
+
+          <NotationRow label="행동" value={o.classic} onChange={(classic) => update(i, { classic })} placeholder="예: (약간 끌어서) 5HP" />
           <NotationRow label="모던" value={o.modern ?? ""} onChange={(modern) => update(i, { modern })} placeholder="비우면 클래식 전용" />
-          {LANGS.map((lang) => (
-            <div key={lang} className="grid grid-cols-[3.2rem_1fr] items-start gap-2">
-              <span className="pt-1.5 text-xs font-bold uppercase text-muted">{lang}</span>
-              <input
-                value={o.description?.[lang] ?? ""}
-                onChange={(e) =>
-                  update(i, { description: { ...(o.description ?? { ko: "" }), [lang]: e.target.value } as Localized })
-                }
-                placeholder={lang === "ko" ? "설명 (한국어)" : "설명 (선택)"}
-                className={inputClass}
-              />
+          <div className="grid grid-cols-[3.2rem_1fr] items-start gap-2">
+            <span className="pt-1.5 text-xs font-bold text-muted">설명</span>
+            <LocalizedLine
+              value={o.description}
+              onChange={(description) => update(i, { description })}
+              placeholder="예: HP가 2히트 되는 거리에서 써야 됨"
+            />
+          </div>
+
+          {/* 결과별 분기 */}
+          <div className="flex flex-col gap-2 border-t border-border pt-2">
+            <span className="text-xs font-semibold text-muted">결과별 루트</span>
+            {o.branches.map((b, j) => {
+              const setBranch = (patch: Partial<OptionBranch>) =>
+                update(i, { branches: o.branches.map((x, k) => (k === j ? { ...x, ...patch } : x)) });
+              return (
+                <div key={j} className="flex flex-col gap-1.5 border border-border bg-surface p-2">
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={b.result}
+                      onChange={(e) => setBranch({ result: e.target.value as OptionResult })}
+                      className={`${inputClass} w-24!`}
+                      aria-label="결과"
+                    >
+                      {OPTION_RESULTS.map((r) => (
+                        <option key={r} value={r}>
+                          {RESULT_LABELS[r]}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="ml-auto">
+                      <RowButtons
+                        index={j}
+                        length={o.branches.length}
+                        onMove={(dir) => update(i, { branches: moveItem(o.branches, j, dir) })}
+                        onRemove={() => update(i, { branches: o.branches.filter((_, k) => k !== j) })}
+                      />
+                    </span>
+                  </div>
+                  <NotationRow label="루트" value={b.classic} onChange={(classic) => setBranch({ classic })} placeholder="예: 5HP(2) → 2MP" />
+                  <NotationRow label="모던" value={b.modern ?? ""} onChange={(modern) => setBranch({ modern })} placeholder="비우면 클래식 전용" />
+                  <div className="grid grid-cols-[3.2rem_1fr] items-start gap-2">
+                    <span className="pt-1.5 text-xs font-bold text-muted">메모</span>
+                    <LocalizedLine value={b.note} onChange={(note) => setBranch({ note })} placeholder="예: HP가 1타만 맞아도 이어짐" />
+                  </div>
+                </div>
+              );
+            })}
+            <div className="flex gap-1">
+              {OPTION_RESULTS.map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  onClick={() => update(i, { branches: [...o.branches, emptyBranch(r)] })}
+                  className={addButton}
+                >
+                  + {RESULT_LABELS[r]}
+                </button>
+              ))}
             </div>
-          ))}
+          </div>
+
           <div className="grid grid-cols-[3.2rem_1fr] items-start gap-2">
             <span className="pt-1.5 text-xs font-bold text-muted">영상</span>
             <input
@@ -293,7 +401,12 @@ export function OptionsInput({ value, onChange }: { value: SetupOption[]; onChan
       ))}
       <button
         type="button"
-        onClick={() => onChange([...value, { label: nextLabel(value), classic: "", modern: null, description: null, youtube_url: null }])}
+        onClick={() =>
+          onChange([
+            ...value,
+            { label: nextLabel(value), classic: "", modern: null, description: null, branches: [emptyBranch("hit"), emptyBranch("guard")], youtube_url: null },
+          ])
+        }
         className="self-start border border-dashed border-border-strong px-3 py-1.5 text-sm font-semibold text-muted hover:border-accent hover:text-accent"
       >
         + 옵션 추가
@@ -304,14 +417,7 @@ export function OptionsInput({ value, onChange }: { value: SetupOption[]; onChan
 
 // ───────────────────────── 프랙티스 설정 ─────────────────────────
 
-export const emptyPractice = (): PracticeConfig => ({
-  guard: "all",
-  playback: "random",
-  wakeup: [],
-  after_guard: { count: null, slots: [] },
-  after_hit: [],
-  notes: null,
-});
+export const emptyPractice = (): PracticeConfig => ({ wakeup: [], guard: [], after_hit: [], notes: null });
 
 export function PracticeInput({ value, onChange }: { value: PracticeConfig | null; onChange: (v: PracticeConfig | null) => void }) {
   if (!value) {
@@ -329,112 +435,84 @@ export function PracticeInput({ value, onChange }: { value: PracticeConfig | nul
 
   return (
     <div className="flex flex-col gap-3 border border-border bg-surface-2 p-3">
-      <div className="flex flex-wrap items-end gap-3">
-        <label className="flex flex-col gap-1">
-          <span className="text-xs font-semibold text-muted">가드</span>
-          <select
-            value={value.guard ?? ""}
-            onChange={(e) => set({ guard: (e.target.value || null) as GuardSetting | null })}
-            className={inputClass}
-          >
-            <option value="">— (지정 안 함)</option>
-            {GUARD_SETTINGS.map((g) => (
-              <option key={g} value={g}>
-                {GUARD_LABELS[g]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col gap-1">
-          <span className="text-xs font-semibold text-muted">녹화 슬롯 재생</span>
-          <select
-            value={value.playback}
-            onChange={(e) => set({ playback: e.target.value as PracticeConfig["playback"] })}
-            className={inputClass}
-          >
-            <option value="random">랜덤 재생</option>
-            <option value="sequential">순서대로</option>
-          </select>
-        </label>
-        <button
-          type="button"
-          onClick={() => onChange(null)}
-          className="ml-auto text-xs font-semibold text-muted hover:text-warn"
-        >
+      <div className="flex items-center">
+        <p className="text-xs text-muted">더미는 아무 캐릭터로 하므로 커맨드는 글자로 적습니다. 딜레이는 프레임.</p>
+        <button type="button" onClick={() => onChange(null)} className="ml-auto text-xs font-semibold text-muted hover:text-warn">
           프랙티스 설정 빼기
         </button>
       </div>
-
-      <SlotList label="기상 시 리버설" slots={value.wakeup} onChange={(wakeup) => set({ wakeup })} />
-      <div className="flex flex-col gap-1.5">
-        <SlotList
-          label="가드 후 리버설"
-          slots={value.after_guard.slots}
-          onChange={(slots) => set({ after_guard: { ...value.after_guard, slots } })}
-        />
-        <label className="flex items-center gap-2 text-xs text-muted">
-          <input
-            type="number"
-            min={1}
-            value={value.after_guard.count ?? ""}
-            onChange={(e) => set({ after_guard: { ...value.after_guard, count: e.target.value ? Number(e.target.value) : null } })}
-            className={`${inputClass} w-20!`}
-          />
-          회 가드 후 (비우면 매번)
-        </label>
-      </div>
-      <SlotList label="피격 후 리버설" slots={value.after_hit} onChange={(after_hit) => set({ after_hit })} />
-
+      <RowList label="다운 리버설" rows={value.wakeup} onChange={(wakeup) => set({ wakeup })} />
+      <RowList label="가드 리버설" rows={value.guard} onChange={(guard) => set({ guard })} withCount />
+      <RowList label="데미지 복귀 리버설" rows={value.after_hit} onChange={(after_hit) => set({ after_hit })} />
       <div className="flex flex-col gap-1.5">
         <span className="text-xs font-semibold text-muted">메모</span>
-        {LANGS.map((lang) => (
-          <div key={lang} className="grid grid-cols-[3.2rem_1fr] items-start gap-2">
-            <span className="pt-1.5 text-xs font-bold uppercase text-muted">{lang}</span>
-            <input
-              value={value.notes?.[lang] ?? ""}
-              onChange={(e) => set({ notes: { ...(value.notes ?? { ko: "" }), [lang]: e.target.value } as Localized })}
-              placeholder={lang === "ko" ? "예: 더미 위치 코너, 상대 체력 …" : "(선택)"}
-              className={inputClass}
-            />
-          </div>
-        ))}
+        <LocalizedLine value={value.notes} onChange={(notes) => set({ notes })} placeholder="예: 더미 위치 코너" />
       </div>
     </div>
   );
 }
 
-/** 녹화 슬롯 목록. 콤보 표기로 적는다 (2LP, LPLK, 4 …) */
-function SlotList({ label, slots, onChange }: { label: string; slots: string[]; onChange: (v: string[]) => void }) {
+/** 리버설 표 한 개: 커맨드(글자) · (카운트) · 딜레이 */
+function RowList({
+  label,
+  rows,
+  onChange,
+  withCount = false,
+}: {
+  label: string;
+  rows: PracticeRow[];
+  onChange: (v: PracticeRow[]) => void;
+  withCount?: boolean;
+}) {
+  const setRow = (i: number, patch: Partial<PracticeRow>) => onChange(rows.map((r, j) => (j === i ? { ...r, ...patch } : r)));
+  const num = (v: string) => (v === "" ? null : Number(v));
+
   return (
     <div className="flex flex-col gap-1.5">
       <span className="text-xs font-semibold text-muted">{label}</span>
-      {slots.map((slot, i) => (
+      {rows.length > 0 && (
+        <div className="flex items-center gap-2 text-[0.65rem] font-bold text-muted">
+          <span className="flex-1">커맨드</span>
+          {withCount && <span className="w-16 text-center">카운트</span>}
+          <span className="w-16 text-center">딜레이</span>
+          <span className="w-[5.5rem]" />
+        </div>
+      )}
+      {rows.map((row, i) => (
         <div key={i} className="flex items-start gap-2">
-          <span className="display w-4 pt-1.5 text-right text-muted">{i + 1}</span>
-          <div className="flex-1">
-            <NotationRow
-              label="슬롯"
-              value={slot}
-              onChange={(v) => onChange(slots.map((s, j) => (j === i ? v : s)))}
-              placeholder="예: 2LP / LPLK / 4"
+          <LocalizedLine value={row.command} onChange={(command) => setRow(i, { command: command ?? { ko: "" } })} placeholder="예: 4F 기본기 / 뒤로 걷기 (녹화)" />
+          {withCount && (
+            <input
+              type="number"
+              min={0}
+              value={row.count ?? ""}
+              onChange={(e) => setRow(i, { count: num(e.target.value) })}
+              className={`${inputClass} w-16! text-center`}
+              aria-label="카운트"
             />
-          </div>
-          <button
-            type="button"
-            className={`${iconButton} hover:border-warn hover:text-warn`}
-            onClick={() => onChange(slots.filter((_, j) => j !== i))}
-            aria-label="슬롯 삭제"
-          >
-            ×
-          </button>
+          )}
+          <input
+            type="number"
+            min={0}
+            value={row.delay ?? ""}
+            onChange={(e) => setRow(i, { delay: num(e.target.value) })}
+            className={`${inputClass} w-16! text-center`}
+            aria-label="딜레이"
+          />
+          <RowButtons
+            index={i}
+            length={rows.length}
+            onMove={(dir) => onChange(moveItem(rows, i, dir))}
+            onRemove={() => onChange(rows.filter((_, j) => j !== i))}
+          />
         </div>
       ))}
       <button
         type="button"
-        onClick={() => onChange([...slots, ""])}
-        className="self-start border border-dashed border-border-strong px-2.5 py-1 text-xs font-semibold text-muted hover:border-accent hover:text-accent"
+        onClick={() => onChange([...rows, withCount ? { command: { ko: "" }, count: 0, delay: 0 } : { command: { ko: "" }, delay: 0 }])}
+        className={addButton}
       >
-        + 슬롯
+        + 행 추가
       </button>
     </div>
   );
@@ -455,24 +533,32 @@ function cleanLocalized(v: Localized | null | undefined): Localized | null {
 export function cleanOptions(list: SetupOption[] | null | undefined): SetupOption[] {
   return (list ?? [])
     .map((o, i) => ({
-      label: o.label.trim() || String.fromCharCode(65 + i),
+      label: o.label.trim() || String(i + 1),
       classic: o.classic.trim(),
       modern: o.modern?.trim() || null,
       description: cleanLocalized(o.description),
+      branches: (o.branches ?? [])
+        .map((b) => ({ result: b.result, classic: b.classic.trim(), modern: b.modern?.trim() || null, note: cleanLocalized(b.note) }))
+        .filter((b) => b.classic || b.note),
       youtube_url: o.youtube_url?.trim() || null,
     }))
-    .filter((o) => o.classic || o.description);
+    .filter((o) => o.classic || o.description || o.branches.length > 0);
 }
 
 export function cleanPractice(p: PracticeConfig | null | undefined): PracticeConfig | null {
   if (!p) return null;
-  const slots = (list: string[]) => list.map((s) => s.trim()).filter(Boolean);
+  const rows = (list: PracticeRow[], withCount: boolean) =>
+    list
+      .map((r) => {
+        const command = cleanLocalized(r.command);
+        if (!command) return null;
+        return withCount ? { command, count: r.count ?? null, delay: r.delay ?? null } : { command, delay: r.delay ?? null };
+      })
+      .filter((r): r is PracticeRow => r !== null);
   return {
-    guard: p.guard,
-    playback: p.playback,
-    wakeup: slots(p.wakeup),
-    after_guard: { count: p.after_guard.count || null, slots: slots(p.after_guard.slots) },
-    after_hit: slots(p.after_hit),
+    wakeup: rows(p.wakeup, false),
+    guard: rows(p.guard, true),
+    after_hit: rows(p.after_hit, false),
     notes: cleanLocalized(p.notes),
   };
 }

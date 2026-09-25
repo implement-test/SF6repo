@@ -95,28 +95,43 @@ export type Combo = ContentBase &
 
 export type SetupSituation = { slug: string; name: Localized; sort_order: number };
 
-/** 옵션 A / B / ... */
+/** 옵션의 결과별 분기: 히트 / 가드 / 헛침 */
+export type OptionResult = "hit" | "guard" | "whiff";
+export const OPTION_RESULTS: OptionResult[] = ["hit", "guard", "whiff"];
+
+export type OptionBranch = {
+  result: OptionResult;
+  /** 이어지는 루트 (콤보 표기) */
+  classic: string;
+  modern: string | null;
+  note: Localized | null;
+};
+
+/** 옵션 1 / 2 / ... */
 export type SetupOption = {
   label: string;
+  /** 옵션의 행동 (콤보 표기. 글자는 괄호로: "(약간 끌어서) 5HP") */
   classic: string;
   modern: string | null;
   description: Localized | null;
+  branches: OptionBranch[];
   youtube_url: string | null;
 };
 
-export type GuardSetting = "all" | "none" | "after_first" | "random";
-export const GUARD_SETTINGS: GuardSetting[] = ["all", "none", "after_first", "random"];
-
 /**
- * 트레이닝 모드 더미 설정. 리버설 슬롯은 콤보 표기로 적는다 (2LP, LPLK, 4 …).
- * 녹화 슬롯이 여러 개면 기본은 랜덤 재생.
+ * 셋업을 연습하기 위한 트레이닝 모드 더미 설정.
+ * 더미는 아무 캐릭터로 하므로 커맨드는 표기가 아니라 글자로 적는다 ("4F 기본기", "뒤로 걷기 (녹화)").
+ * delay 는 프레임.
  */
+export type PracticeRow = { command: Localized; count?: number | null; delay: number | null };
+
 export type PracticeConfig = {
-  guard: GuardSetting | null;
-  playback: "random" | "sequential";
-  wakeup: string[];
-  after_guard: { count: number | null; slots: string[] };
-  after_hit: string[];
+  /** 다운 리버설 */
+  wakeup: PracticeRow[];
+  /** 가드 리버설 (count = 몇 번 가드한 뒤) */
+  guard: PracticeRow[];
+  /** 데미지 복귀 리버설 */
+  after_hit: PracticeRow[];
   notes: Localized | null;
 };
 

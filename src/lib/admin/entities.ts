@@ -211,8 +211,8 @@ export const ENTITIES: Record<EntityType, Entity> = {
           { key: "description", label: "설명", type: "localized", multiline: true },
         ],
       },
-      { title: "프랙티스 설정", fields: [{ key: "practice", label: "트레이닝 모드 더미 설정", type: "practice", wide: true }] },
-      { title: "옵션", fields: [{ key: "options", label: "옵션", type: "setupOptions", wide: true }] },
+      { title: "셋업을 위한 프랙티스 설정", fields: [{ key: "practice", label: "트레이닝 모드 더미 설정", type: "practice", wide: true }] },
+      { title: "옵션", fields: [{ key: "options", label: "옵션 1 / 2 / …", type: "setupOptions", wide: true }] },
       { title: "기타", fields: [{ key: "difficulty", label: "입력 난이도", type: "select", options: DIFFICULTY }] },
       MEDIA_GROUP,
       META_GROUP,
@@ -220,10 +220,17 @@ export const ENTITIES: Record<EntityType, Entity> = {
     defaults: () => ({
       ...metaDefaults(),
       situations: [],
-      options: [
-        { label: "A", classic: "", modern: null, description: null, youtube_url: null },
-        { label: "B", classic: "", modern: null, description: null, youtube_url: null },
-      ],
+      options: [1, 2].map((n) => ({
+        label: String(n),
+        classic: "",
+        modern: null,
+        description: null,
+        branches: [
+          { result: "hit", classic: "", modern: null, note: null },
+          { result: "guard", classic: "", modern: null, note: null },
+        ],
+        youtube_url: null,
+      })),
       practice: null,
       difficulty: "normal",
       combo_links: [],
