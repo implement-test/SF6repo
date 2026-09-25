@@ -249,12 +249,8 @@ export function ComboCard({
             </div>
           ))}
         />
-        <div className="flex items-center justify-between text-xs text-muted">
-          <span>
-            {dict.combo.difficulty} <b className="text-fg">{dict.difficulty[combo.difficulty]}</b>
-          </span>
-          <span>{combo.created_date}</span>
-        </div>
+        {/* 입력 난이도는 대상 수준(초급·중급·상급)과 겹쳐서 콤보에는 표시하지 않는다 */}
+        <p className="text-right text-xs text-muted">{combo.created_date}</p>
         {(createdBy || updatedBy) && (
           <p className="text-xs text-muted">
             {createdBy && (

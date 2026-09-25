@@ -147,7 +147,6 @@ export const ENTITIES: Record<EntityType, Entity> = {
           { key: "position_start", label: "시작 위치", type: "select", options: POSITIONS },
         ],
       },
-      { title: "기타", fields: [{ key: "difficulty", label: "입력 난이도", type: "select", options: DIFFICULTY }] },
       {
         title: "설명",
         fields: [
@@ -169,7 +168,6 @@ export const ENTITIES: Record<EntityType, Entity> = {
       hit_states: ["normal"],
       position_start: "midscreen",
       routes: [{ classic: "", modern: null, damage: null, drive_cost: 0, sa_cost: 0, frame_after: null, note: null }],
-      difficulty: "normal",
     }),
   },
 

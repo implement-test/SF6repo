@@ -16,6 +16,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-09-26",
     items: [
       {
+        kind: "removed",
+        text: {
+          ko: "콤보의 입력 난이도 표시 삭제 (대상 수준으로 충분)",
+          en: "Removed execution difficulty from combos (target level covers it)",
+          ja: "コンボの入力難度表示を削除（対象レベルで十分）",
+        },
+      },
+      {
         kind: "changed",
         adminOnly: true,
         text: {
