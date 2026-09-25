@@ -4,11 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { normalizeNotation } from "@/lib/notation/parse";
 import {
-  DRIVE_REVERSALS,
+  DRIVE_REVERSAL_OPTIONS,
   GUARD_SETTINGS,
   GUARD_SWITCHES,
   OPTION_RESULTS,
-  type DriveReversal,
+  type DriveReversalWeights,
   type GuardSetting,
   type GuardSwitch,
   type Localized,
@@ -19,6 +19,7 @@ import {
   type SetupOption,
   type SetupSituation,
 } from "@/lib/types";
+import { normalizeDriveReversal } from "@/lib/setup";
 import { NotationImage } from "../notation";
 import { inputClass, NotationRow } from "./starters-input";
 
@@ -459,12 +460,54 @@ const GUARD_SWITCH_LABELS: Record<GuardSwitch, string> = {
   crouch: "앉아 가드만",
   random: "랜덤",
 };
-const DRIVE_REVERSAL_LABELS: Record<DriveReversal, string> = {
-  off: "실행하지 않음",
-  guard: "가드 발동",
-  wakeup: "일어서기 발동",
-  random: "랜덤",
-};
+const DRIVE_REVERSAL_LABELS = { off: "실행하지 않음", guard: "가드 발동", wakeup: "일어서기 발동" } as const;
+
+/** 드라이브 리버설(랜덤): 항목별 확률 0~10. 비우면 지정 안 함 */
+function DriveReversalInput({
+  value,
+  onChange,
+}: {
+  value: DriveReversalWeights | null;
+  onChange: (v: DriveReversalWeights | null) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5 border border-border bg-surface p-2">
+      <div className="flex items-center gap-2">
+        <span className="text-xs font-semibold text-muted">드라이브 리버설(랜덤)</span>
+        {value && (
+          <button type="button" onClick={() => onChange(null)} className="ml-auto text-[0.7rem] font-semibold text-muted hover:text-warn">
+            빼기
+          </button>
+        )}
+      </div>
+      <span className="text-[0.7rem] text-muted">Y 버튼을 누르면 확률을 수정할 수 있습니다.</span>
+      {value ? (
+        DRIVE_REVERSAL_OPTIONS.map((k) => (
+          <label key={k} className="flex items-center gap-2 text-sm">
+            <span className="flex-1">{DRIVE_REVERSAL_LABELS[k]}</span>
+            <input
+              type="number"
+              min={0}
+              max={10}
+              step={1}
+              value={value[k]}
+              onChange={(e) => onChange({ ...value, [k]: Math.min(10, Math.max(0, Number(e.target.value) || 0)) })}
+              className={`${inputClass} w-16! text-center`}
+            />
+          </label>
+        ))
+      ) : (
+        <button
+          type="button"
+          onClick={() => onChange({ off: 0, guard: 0, wakeup: 0 })}
+          className="self-start border border-dashed border-border-strong px-2.5 py-1 text-xs font-semibold text-muted hover:border-accent hover:text-accent"
+        >
+          + 설정
+        </button>
+      )}
+    </div>
+  );
+}
 
 /** 더미 설정 선택 상자 (비우면 지정 안 함) */
 function DummySelect<T extends string>({
@@ -532,13 +575,7 @@ export function PracticeInput({ value, onChange }: { value: PracticeConfig | nul
           labels={GUARD_SWITCH_LABELS}
           onChange={(guard_switch) => set({ guard_switch })}
         />
-        <DummySelect
-          label="드라이브 리버설"
-          value={value.drive_reversal}
-          options={DRIVE_REVERSALS}
-          labels={DRIVE_REVERSAL_LABELS}
-          onChange={(drive_reversal) => set({ drive_reversal })}
-        />
+        <DriveReversalInput value={value.drive_reversal} onChange={(drive_reversal) => set({ drive_reversal })} />
       </div>
       <RowList label="다운 리버설" rows={value.wakeup} onChange={(wakeup) => set({ wakeup })} />
       <RowList label="가드 리버설" rows={value.guard} onChange={(guard) => set({ guard })} withCount />
@@ -657,7 +694,7 @@ export function cleanPractice(p: PracticeConfig | null | undefined): PracticeCon
   return {
     guard_setting: p.guard_setting ?? null,
     guard_switch: p.guard_switch ?? null,
-    drive_reversal: p.drive_reversal ?? null,
+    drive_reversal: normalizeDriveReversal(p.drive_reversal),
     wakeup: rows(p.wakeup, false),
     guard: rows(p.guard, true),
     after_hit: rows(p.after_hit, false),

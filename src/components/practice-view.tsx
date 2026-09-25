@@ -1,7 +1,7 @@
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { pickLocalized } from "@/lib/i18n/localized";
-import type { PracticeConfig, PracticeRow } from "@/lib/types";
+import { DRIVE_REVERSAL_OPTIONS, type PracticeConfig, type PracticeRow } from "@/lib/types";
 import { NotTranslatedBadge } from "./badges";
 
 /**
@@ -17,19 +17,32 @@ export function PracticeView({ config, locale, dict }: { config: PracticeConfig;
   const settings = [
     config.guard_setting && { label: t.guardSetting, value: t.guardSettingValues[config.guard_setting] },
     config.guard_switch && { label: t.guardSwitch, value: t.guardSwitchValues[config.guard_switch] },
-    config.drive_reversal && { label: t.driveReversal, value: t.driveReversalValues[config.drive_reversal] },
   ].filter((s): s is { label: string; value: string } => !!s);
+  const drive = config.drive_reversal;
 
   return (
     <div className="flex flex-col gap-3">
-      {settings.length > 0 && (
-        <dl className="grid gap-3 sm:grid-cols-3">
+      {(settings.length > 0 || drive) && (
+        <dl className="grid items-start gap-3 sm:grid-cols-3">
           {settings.map((s) => (
             <div key={s.label} className="flex items-center justify-between gap-3 border border-border px-3 py-2">
               <dt className="text-xs font-semibold text-muted">{s.label}</dt>
               <dd className="text-sm font-bold">{s.value}</dd>
             </div>
           ))}
+          {drive && (
+            <div className="flex flex-col gap-2 border border-border px-3 py-2">
+              <dt className="flex flex-col gap-0.5">
+                <span className="text-xs font-semibold text-muted">{t.driveReversal}</span>
+                <span className="text-[0.7rem] text-muted">{t.driveReversalNote}</span>
+              </dt>
+              <dd className="flex flex-col gap-1.5">
+                {DRIVE_REVERSAL_OPTIONS.map((k) => (
+                  <WeightRow key={k} label={t.driveReversalValues[k]} value={drive[k]} />
+                ))}
+              </dd>
+            </div>
+          )}
         </dl>
       )}
       <div className="grid items-start gap-3 lg:grid-cols-3">
@@ -42,6 +55,21 @@ export function PracticeView({ config, locale, dict }: { config: PracticeConfig;
           {notes.text} {!notes.translated && <NotTranslatedBadge label={dict.notTranslated} />}
         </p>
       )}
+    </div>
+  );
+}
+
+/** 확률 0~10: 숫자 + 10칸 막대 (드라이브 게이지처럼) */
+function WeightRow({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="flex items-center gap-2 text-sm" role="img" aria-label={`${label} ${value}/10`}>
+      <span className="flex-1 truncate">{label}</span>
+      <span className="flex gap-[2px]" aria-hidden>
+        {Array.from({ length: 10 }, (_, i) => (
+          <span key={i} className={`h-2.5 w-1.5 ${i < value ? "bg-drive" : "bg-inset ring-1 ring-border"}`} />
+        ))}
+      </span>
+      <span className="display w-5 text-right tabular-nums">{value}</span>
     </div>
   );
 }

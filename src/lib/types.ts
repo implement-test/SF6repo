@@ -130,15 +130,19 @@ export const GUARD_SETTINGS: GuardSetting[] = ["random", "none", "all", "count"]
 /** 가드 전환: 실행 / 서서 가드만 / 앉아 가드만 / 랜덤 */
 export type GuardSwitch = "on" | "stand" | "crouch" | "random";
 export const GUARD_SWITCHES: GuardSwitch[] = ["on", "stand", "crouch", "random"];
-/** 드라이브 리버설: 실행하지 않음 / 가드 발동 / 일어서기 발동 / 랜덤 */
-export type DriveReversal = "off" | "guard" | "wakeup" | "random";
-export const DRIVE_REVERSALS: DriveReversal[] = ["off", "guard", "wakeup", "random"];
+/**
+ * 드라이브 리버설(랜덤): 트레이닝 모드에서 Y 버튼으로 정하는 항목별 확률 (각 0~10).
+ * 실행하지 않음 / 가드 발동 / 일어서기 발동
+ */
+export type DriveReversalOption = "off" | "guard" | "wakeup";
+export const DRIVE_REVERSAL_OPTIONS: DriveReversalOption[] = ["off", "guard", "wakeup"];
+export type DriveReversalWeights = Record<DriveReversalOption, number>;
 
 export type PracticeConfig = {
   /** 더미 설정. null 이면 지정하지 않음 */
   guard_setting: GuardSetting | null;
   guard_switch: GuardSwitch | null;
-  drive_reversal: DriveReversal | null;
+  drive_reversal: DriveReversalWeights | null;
   /** 다운 리버설 */
   wakeup: PracticeRow[];
   /** 가드 리버설 (count = 몇 번 가드한 뒤) */

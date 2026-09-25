@@ -21,6 +21,14 @@ export const CHANGELOG: ChangelogEntry[] = [
         text: { ko: "콤보 · 셋업 복사하기", en: "Duplicate combos and setups", ja: "コンボ・セットプレイの複製" },
       },
       {
+        kind: "changed",
+        text: {
+          ko: "드라이브 리버설(랜덤): 항목별 확률 0~10 (실행하지 않음 · 가드 발동 · 일어서기 발동)",
+          en: "Drive Reversal (Random): per-option odds 0–10 (off / on block / on wake-up)",
+          ja: "ドライブリバーサル（ランダム）：項目別の確率 0〜10（しない・ガード時・起き上がり時）",
+        },
+      },
+      {
         kind: "added",
         text: {
           ko: "프랙티스 설정에 가드 · 가드 전환 · 드라이브 리버설 설정",

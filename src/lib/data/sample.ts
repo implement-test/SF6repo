@@ -146,7 +146,7 @@ export const sampleSetups: Setup[] = [
     practice: {
       guard_setting: "all",
       guard_switch: "random",
-      drive_reversal: "off",
+      drive_reversal: { off: 3, guard: 5, wakeup: 2 },
       wakeup: [
         { command: { ko: "4F 기본기" }, delay: 0 },
         { command: { ko: "뒤로 걷기 (녹화)" }, delay: 0 },
