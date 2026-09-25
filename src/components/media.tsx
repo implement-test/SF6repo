@@ -26,7 +26,8 @@ export function ItemMedia({
 
   return (
     <MediaToggle showLabel={showLabel} hideLabel={hideLabel}>
-      <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-3">
+      {/* YouTube 는 플레이어 높이보다 한 단계 높은 화질을 고른다. 최대 폭 1024px(높이 576px)이면 720p 가 선택된다 */}
+      <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-3">
         {mediaUrl && (
           <video
             src={mediaUrl}

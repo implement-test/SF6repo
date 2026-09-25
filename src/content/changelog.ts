@@ -16,6 +16,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-09-26",
     items: [
       {
+        kind: "changed",
+        text: {
+          ko: "YouTube 영상 기본 화질 720p (플레이어 확대)",
+          en: "YouTube videos default to 720p (larger player)",
+          ja: "YouTube 動画の標準画質を 720p に（プレーヤー拡大）",
+        },
+      },
+      {
         kind: "added",
         adminOnly: true,
         text: { ko: "콤보 · 셋업 복사하기", en: "Duplicate combos and setups", ja: "コンボ・セットプレイの複製" },

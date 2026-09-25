@@ -36,9 +36,13 @@ function parseTime(value: string | null): number | null {
   return Number(h ?? 0) * 3600 + Number(min ?? 0) * 60 + Number(s ?? 0);
 }
 
-/** 개인정보 보호 모드(youtube-nocookie) 임베드 주소 */
+/**
+ * 개인정보 보호 모드(youtube-nocookie) 임베드 주소.
+ * vq=hd720 은 720p 를 요청하지만 YouTube 가 무시할 수 있다. 실제 화질은 플레이어 크기로 정해지므로
+ * 플레이어를 720p 가 선택되는 크기로 둔다 (src/components/media.tsx).
+ */
 export function youTubeEmbedUrl(id: string, start: number | null): string {
-  const params = new URLSearchParams({ rel: "0", modestbranding: "1" });
+  const params = new URLSearchParams({ rel: "0", modestbranding: "1", vq: "hd720" });
   if (start) params.set("start", String(start));
   return `https://www.youtube-nocookie.com/embed/${id}?${params}`;
 }
