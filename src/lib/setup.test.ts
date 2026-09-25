@@ -12,6 +12,9 @@ describe("normalizePractice", () => {
       notes: { ko: "메모" },
     });
     expect(p).toEqual({
+      guard_setting: "all",
+      guard_switch: null,
+      drive_reversal: null,
       wakeup: [
         { command: { ko: "2LP" }, delay: null },
         { command: { ko: "LPLK" }, delay: null },
@@ -24,6 +27,9 @@ describe("normalizePractice", () => {
 
   it("현재 형식은 그대로 둔다", () => {
     const current = {
+      guard_setting: "count" as const,
+      guard_switch: "stand" as const,
+      drive_reversal: "wakeup" as const,
       wakeup: [{ command: { ko: "4F 기본기" }, delay: 0 }],
       guard: [{ command: { ko: "기본 잡기" }, count: 1, delay: 3 }],
       after_hit: [],

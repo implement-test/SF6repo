@@ -13,9 +13,25 @@ export function PracticeView({ config, locale, dict }: { config: PracticeConfig;
   const t = dict.setup;
   const notes = config.notes ? pickLocalized(config.notes, locale) : null;
   const rowCount = Math.max(1, config.wakeup.length, config.guard.length, config.after_hit.length);
+  // 더미 설정 (지정한 것만)
+  const settings = [
+    config.guard_setting && { label: t.guardSetting, value: t.guardSettingValues[config.guard_setting] },
+    config.guard_switch && { label: t.guardSwitch, value: t.guardSwitchValues[config.guard_switch] },
+    config.drive_reversal && { label: t.driveReversal, value: t.driveReversalValues[config.drive_reversal] },
+  ].filter((s): s is { label: string; value: string } => !!s);
 
   return (
     <div className="flex flex-col gap-3">
+      {settings.length > 0 && (
+        <dl className="grid gap-3 sm:grid-cols-3">
+          {settings.map((s) => (
+            <div key={s.label} className="flex items-center justify-between gap-3 border border-border px-3 py-2">
+              <dt className="text-xs font-semibold text-muted">{s.label}</dt>
+              <dd className="text-sm font-bold">{s.value}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
       <div className="grid items-start gap-3 lg:grid-cols-3">
         <ReversalTable title={t.wakeup} rows={config.wakeup} rowCount={rowCount} locale={locale} dict={dict} />
         <ReversalTable title={t.guardReversal} rows={config.guard} rowCount={rowCount} locale={locale} dict={dict} withCount />

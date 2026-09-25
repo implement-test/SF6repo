@@ -1,4 +1,14 @@
-import type { Localized, OptionBranch, PracticeConfig, PracticeRow, SetupOption } from "./types";
+import {
+  DRIVE_REVERSALS,
+  GUARD_SETTINGS,
+  GUARD_SWITCHES,
+  type GuardSetting,
+  type Localized,
+  type OptionBranch,
+  type PracticeConfig,
+  type PracticeRow,
+  type SetupOption,
+} from "./types";
 
 /**
  * 셋업 데이터를 현재 형식으로 맞춘다.
@@ -6,6 +16,9 @@ import type { Localized, OptionBranch, PracticeConfig, PracticeRow, SetupOption 
  */
 
 type LegacyPractice = {
+  guard_setting?: unknown;
+  guard_switch?: unknown;
+  drive_reversal?: unknown;
   wakeup?: unknown;
   guard?: unknown;
   after_guard?: { count?: number | null; slots?: string[] };
@@ -26,11 +39,22 @@ function toRows(value: unknown, count?: number | null): PracticeRow[] {
   );
 }
 
+/** 초기 형식의 guard 문자열 설정을 지금의 가드 설정으로 */
+const LEGACY_GUARD: Record<string, GuardSetting> = { all: "all", none: "none", random: "random", after_first: "count" };
+
+function oneOf<T extends string>(value: unknown, allowed: readonly T[]): T | null {
+  return typeof value === "string" && (allowed as readonly string[]).includes(value) ? (value as T) : null;
+}
+
 export function normalizePractice(raw: unknown): PracticeConfig | null {
   if (!raw || typeof raw !== "object") return null;
   const p = raw as LegacyPractice;
   const legacyGuard = p.after_guard ? toRows(p.after_guard.slots ?? [], p.after_guard.count ?? null) : [];
   return {
+    guard_setting:
+      oneOf(p.guard_setting, GUARD_SETTINGS) ?? (typeof p.guard === "string" ? (LEGACY_GUARD[p.guard] ?? null) : null),
+    guard_switch: oneOf(p.guard_switch, GUARD_SWITCHES),
+    drive_reversal: oneOf(p.drive_reversal, DRIVE_REVERSALS),
     wakeup: toRows(p.wakeup),
     // 초기 형식에서 guard 는 '전부 가드' 같은 문자열 설정이었다
     guard: Array.isArray(p.guard) ? toRows(p.guard, null) : legacyGuard,

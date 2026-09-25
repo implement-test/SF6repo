@@ -16,6 +16,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-09-26",
     items: [
       {
+        kind: "added",
+        text: {
+          ko: "프랙티스 설정에 가드 · 가드 전환 · 드라이브 리버설 설정",
+          en: "Training settings: guard, switch guard and Drive Reversal",
+          ja: "トレーニング設定にガード・ガード切り替え・ドライブリバーサル",
+        },
+      },
+      {
         kind: "changed",
         text: {
           ko: "셋업 옵션: 옵션 이름과 결과(히트 · 가드 · 헛침) 줄을 들여쓰기로 구분",

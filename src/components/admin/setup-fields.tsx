@@ -4,7 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { normalizeNotation } from "@/lib/notation/parse";
 import {
+  DRIVE_REVERSALS,
+  GUARD_SETTINGS,
+  GUARD_SWITCHES,
   OPTION_RESULTS,
+  type DriveReversal,
+  type GuardSetting,
+  type GuardSwitch,
   type Localized,
   type OptionBranch,
   type OptionResult,
@@ -431,7 +437,63 @@ export function OptionsInput({ value, onChange }: { value: SetupOption[]; onChan
 
 // ───────────────────────── 프랙티스 설정 ─────────────────────────
 
-export const emptyPractice = (): PracticeConfig => ({ wakeup: [], guard: [], after_hit: [], notes: null });
+export const emptyPractice = (): PracticeConfig => ({
+  guard_setting: null,
+  guard_switch: null,
+  drive_reversal: null,
+  wakeup: [],
+  guard: [],
+  after_hit: [],
+  notes: null,
+});
+
+const GUARD_SETTING_LABELS: Record<GuardSetting, string> = {
+  random: "랜덤",
+  none: "가드하지 않음",
+  all: "전부 가드",
+  count: "카운트 가드",
+};
+const GUARD_SWITCH_LABELS: Record<GuardSwitch, string> = {
+  on: "실행",
+  stand: "서서 가드만",
+  crouch: "앉아 가드만",
+  random: "랜덤",
+};
+const DRIVE_REVERSAL_LABELS: Record<DriveReversal, string> = {
+  off: "실행하지 않음",
+  guard: "가드 발동",
+  wakeup: "일어서기 발동",
+  random: "랜덤",
+};
+
+/** 더미 설정 선택 상자 (비우면 지정 안 함) */
+function DummySelect<T extends string>({
+  label,
+  value,
+  options,
+  labels,
+  onChange,
+}: {
+  label: string;
+  value: T | null;
+  options: readonly T[];
+  labels: Record<T, string>;
+  onChange: (v: T | null) => void;
+}) {
+  return (
+    <label className="flex flex-col gap-1">
+      <span className="text-xs font-semibold text-muted">{label}</span>
+      <select value={value ?? ""} onChange={(e) => onChange((e.target.value || null) as T | null)} className={inputClass}>
+        <option value="">— (지정 안 함)</option>
+        {options.map((o) => (
+          <option key={o} value={o}>
+            {labels[o]}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
 
 export function PracticeInput({ value, onChange }: { value: PracticeConfig | null; onChange: (v: PracticeConfig | null) => void }) {
   if (!value) {
@@ -454,6 +516,29 @@ export function PracticeInput({ value, onChange }: { value: PracticeConfig | nul
         <button type="button" onClick={() => onChange(null)} className="ml-auto text-xs font-semibold text-muted hover:text-warn">
           프랙티스 설정 빼기
         </button>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <DummySelect
+          label="가드"
+          value={value.guard_setting}
+          options={GUARD_SETTINGS}
+          labels={GUARD_SETTING_LABELS}
+          onChange={(guard_setting) => set({ guard_setting })}
+        />
+        <DummySelect
+          label="가드 전환"
+          value={value.guard_switch}
+          options={GUARD_SWITCHES}
+          labels={GUARD_SWITCH_LABELS}
+          onChange={(guard_switch) => set({ guard_switch })}
+        />
+        <DummySelect
+          label="드라이브 리버설"
+          value={value.drive_reversal}
+          options={DRIVE_REVERSALS}
+          labels={DRIVE_REVERSAL_LABELS}
+          onChange={(drive_reversal) => set({ drive_reversal })}
+        />
       </div>
       <RowList label="다운 리버설" rows={value.wakeup} onChange={(wakeup) => set({ wakeup })} />
       <RowList label="가드 리버설" rows={value.guard} onChange={(guard) => set({ guard })} withCount />
@@ -570,6 +655,9 @@ export function cleanPractice(p: PracticeConfig | null | undefined): PracticeCon
       })
       .filter((r): r is PracticeRow => r !== null);
   return {
+    guard_setting: p.guard_setting ?? null,
+    guard_switch: p.guard_switch ?? null,
+    drive_reversal: p.drive_reversal ?? null,
     wakeup: rows(p.wakeup, false),
     guard: rows(p.guard, true),
     after_hit: rows(p.after_hit, false),
