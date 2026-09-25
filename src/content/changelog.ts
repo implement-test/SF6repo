@@ -16,6 +16,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-09-26",
     items: [
       {
+        kind: "removed",
+        text: {
+          ko: "프랙티스 세팅 탭 삭제 (셋업 안의 프랙티스 설정으로 통합)",
+          en: "Removed the Training settings tab (now part of each setup)",
+          ja: "トレーニング設定タブを削除（各セットプレイ内の設定に統合）",
+        },
+      },
+      {
         kind: "added",
         text: {
           ko: "셋업 옵션의 결과에 '기타' 추가 (히트 · 가드 · 헛침 · 기타)",
