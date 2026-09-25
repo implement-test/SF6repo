@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" width="36" height="36">
+  <!-- 앞대쉬(66). 원본 방향키 아이콘(dir-6.webp)의 모양·색을 따라 그렸다. 44 는 좌우 반전해서 쓴다. -->
+  <defs>
+    <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9a9a9a"/>
+      <stop offset="1" stop-color="#555555"/>
+    </linearGradient>
+    <linearGradient id="pad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4f4f4f"/>
+      <stop offset="0.55" stop-color="#383838"/>
+      <stop offset="1" stop-color="#262626"/>
+    </linearGradient>
+    <linearGradient id="arrow" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#c8321c"/>
+      <stop offset="0.55" stop-color="#ff8a00"/>
+      <stop offset="1" stop-color="#ffc21a"/>
+    </linearGradient>
+  </defs>
+  <!-- 테두리(밝은 테) + 안쪽 판 -->
+  <path d="M12.3 1.7h11.4a1.6 1.6 0 0 1 1.6 1.6v9.4h7.4a1.6 1.6 0 0 1 1.6 1.6v7.4a1.6 1.6 0 0 1-1.6 1.6h-7.4v9.4a1.6 1.6 0 0 1-1.6 1.6h-11.4a1.6 1.6 0 0 1-1.6-1.6v-9.4h-7.4a1.6 1.6 0 0 1-1.6-1.6v-7.4a1.6 1.6 0 0 1 1.6-1.6h7.4v-9.4a1.6 1.6 0 0 1 1.6-1.6z"
+        fill="url(#pad)" stroke="url(#rim)" stroke-width="1.1"/>
+  <!-- 두 겹 화살표: 가운데에서 오른쪽 끝을 넘어가게 -->
+  <g fill="url(#arrow)" stroke="#5a1800" stroke-width="0.7" stroke-linejoin="round">
+    <path d="M10.5 15.2h9.5v-4.4l6.6 7.2-6.6 7.2v-4.4h-9.5z"/>
+    <path d="M25.6 10.8l7.6 7.2-7.6 7.2v-3.6l3.8-3.6-3.8-3.6z"/>
+  </g>
+  <path d="M11.5 16.2h8.5" stroke="#ffd27a" stroke-width="0.8" stroke-linecap="round" opacity="0.8"/>
+</svg>

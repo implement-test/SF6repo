@@ -25,6 +25,9 @@ const DIRECTION_ICONS: Record<string, IconRef> = {
   "7": { src: "/icons/dir-9.webp", flip: "x", alt: "7" },
   "8": { src: "/icons/dir-2.webp", flip: "y", alt: "8" },
   "9": { src: "/icons/dir-9.webp", alt: "9" },
+  // 앞대쉬 / 뒷대쉬: 새로 그린 아이콘. 44 는 66 을 좌우 반전
+  "66": { src: "/icons/dir-66.svg", alt: "66" },
+  "44": { src: "/icons/dir-66.svg", flip: "x", alt: "44" },
   "236": { src: "/icons/dir-236.webp", alt: "236" },
   "214": { src: "/icons/dir-214.webp", alt: "214" },
   "623": { src: "/icons/dir-623.webp", alt: "623" },

@@ -17,6 +17,10 @@ export const CHANGELOG: ChangelogEntry[] = [
     items: [
       {
         kind: "added",
+        text: { ko: "앞대쉬 · 뒷대쉬 아이콘 (66 / 44)", en: "Forward / back dash icons (66 / 44)", ja: "前ステップ・バックステップのアイコン（66 / 44）" },
+      },
+      {
+        kind: "added",
         text: {
           ko: "앞잡기 · 뒤잡기 아이콘 (f.throw / b.throw)",
           en: "Forward / back throw icons (f.throw / b.throw)",

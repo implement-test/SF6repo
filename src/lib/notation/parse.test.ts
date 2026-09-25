@@ -88,6 +88,13 @@ describe("directionIcons", () => {
     expect(directionIcons("41236").map((i) => i.alt)).toEqual(["4", "1", "236"]);
   });
 
+  it("66 / 44 는 대쉬 아이콘 하나로 그린다", () => {
+    expect(directionIcons("66")).toEqual([{ src: "/icons/dir-66.svg", alt: "66" }]);
+    expect(directionIcons("44")).toEqual([{ src: "/icons/dir-66.svg", flip: "x", alt: "44" }]);
+    expect(directionIcons("41236").map((i) => i.alt)).toEqual(["4", "1", "236"]);
+    expect(parseNotation("66 → 5LP")[0][0]).toMatchObject({ kind: "input", direction: "66", buttons: [] });
+  });
+
   it("3, 7, 8 은 기존 아이콘을 뒤집어 쓴다", () => {
     expect(directionIcons("3")[0]).toMatchObject({ src: "/icons/dir-9.webp", flip: "y" });
     expect(directionIcons("7")[0]).toMatchObject({ src: "/icons/dir-9.webp", flip: "x" });
