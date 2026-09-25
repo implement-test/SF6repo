@@ -301,7 +301,7 @@ article[id] {
   border-top: 1px dashed var(--border);
 }
 
-/* 셋업 옵션의 결과 표시: 히트 / 가드 / 헛침 (옵션 이름보다 작게) */
+/* 셋업 옵션의 결과 표시: 히트 / 가드 / 헛침 / 기타 (옵션 이름보다 작게) */
 .option-result {
   display: inline-flex;
   align-items: center;
@@ -324,6 +324,12 @@ article[id] {
 .option-result[data-result="whiff"] {
   color: var(--muted);
   border-color: var(--border-strong);
+}
+/* 기타: 헛침(회색 실선)과 구분되게 점선 */
+.option-result[data-result="other"] {
+  color: var(--fg);
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--fg) 45%, transparent);
 }
 
 /* 딜레이 배지: 속이 빈 점선 알약 + 스톱워치 (타이밍 지시) */

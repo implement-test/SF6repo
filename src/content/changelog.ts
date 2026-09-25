@@ -18,6 +18,14 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         kind: "added",
         text: {
+          ko: "셋업 옵션의 결과에 '기타' 추가 (히트 · 가드 · 헛침 · 기타)",
+          en: "Setup option results now include 'Other' (hit / block / whiff / other)",
+          ja: "セットプレイのオプション結果に「その他」を追加（ヒット・ガード・空振り・その他）",
+        },
+      },
+      {
+        kind: "added",
+        text: {
           ko: "콤보·셋업 즐겨찾기 (☆, 로그인 없이 이 브라우저에 저장) 와 '즐겨찾기만' 필터",
           en: "Favorite combos and setups (☆, saved in this browser, no login) with a 'Favorites only' filter",
           ja: "コンボ・セットプレイのお気に入り（☆、ログイン不要でこのブラウザに保存）と「お気に入りのみ」フィルター",

@@ -25,7 +25,7 @@ import { NotationImage } from "../notation";
 import { inputClass, NotationRow } from "./starters-input";
 import { ClockInput } from "./clock-input";
 
-const RESULT_LABELS: Record<OptionResult, string> = { hit: "히트", guard: "가드", whiff: "헛침" };
+const RESULT_LABELS: Record<OptionResult, string> = { hit: "히트", guard: "가드", whiff: "헛침", other: "기타" };
 
 const iconButton =
   "grid size-7 place-items-center border border-border-strong text-sm text-muted hover:text-fg disabled:opacity-30";

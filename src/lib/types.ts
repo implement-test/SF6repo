@@ -125,9 +125,9 @@ export type Combo = ContentBase &
 
 export type SetupSituation = { slug: string; name: Localized; sort_order: number };
 
-/** 옵션의 결과별 분기: 히트 / 가드 / 헛침 */
-export type OptionResult = "hit" | "guard" | "whiff";
-export const OPTION_RESULTS: OptionResult[] = ["hit", "guard", "whiff"];
+/** 옵션의 결과별 분기: 히트 / 가드 / 헛침 / 기타 */
+export type OptionResult = "hit" | "guard" | "whiff" | "other";
+export const OPTION_RESULTS: OptionResult[] = ["hit", "guard", "whiff", "other"];
 
 export type OptionBranch = {
   result: OptionResult;
