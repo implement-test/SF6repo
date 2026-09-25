@@ -8,7 +8,7 @@ import { damageBasisIndex, flattenStarters } from "@/lib/starters";
 import { comboRoutes } from "@/lib/combo-routes";
 import { ControlNotation } from "./notation";
 import { RouteList, RoutePanels, RouteRow, RouteScope } from "./combo-route-switch";
-import { LevelBadge, NotTranslatedBadge, OutdatedBadge, Tag } from "./badges";
+import { LevelBadge, NotTranslatedBadge, OutdatedBadge, PositionBadge, Tag } from "./badges";
 import { SegmentGauge } from "./gauges";
 import { ItemMedia } from "./media";
 import { EditButton } from "./admin/admin-context";
@@ -68,6 +68,7 @@ export function ComboCard({
       <div className="flex min-w-0 flex-col gap-3 py-4 pl-5 pr-4">
         <header className="flex flex-wrap items-center gap-2">
           <LevelBadge level={combo.target_level} label={dict.level[combo.target_level]} />
+          <PositionBadge label={position} />
           {title && <h2 className="font-bold">{title.text}</h2>}
           {title && !title.translated && <NotTranslatedBadge label={dict.notTranslated} />}
           {outdated && <OutdatedBadge label={dict.patch.outdated} />}
@@ -170,7 +171,6 @@ export function ComboCard({
               {dict.hitState[h] ?? h}
             </Tag>
           ))}
-          <Tag>{position}</Tag>
         </div>
 
         {notes && (

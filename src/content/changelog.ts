@@ -18,6 +18,14 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         kind: "changed",
         text: {
+          ko: "콤보 시작 위치를 대상 수준 배지 바로 옆에 표시",
+          en: "Combo start position now shows right next to the level badge",
+          ja: "コンボの開始位置を対象レベルのバッジのすぐ横に表示",
+        },
+      },
+      {
+        kind: "changed",
+        text: {
           ko: "루트를 바꿀 때 카드 높이가 변해 화면이 떨리던 문제 수정",
           en: "Fixed flickering when switching routes changed the card height",
           ja: "ルート切り替えでカードの高さが変わり画面がちらつく問題を修正",
