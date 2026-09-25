@@ -246,6 +246,24 @@ article[id] {
   text-shadow: 0 1px 2px rgb(0 0 0 / 0.5);
   pointer-events: none;
 }
+/* 잡기 판: DI / DR 아이콘과 같은 파란 판 (동작이라 커맨드 쪽 모양) */
+.notation-throw {
+  display: inline-flex;
+  align-items: center;
+  height: 1.6rem;
+  padding: 0 0.5rem;
+  border-radius: 0.3rem;
+  background: #00749d;
+  box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / 0.26);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  flex: none;
+}
+
 /* 히트 상황 배지: 왼쪽이 파이고 오른쪽이 뾰족한 리본. 커맨드 아이콘(원·방향키)과 모양부터 다르게 */
 .notation-situation {
   --sit-bg: #3ab8ff;

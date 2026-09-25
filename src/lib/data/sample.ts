@@ -93,10 +93,9 @@ export const sampleCombos: Combo[] = [
 ];
 
 export const sampleSituations: SetupSituation[] = [
-  { slug: "oki", name: { ko: "기상 공격", en: "Okizeme", ja: "起き攻め" }, sort_order: 1 },
-  { slug: "safe_jump", name: { ko: "안전 점프", en: "Safe jump", ja: "詐欺飛び" }, sort_order: 2 },
-  { slug: "after_throw", name: { ko: "잡기 후", en: "After throw", ja: "投げ後" }, sort_order: 3 },
-  { slug: "after_combo", name: { ko: "콤보 후", en: "After combo", ja: "コンボ後" }, sort_order: 4 },
+  { slug: "any", name: { ko: "거리 무관", en: "Any range", ja: "距離不問" }, sort_order: 1 },
+  { slug: "midscreen", name: { ko: "필드", en: "Midscreen", ja: "画面中央" }, sort_order: 2 },
+  { slug: "corner", name: { ko: "코너", en: "Corner", ja: "画面端" }, sort_order: 3 },
 ];
 
 const setupBase = {
@@ -115,7 +114,7 @@ export const sampleSetups: Setup[] = [
     ...setupBase,
     id: 1,
     title: { ko: "[예시] 코너 기상 압박", en: "[Sample] Corner oki" },
-    situations: ["oki", "after_combo"],
+    situations: ["corner"],
     notation_classic: "66 → delay 5MP",
     notation_modern: null,
     description: { ko: "예시 설명입니다. 실제 공략 내용이 아닙니다." },
@@ -138,13 +137,13 @@ export const sampleSetups: Setup[] = [
     ...setupBase,
     id: 2,
     title: { ko: "[예시] 잡기 후 상황" },
-    situations: ["after_throw"],
-    notation_classic: null,
+    situations: ["any"],
+    notation_classic: "f.throw → 66",
     notation_modern: null,
     description: null,
     target_level: "beginner",
     sort_order: 2,
-    options: [{ label: "A", classic: "66 → 5LP", modern: null, description: null, youtube_url: null }],
+    options: [{ label: "A", classic: "5LP", modern: null, description: null, youtube_url: null }],
     practice: null,
   },
 ];

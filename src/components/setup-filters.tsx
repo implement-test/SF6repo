@@ -16,7 +16,10 @@ export function SetupFilters({
   dict: Dictionary;
 }) {
   const [selected, setSelected] = useState<string[]>([]);
-  const visible = items.filter((i) => selected.length === 0 || i.situations.some((s) => selected.includes(s)));
+  // '거리 무관' 셋업은 어떤 위치를 골라도 함께 보여 준다.
+  const visible = items.filter(
+    (i) => selected.length === 0 || i.situations.includes("any") || i.situations.some((s) => selected.includes(s)),
+  );
 
   return (
     <div className="flex flex-col gap-4">

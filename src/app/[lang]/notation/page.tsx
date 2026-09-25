@@ -19,6 +19,7 @@ const LEGEND: { notation: string; ko: string; en: string; ja: string }[] = [
     ja: "ヒット状況（コマンドの前）：counter カウンター / punish パニッシュカウンター / air 空中",
   },
   { notation: "delay 5HP", ko: "delay 딜레이 입력", en: "delay = delayed input", ja: "delay ディレイ入力" },
+  { notation: "f.throw → b.throw", ko: "앞잡기 / 뒤잡기", en: "Forward throw / back throw", ja: "前投げ / 後ろ投げ" },
   { notation: "DR → DRC → DI", ko: "생 드라이브 러시 / 캔슬 드라이브 러시 / 드라이브 임팩트", en: "Raw Drive Rush / Drive Rush cancel / Drive Impact", ja: "生ドライブラッシュ / キャンセルラッシュ / ドライブインパクト" },
   { notation: "L → M → H → SP → A+M → ANY", ko: "모던 버튼 (A = 어시스트)", en: "Modern buttons (A = assist)", ja: "モダンボタン (A = アシスト)" },
 ];

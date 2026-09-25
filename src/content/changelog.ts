@@ -18,6 +18,22 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         kind: "added",
         text: {
+          ko: "앞잡기 · 뒤잡기 아이콘 (f.throw / b.throw)",
+          en: "Forward / back throw icons (f.throw / b.throw)",
+          ja: "前投げ・後ろ投げアイコン（f.throw / b.throw）",
+        },
+      },
+      {
+        kind: "changed",
+        text: {
+          ko: "셋업 상황 선택지: 거리 무관 · 필드 · 코너",
+          en: "Setup situations: any range, midscreen, corner",
+          ja: "セットプレイの状況：距離不問・画面中央・画面端",
+        },
+      },
+      {
+        kind: "added",
+        text: {
           ko: "셋업 페이지: 이어지는 콤보, 프랙티스 설정, 옵션 A/B",
           en: "Setups page: leading combos, training settings, options A/B",
           ja: "セットプレイページ：つながるコンボ、トレーニング設定、択A/B",

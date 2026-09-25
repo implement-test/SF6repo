@@ -8,6 +8,7 @@
  *   air HP                히트 상황: 공중 (counter = 카운터, punish = 퍼니시 카운터)
  *   delay 5HP             딜레이 입력
  *   DR / DRC / DI         생 드라이브 러시 / 캔슬 드라이브 러시 / 드라이브 임팩트
+ *   f.throw / b.throw     앞잡기 / 뒤잡기
  *   L M H SP A            모던 버튼 (A = AUTO)
  *   (텍스트)              괄호 안은 그대로 메모로 표시
  */
@@ -26,6 +27,8 @@ export type Button = ClassicButton | ModernButton;
 export type Move =
   | { kind: "input"; modifiers: Modifier[]; direction: string | null; buttons: Button[] }
   | { kind: "system"; modifiers: Modifier[]; value: "DR" | "DRC" | "DI" }
+  /** 잡기: f.throw = 앞잡기, b.throw = 뒤잡기, throw = 방향 없음 */
+  | { kind: "throw"; modifiers: Modifier[]; direction: "f" | "b" | null }
   | { kind: "note"; text: string }
   | { kind: "unknown"; text: string };
 
@@ -94,6 +97,9 @@ function parseMove(src: string): Move {
   const word = words[0];
   const upper = word.toUpperCase();
   if (SYSTEM.has(upper)) return { kind: "system", modifiers, value: upper as "DR" | "DRC" | "DI" };
+
+  const thr = /^(?:([fb])\.)?throw$/i.exec(word);
+  if (thr) return { kind: "throw", modifiers, direction: (thr[1]?.toLowerCase() as "f" | "b" | undefined) ?? null };
 
   // 히트 상황만 따로 쓴 경우 (예: "counter → 5HP")
   const alone = MODIFIERS[word.toLowerCase()];

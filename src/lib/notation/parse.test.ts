@@ -55,6 +55,15 @@ describe("parseNotation", () => {
     expect(findUnknownTokens(combo)).toEqual([]);
   });
 
+  it("f.throw / b.throw 는 앞잡기 / 뒤잡기", () => {
+    expect(parseNotation("f.throw → B.Throw → throw")).toEqual([
+      [{ kind: "throw", modifiers: [], direction: "f" }],
+      [{ kind: "throw", modifiers: [], direction: "b" }],
+      [{ kind: "throw", modifiers: [], direction: null }],
+    ]);
+    expect(parseNotation("punish b.throw")[0][0]).toEqual({ kind: "throw", modifiers: ["punish"], direction: "b" });
+  });
+
   it("모던 버튼을 읽는다", () => {
     expect(parseNotation("A+M")[0][0]).toMatchObject({ buttons: ["A", "M"] });
     expect(parseNotation("6SP")[0][0]).toMatchObject({ direction: "6", buttons: ["SP"] });

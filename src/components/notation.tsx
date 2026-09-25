@@ -81,6 +81,18 @@ function MoveIcons({ move }: { move: Move }) {
           <Icon icon={SYSTEM_ICONS[move.value]} />
         </span>
       );
+    case "throw": {
+      const label = move.direction === "f" ? "f.throw" : move.direction === "b" ? "b.throw" : "throw";
+      return (
+        <span className="inline-flex items-center gap-0.5" title={label}>
+          <Modifiers modifiers={move.modifiers} />
+          {move.direction && <Icon icon={directionIcons(move.direction === "f" ? "6" : "4")[0]} />}
+          <span className="notation-throw" aria-label={label}>
+            THROW
+          </span>
+        </span>
+      );
+    }
     case "input":
       return (
         <span className="inline-flex items-center gap-0.5">
