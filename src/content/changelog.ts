@@ -17,6 +17,11 @@ export const CHANGELOG: ChangelogEntry[] = [
     items: [
       {
         kind: "added",
+        adminOnly: true,
+        text: { ko: "콤보 · 셋업 복사하기", en: "Duplicate combos and setups", ja: "コンボ・セットプレイの複製" },
+      },
+      {
+        kind: "added",
         text: {
           ko: "프랙티스 설정에 가드 · 가드 전환 · 드라이브 리버설 설정",
           en: "Training settings: guard, switch guard and Drive Reversal",

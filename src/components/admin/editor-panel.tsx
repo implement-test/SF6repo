@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ENTITIES, type Field } from "@/lib/admin/entities";
+import { ENTITIES, today, type Field } from "@/lib/admin/entities";
 import { findUnknownTokens, parseNotation } from "@/lib/notation/parse";
 import { describeError, revalidateSite, supabaseBrowser } from "@/lib/supabase/browser";
 import type { ComboStarter, Localized, Patch, PracticeConfig, SetupOption } from "@/lib/types";
@@ -41,7 +41,7 @@ const LANGS = [
 export default function EditorPanel({ request, onClose }: { request: EditorRequest; onClose: () => void }) {
   const entity = ENTITIES[request.entity];
   const router = useRouter();
-  const { bumpData } = useAdmin();
+  const { bumpData, openEditor } = useAdmin();
   const sb = supabaseBrowser();
   const isNew = request.id === undefined;
   const usesPatch = entity.groups.some((g) => g.fields.some((f) => f.type === "patch"));
@@ -66,7 +66,7 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
         : [];
       let initial: Values;
       if (isNew) {
-        initial = { ...entity.defaults(), patch_id: patchList[0]?.id ?? null, ...request.defaults };
+        initial = { ...entity.defaults(), patch_id: patchList[0]?.id ?? null, ...request.defaults, ...request.initial };
       } else {
         const { data, error } = await sb.from(entity.table).select("*").eq("id", request.id).single();
         if (error) {
@@ -92,7 +92,7 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
     return () => {
       cancelled = true;
     };
-  }, [sb, entity, isNew, request.id, request.defaults, usesPatch, usesComboLinks]);
+  }, [sb, entity, isNew, request.id, request.defaults, request.initial, usesPatch, usesComboLinks]);
 
   /** 셋업 ↔ 콤보 연결 맞추기: 빠진 것은 지우고, 나머지는 순서까지 저장 */
   async function syncComboLinks(setupId: number): Promise<string | null> {
@@ -186,6 +186,25 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
     await finish();
   }
 
+  /**
+   * 복사하기: 지금 폼의 내용으로 새 항목 창을 연다 (저장해야 만들어진다).
+   * 제목에 '(복사본)'을 붙이고, 작성일은 오늘, 공개는 끈 상태로 시작한다.
+   */
+  function duplicate() {
+    if (!values || request.id === undefined) return;
+    const copy: Values = {};
+    for (const field of entity.groups.flatMap((g) => g.fields)) copy[field.key] = values[field.key];
+    const title = values.title as Localized | null | undefined;
+    if (title?.ko) copy.title = { ...title, ko: `${title.ko} (복사본)` };
+    copy.created_date = today();
+    copy.is_published = false;
+    openEditor({
+      entity: request.entity,
+      defaults: typeof values.character_id === "number" ? { character_id: values.character_id } : undefined,
+      initial: copy,
+    });
+  }
+
   /** 변경 이력의 한 시점 내용을 폼에 불러온다 (저장해야 반영된다). */
   function loadVersion(snapshot: Values) {
     // 연결 콤보는 이력에 없는 따로 저장되는 값이라 지금 값을 유지한다.
@@ -206,7 +225,7 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
         className="relative flex h-full w-full max-w-2xl flex-col border-l-2 border-accent bg-surface shadow-2xl"
       >
         <header className="flex items-center gap-3 border-b border-border px-5 py-4">
-          <span className="eyebrow text-accent!">{isNew ? "New" : `Edit #${request.id}`}</span>
+          <span className="eyebrow text-accent!">{isNew ? (request.initial ? "Copy" : "New") : `Edit #${request.id}`}</span>
           <h2 className="display text-2xl">
             {entity.label} {isNew ? "추가" : "수정"}
           </h2>
@@ -220,6 +239,11 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
             <p className="text-muted">{error ?? "불러오는 중…"}</p>
           ) : (
             <div className="flex flex-col gap-7">
+              {isNew && request.initial && (
+                <p className="border border-accent/40 bg-accent/10 px-3 py-2 text-sm">
+                  원본 내용을 복사했습니다. 필요한 부분을 고친 뒤 <b>저장</b>하면 새 항목이 만들어집니다. (공개는 꺼진 상태로 시작합니다)
+                </p>
+              )}
               {!isNew && (
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border border-border bg-surface-2 px-3 py-2 text-xs text-muted">
                   <span>
@@ -277,6 +301,17 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
                 className="border border-warn/50 px-3 py-1.5 text-sm font-semibold text-warn hover:bg-warn/10 disabled:opacity-50"
               >
                 삭제
+              </button>
+            )}
+            {!isNew && typeof values?.character_id === "number" && (
+              <button
+                type="button"
+                onClick={duplicate}
+                disabled={busy}
+                title="이 내용으로 새 항목을 만듭니다 (저장해야 만들어집니다)"
+                className="border border-border-strong px-3 py-1.5 text-sm font-semibold text-muted hover:border-accent hover:text-accent disabled:opacity-50"
+              >
+                복사
               </button>
             )}
             <button type="button" onClick={onClose} className="ml-auto px-3 py-1.5 text-sm font-semibold text-muted hover:text-fg">

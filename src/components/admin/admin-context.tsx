@@ -17,7 +17,10 @@ export const ADMIN_FLAG = "sf6r:admin";
 export type EditorRequest = {
   entity: EntityType;
   id?: number;
+  /** 새로 만들 때 그대로 저장되는 숨은 칸 (character_id 등) */
   defaults?: Record<string, unknown>;
+  /** 새로 만들 때 폼에 미리 채울 값 (복사하기). 저장은 폼 값으로 한다 */
+  initial?: Record<string, unknown>;
 };
 
 /**
@@ -66,7 +69,7 @@ function hasFlag() {
 
 export function AdminProvider({ children }: { children: ReactNode }) {
   const [admin, setAdmin] = useState<AdminInfo | null>(null);
-  const [editor, setEditor] = useState<EditorRequest | null>(null);
+  const [editor, setEditor] = useState<{ req: EditorRequest; n: number } | null>(null);
   const [nonce, setNonce] = useState(0);
   const [dataVersion, setDataVersion] = useState(0);
 
@@ -102,7 +105,8 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     [admin],
   );
 
-  const openEditor = useCallback((req: EditorRequest) => setEditor(req), []);
+  // 여는 요청마다 번호를 붙여, 같은 종류의 '새 항목' 창을 연달아 열어도(복사하기) 새로 그려지게 한다.
+  const openEditor = useCallback((req: EditorRequest) => setEditor((prev) => ({ req, n: (prev?.n ?? 0) + 1 })), []);
   const recheck = useCallback(() => {
     // 로그아웃으로 표시가 지워졌으면 바로 관리자 모드를 끈다.
     if (!hasFlag()) setAdmin(null);
@@ -119,7 +123,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         <Suspense>
           <AdminBar />
           {editor && (
-            <EditorPanel key={`${editor.entity}-${editor.id ?? "new"}`} request={editor} onClose={() => setEditor(null)} />
+            <EditorPanel key={editor.n} request={editor.req} onClose={() => setEditor(null)} />
           )}
         </Suspense>
       )}
