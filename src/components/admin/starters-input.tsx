@@ -4,13 +4,26 @@ import { useEffect, useState } from "react";
 import { findUnknownTokens, parseNotation } from "@/lib/notation/parse";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import type { ComboStarter, StarterGroup } from "@/lib/types";
+import { flattenStarters, normalizeStarterGroups } from "@/lib/starters";
 import { NotationImage } from "../notation";
 import { useAdmin } from "./admin-context";
 
 export const inputClass =
   "w-full border border-border-strong bg-inset px-2.5 py-1.5 text-sm outline-none transition-colors focus:border-accent";
 
-export type StarterPreset = { id: number; character_id: number; name: string; starters: ComboStarter[]; sort_order: number };
+/** 시동기 프리셋: 그룹 여러 개를 담는다 (예전 목록 형식은 이름 없는 그룹 하나로 읽는다) */
+export type StarterPreset = { id: number; character_id: number; name: string; starters: StarterGroup[]; sort_order: number };
+
+export function normalizePreset(raw: StarterPreset | (Omit<StarterPreset, "starters"> & { starters: unknown })): StarterPreset {
+  return { ...raw, starters: normalizeStarterGroups(raw.starters) };
+}
+
+/** 프리셋을 콤보에 불러올 때의 그룹들. 이름 없는 그룹에는 프리셋 이름을 붙인다 */
+export function presetToGroups(preset: StarterPreset): StarterGroup[] {
+  return preset.starters
+    .map((g) => ({ name: g.name?.trim() || preset.name, starters: cleanStarters(g.starters) }))
+    .filter((g) => g.starters.length > 0);
+}
 
 /** 저장 전 정리: 클래식 표기가 빈 줄은 버리고, 모던이 비어 있으면 null(클래식 전용) */
 export function cleanStarters(list: ComboStarter[] | null | undefined): ComboStarter[] {
@@ -19,26 +32,22 @@ export function cleanStarters(list: ComboStarter[] | null | undefined): ComboSta
     .filter((s) => s.classic);
 }
 
-const sameStarter = (a: ComboStarter, b: ComboStarter) =>
-  a.classic.trim() === b.classic.trim() && (a.modern?.trim() || null) === (b.modern?.trim() || null);
 
 /**
  * 시동 기본기 목록: 추가 / 삭제 / 순서 변경.
- * characterId 를 넘기면 그 캐릭터의 프리셋에서 불러올 수 있다.
+ * (시동기 그룹 한 개의 내용. 그룹 편집은 StarterGroupsInput)
  */
 export function StartersInput({
   label,
   help,
   value,
   onChange,
-  characterId,
   damageBasis = true,
 }: {
   label: string;
   help?: string;
   value: ComboStarter[];
   onChange: (v: ComboStarter[]) => void;
-  characterId?: number;
   /** 첫 번째 시동기에 '데미지 기준' 표시 (프리셋 편집에서는 끈다) */
   damageBasis?: boolean;
 }) {
@@ -55,12 +64,6 @@ export function StartersInput({
   return (
     <div className="flex flex-col gap-2">
       {label && <span className="text-xs font-semibold text-muted">{label}</span>}
-      {characterId !== undefined && (
-        <PresetPicker
-          characterId={characterId}
-          onPick={(preset) => onChange([...value, ...cleanStarters(preset.starters).filter((p) => !value.some((s) => sameStarter(s, p)))])}
-        />
-      )}
       {value.length === 0 && (
         <p className="border border-dashed border-border px-3 py-3 text-xs text-muted">
           {damageBasis ? "시동기가 없으면 루트만 표시됩니다." : "시동기를 추가하세요."}
@@ -135,12 +138,16 @@ export function StarterGroupsInput({
   value,
   onChange,
   characterId,
+  damageBasis = true,
 }: {
   label: string;
   help?: string;
   value: StarterGroup[];
   onChange: (v: StarterGroup[]) => void;
+  /** 넘기면 그 캐릭터의 프리셋을 불러올 수 있다 */
   characterId?: number;
+  /** 첫 그룹의 첫 시동기에 '데미지 기준' 표시 (프리셋 편집에서는 끈다) */
+  damageBasis?: boolean;
 }) {
   const update = (g: number, patch: Partial<StarterGroup>) =>
     onChange(value.map((x, i) => (i === g ? { ...x, ...patch } : x)));
@@ -158,12 +165,14 @@ export function StarterGroupsInput({
       {characterId !== undefined && (
         <PresetPicker
           characterId={characterId}
-          onPick={(preset) => onChange([...value, { name: preset.name, starters: cleanStarters(preset.starters) }])}
+          onPick={(preset) => onChange([...value, ...presetToGroups(preset)])}
         />
       )}
       {value.length === 0 && (
         <p className="border border-dashed border-border px-3 py-3 text-xs text-muted">
-          시동기가 없으면 루트만 표시됩니다. 프리셋을 불러오거나 그룹을 추가하세요.
+          {characterId !== undefined
+            ? "시동기가 없으면 루트만 표시됩니다. 프리셋을 불러오거나 그룹을 추가하세요."
+            : "그룹을 추가하세요."}
         </p>
       )}
       {value.map((group, g) => (
@@ -203,7 +212,7 @@ export function StarterGroupsInput({
             label=""
             value={group.starters}
             onChange={(starters) => update(g, { starters })}
-            damageBasis={g === 0}
+            damageBasis={damageBasis && g === 0}
           />
         </div>
       ))}
@@ -232,7 +241,7 @@ function PresetPicker({ characterId, onPick }: { characterId: number; onPick: (p
       .eq("character_id", characterId)
       .order("sort_order")
       .order("id")
-      .then(({ data }) => setPresets(data ?? []));
+      .then(({ data }) => setPresets((data ?? []).map(normalizePreset)));
   }, [characterId, dataVersion]);
 
   if (!presets) return null;
@@ -253,7 +262,7 @@ function PresetPicker({ characterId, onPick }: { characterId: number; onPick: (p
           <option value="">— 프리셋 선택 —</option>
           {presets.map((p) => (
             <option key={p.id} value={p.id}>
-              {p.name} ({p.starters.length})
+              {p.name} ({flattenStarters(p.starters).length})
             </option>
           ))}
         </select>
@@ -269,16 +278,7 @@ function PresetPicker({ characterId, onPick }: { characterId: number; onPick: (p
           <span>불러오기</span>
         </button>
       </div>
-      {preset && (
-        <ul className="flex flex-col gap-1 pl-1">
-          {preset.starters.map((s, i) => (
-            <li key={i} className="flex items-center gap-2 text-xs text-muted">
-              <span className="w-4 text-right">{i + 1}</span>
-              <NotationImage notation={s.classic} />
-            </li>
-          ))}
-        </ul>
-      )}
+      {preset && <StarterGroupsPreview groups={presetToGroups(preset)} />}
     </div>
   );
 }
@@ -313,6 +313,28 @@ export function NotationRow({
         )}
         {unknown.length > 0 && <span className="text-xs text-warn">해석할 수 없는 부분: {unknown.join(", ")}</span>}
       </div>
+    </div>
+  );
+}
+
+/** 시동기 그룹 미리보기 (그룹 이름 + 시동기 아이콘) */
+export function StarterGroupsPreview({ groups }: { groups: StarterGroup[] }) {
+  let n = 0;
+  return (
+    <div className="flex flex-col gap-1.5 pl-1">
+      {groups.map((g, gi) => (
+        <div key={gi} className="flex flex-col gap-1">
+          {g.name && <span className="text-[0.7rem] font-bold text-muted">— {g.name}</span>}
+          <ul className="flex flex-col gap-1">
+            {g.starters.map((s, i) => (
+              <li key={i} className="flex items-center gap-2 text-xs text-muted">
+                <span className="w-4 text-right">{++n}</span>
+                <NotationImage notation={s.classic} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
     </div>
   );
 }

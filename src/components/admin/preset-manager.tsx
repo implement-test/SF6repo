@@ -2,12 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { describeError, supabaseBrowser } from "@/lib/supabase/browser";
-import type { ComboStarter } from "@/lib/types";
-import { NotationImage } from "../notation";
+import type { StarterGroup } from "@/lib/types";
+import { flattenStarters } from "@/lib/starters";
 import { useAdmin } from "./admin-context";
-import { StartersInput, cleanStarters, inputClass, type StarterPreset } from "./starters-input";
+import {
+  StarterGroupsInput,
+  StarterGroupsPreview,
+  cleanStarterGroups,
+  inputClass,
+  normalizePreset,
+  type StarterPreset,
+} from "./starters-input";
 
-type Draft = { id?: number; name: string; starters: ComboStarter[] };
+type Draft = { id?: number; name: string; starters: StarterGroup[] };
 
 /** 캐릭터별 시동기 프리셋 관리 팝업 */
 export default function PresetManager({
@@ -34,7 +41,7 @@ export default function PresetManager({
       .order("id")
       .then(({ data, error }) => {
         if (error) setError(describeError(error));
-        setPresets(data ?? []);
+        setPresets((data ?? []).map(normalizePreset));
       });
   }, [sb, characterId, dataVersion]);
 
@@ -52,9 +59,9 @@ export default function PresetManager({
   async function save() {
     if (!draft) return;
     const name = draft.name.trim();
-    const starters = cleanStarters(draft.starters);
+    const starters = cleanStarterGroups(draft.starters);
     if (!name) return setError("프리셋 이름을 입력하세요.");
-    if (starters.length === 0) return setError("시동기를 하나 이상 넣으세요.");
+    if (flattenStarters(starters).length === 0) return setError("시동기를 하나 이상 넣으세요.");
     setBusy(true);
     setError(null);
     const result = draft.id
@@ -67,7 +74,7 @@ export default function PresetManager({
     if (result.error || !result.data?.length) {
       return setError(result.error ? describeError(result.error) : "이 캐릭터의 프리셋을 수정할 권한이 없습니다.");
     }
-    const saved = result.data[0] as StarterPreset;
+    const saved = normalizePreset(result.data[0] as StarterPreset);
     setDraft({ id: saved.id, name: saved.name, starters: saved.starters });
     bumpData();
   }
@@ -123,7 +130,7 @@ export default function PresetManager({
                 type="button"
                 onClick={() => {
                   setError(null);
-                  setDraft({ name: "", starters: [{ classic: "", modern: null }] });
+                  setDraft({ name: "", starters: [{ name: null, starters: [{ classic: "", modern: null }] }] });
                 }}
                 className="skew w-full bg-accent py-1.5 text-sm font-bold text-accent-fg"
               >
@@ -137,7 +144,10 @@ export default function PresetManager({
                 <li key={p.id} data-selected={draft?.id === p.id} className="group flex items-center border-l-2 border-transparent data-[selected=true]:border-accent data-[selected=true]:bg-surface-2">
                   <button type="button" onClick={() => select(p)} aria-current={draft?.id === p.id ? "true" : undefined} className="flex min-w-0 flex-1 flex-col items-start px-3 py-2 text-left hover:bg-surface-2">
                     <span className="w-full truncate text-sm font-semibold">{p.name}</span>
-                    <span className="text-xs text-muted">시동기 {p.starters.length}개</span>
+                    <span className="text-xs text-muted">
+                      시동기 {flattenStarters(p.starters).length}개
+                      {p.starters.length > 1 && ` · 그룹 ${p.starters.length}`}
+                    </span>
                   </button>
                   <span className="flex flex-col pr-2 opacity-60 group-hover:opacity-100">
                     <button type="button" disabled={i === 0} onClick={() => move(p, -1)} className="px-1 text-xs text-muted hover:text-fg disabled:opacity-30" aria-label="위로">
@@ -182,21 +192,19 @@ export default function PresetManager({
                         className={inputClass}
                       />
                     </label>
-                    <StartersInput
-                      label="시동기"
+                    <StarterGroupsInput
+                      label="시동기 그룹"
+                      help="이름 없는 그룹은 콤보에 불러올 때 프리셋 이름으로 들어갑니다."
                       value={draft.starters}
                       onChange={(starters) => setDraft({ ...draft, starters })}
                       damageBasis={false}
                     />
-                    {draft.starters.some((s) => s.classic.trim()) && (
+                    {flattenStarters(cleanStarterGroups(draft.starters)).length > 0 && (
                       <div className="flex flex-col gap-1.5 border border-border bg-inset p-3">
                         <span className="eyebrow">Preview</span>
-                        {cleanStarters(draft.starters).map((s, i) => (
-                          <div key={i} className="flex items-center gap-2">
-                            <span className="display w-4 text-right text-muted">{i + 1}</span>
-                            <NotationImage notation={s.classic} />
-                          </div>
-                        ))}
+                        <StarterGroupsPreview
+                          groups={cleanStarterGroups(draft.starters).map((g) => ({ ...g, name: g.name ?? (draft.name.trim() || null) }))}
+                        />
                       </div>
                     )}
                   </div>

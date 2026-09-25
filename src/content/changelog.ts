@@ -17,6 +17,15 @@ export const CHANGELOG: ChangelogEntry[] = [
     items: [
       {
         kind: "changed",
+        adminOnly: true,
+        text: {
+          ko: "시동기 프리셋도 그룹으로 구성 (불러오면 그룹 그대로 추가)",
+          en: "Starter presets hold groups too (loaded as-is into combos)",
+          ja: "始動技プリセットもグループ構成に（読み込むとグループのまま追加）",
+        },
+      },
+      {
+        kind: "changed",
         text: {
           ko: "콤보 시동기를 그룹으로 묶어 표시 (프리셋을 불러오면 그룹으로)",
           en: "Combo starters grouped (loading a preset adds it as a group)",
