@@ -10,7 +10,7 @@ import { AdminSection } from "./admin-section";
 import { AdminUsers } from "./admin-users";
 import { DeletedItems } from "./deleted-items";
 
-type Status = "loading" | "signed-out" | "not-admin" | "admin";
+type Status = "loading" | "signed-out" | "not-admin" | "admin" | "error";
 
 /** /admin: 로그인, 내 계정, 관리자 관리, 패치, 삭제된 항목 */
 export function AdminConsole() {
@@ -18,6 +18,7 @@ export function AdminConsole() {
   const { admin, isManager, recheck } = useAdmin();
   const [status, setStatus] = useState<Status>("loading");
   const [email, setEmail] = useState<string | null>(null);
+  const [retry, setRetry] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -26,14 +27,25 @@ export function AdminConsole() {
       if (cancelled) return;
       if (!data.session) return setStatus("signed-out");
       setEmail(data.session.user.email ?? null);
-      const info = await getAdminInfo(sb);
+      let info;
+      try {
+        info = await getAdminInfo(sb);
+      } catch {
+        if (!cancelled) setStatus("error");
+        return;
+      }
       if (cancelled) return;
       setStatus(info ? "admin" : "not-admin");
+      // 세션은 살아 있는데 사이트 전체의 관리자 모드가 꺼져 있으면(표시가 지워진 경우 등) 다시 켠다.
+      if (info && !admin) {
+        localStorage.setItem(ADMIN_FLAG, "1");
+        recheck();
+      }
     })();
     return () => {
       cancelled = true;
     };
-  }, [sb, admin]);
+  }, [sb, admin, recheck, retry]);
 
   async function signOut() {
     await sb.auth.signOut();
@@ -42,7 +54,31 @@ export function AdminConsole() {
     setStatus("signed-out");
   }
 
-  if (status === "loading" || (status === "admin" && !admin)) return <p className="text-muted">확인 중…</p>;
+  if (status === "loading") return <p className="text-muted">확인 중…</p>;
+  if (status === "error" || (status === "admin" && !admin)) {
+    return (
+      <div className="flex flex-col items-start gap-3 border border-border bg-surface p-5">
+        <p className="text-muted">
+          {status === "error" ? "관리자 정보를 불러오지 못했습니다." : "관리자 모드를 켜는 중…"}
+        </p>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              recheck();
+              setRetry((n) => n + 1);
+            }}
+            className="skew bg-accent px-4 py-1.5 text-sm font-bold text-accent-fg"
+          >
+            <span>다시 시도</span>
+          </button>
+          <button type="button" onClick={signOut} className="text-sm font-semibold text-muted underline">
+            로그아웃
+          </button>
+        </div>
+      </div>
+    );
+  }
   if (status === "signed-out") return <LoginForm onSignedIn={() => recheck()} />;
 
   if (status === "not-admin" || !admin) {
@@ -156,7 +192,15 @@ function LoginForm({ onSignedIn }: { onSignedIn: () => void }) {
       setError("로그인에 실패했습니다. 이메일과 비밀번호를 확인하세요.");
       return;
     }
-    if (!(await getAdminInfo(sb))) {
+    let info;
+    try {
+      info = await getAdminInfo(sb);
+    } catch {
+      setBusy(false);
+      setError("관리자 정보를 불러오지 못했습니다. 잠시 후 다시 시도하세요.");
+      return;
+    }
+    if (!info) {
       await sb.auth.signOut();
       setBusy(false);
       setError("관리자로 등록되지 않은 계정입니다.");

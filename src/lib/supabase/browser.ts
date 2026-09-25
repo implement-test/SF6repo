@@ -31,15 +31,19 @@ export const ROLE_LABELS: Record<AdminRole, string> = {
   character: "캐릭터 관리자",
 };
 
-/** 로그인한 계정의 관리자 정보. 관리자가 아니거나 로그인하지 않았으면 null */
+/**
+ * 로그인한 계정의 관리자 정보. 관리자가 아니거나 로그인하지 않았으면 null.
+ * 조회 자체가 실패하면(네트워크, DB 오류) 관리자가 아니라고 단정하지 않고 예외를 던진다.
+ */
 export async function getAdminInfo(sb: SupabaseClient): Promise<AdminInfo | null> {
   const { data: session } = await sb.auth.getSession();
   const user = session.session?.user;
   if (!user) return null;
-  const [{ data: me }, { data: chars }] = await Promise.all([
+  const [{ data: me, error: meError }, { data: chars, error: charsError }] = await Promise.all([
     sb.from("admins").select("role,display_name").eq("user_id", user.id).maybeSingle(),
     sb.from("admin_characters").select("character_id").eq("user_id", user.id),
   ]);
+  if (meError || charsError) throw new Error((meError ?? charsError)!.message);
   if (!me) return null;
   return {
     userId: user.id,

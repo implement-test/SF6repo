@@ -74,11 +74,16 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     if (!hasFlag()) return;
     let cancelled = false;
     import("@/lib/supabase/browser").then(async ({ supabaseBrowser, getAdminInfo }) => {
-      const info = await getAdminInfo(supabaseBrowser());
-      if (cancelled) return;
-      setAdmin(info);
-      // 세션이 만료됐거나 해임됐으면 표시를 지워 다음부터는 불러오지 않는다.
-      if (!info) localStorage.removeItem(ADMIN_FLAG);
+      try {
+        const info = await getAdminInfo(supabaseBrowser());
+        if (cancelled) return;
+        setAdmin(info);
+        // 세션이 만료됐거나 해임됐으면 표시를 지워 다음부터는 불러오지 않는다.
+        if (!info) localStorage.removeItem(ADMIN_FLAG);
+      } catch {
+        // 일시적인 오류: 표시는 남겨 두고 이번에는 관리자 모드를 켜지 않는다.
+        if (!cancelled) setAdmin(null);
+      }
     });
     return () => {
       cancelled = true;
