@@ -56,6 +56,7 @@ const ko = {
   },
   patch: { outdated: "이전 패치 기준" },
   created: "작성일",
+  changelog: { button: "업데이트 내역", title: "업데이트 내역", added: "추가", changed: "수정", removed: "삭제", adminOnly: "관리자" },
   author: { created: "작성", updated: "수정" },
   video: { show: "영상 보기", hide: "영상 접기" },
   notationPage: {
@@ -124,6 +125,7 @@ const en: Dictionary = {
   },
   patch: { outdated: "Older patch" },
   created: "Added",
+  changelog: { button: "Updates", title: "Update history", added: "Added", changed: "Changed", removed: "Removed", adminOnly: "Admin" },
   author: { created: "By", updated: "Edited by" },
   video: { show: "Show video", hide: "Hide video" },
   notationPage: {
@@ -190,6 +192,7 @@ const ja: Dictionary = {
   },
   patch: { outdated: "旧パッチ基準" },
   created: "作成日",
+  changelog: { button: "更新履歴", title: "更新履歴", added: "追加", changed: "変更", removed: "削除", adminOnly: "管理者" },
   author: { created: "作成", updated: "更新" },
   video: { show: "動画を見る", hide: "動画を閉じる" },
   notationPage: {

@@ -7,6 +7,9 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import { PREFS_INLINE_SCRIPT } from "@/lib/prefs";
 import { SitePrefs } from "@/components/prefs-controls";
 import { AdminProvider } from "@/components/admin/admin-context";
+import { ChangelogButton } from "@/components/changelog";
+import { CHANGELOG } from "@/content/changelog";
+import { pickLocalized } from "@/lib/i18n/localized";
 import "../globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -59,6 +62,17 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
             <nav className="order-last flex w-full gap-5 whitespace-nowrap sm:order-none sm:w-auto">
               <HeaderLink href="/notation">{dict.nav.notation}</HeaderLink>
               <HeaderLink href="/glossary">{dict.nav.glossary}</HeaderLink>
+              <ChangelogButton
+                labels={dict.changelog}
+                entries={CHANGELOG.map((entry) => ({
+                  date: entry.date,
+                  items: entry.items.map((item) => ({
+                    kind: item.kind,
+                    text: pickLocalized(item.text, lang).text,
+                    adminOnly: !!item.adminOnly,
+                  })),
+                }))}
+              />
             </nav>
             <div className="ml-auto">
               <SitePrefs locale={lang} dict={dict} />
