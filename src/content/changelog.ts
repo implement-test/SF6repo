@@ -17,6 +17,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     items: [
       {
         kind: "added",
+        text: {
+          ko: "콤보 표기에 히트 상황 배지 (air · counter · punish)",
+          en: "Hit situation badges in combo notation (air, counter, punish)",
+          ja: "コンボ表記にヒット状況バッジ（air・counter・punish）",
+        },
+      },
+      {
+        kind: "added",
         text: { ko: "콤보 후 프레임 표시", en: "Frame advantage after combo", ja: "コンボ後の有利フレーム表示" },
       },
       {

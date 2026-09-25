@@ -1,5 +1,12 @@
 import { Fragment } from "react";
-import { normalizeNotation, parseNotation, type Move } from "@/lib/notation/parse";
+import {
+  isSituation,
+  normalizeNotation,
+  parseNotation,
+  type Modifier,
+  type Move,
+  type Situation,
+} from "@/lib/notation/parse";
 import { BUTTON_ICONS, SYSTEM_ICONS, directionIcons, type IconRef } from "@/lib/notation/icons";
 
 function Icon({ icon }: { icon: IconRef }) {
@@ -28,8 +35,37 @@ function Icon({ icon }: { icon: IconRef }) {
   );
 }
 
-function ModifierLabel({ children }: { children: string }) {
-  return <span className="text-xs font-semibold uppercase tracking-wide text-muted">{children}</span>;
+const SITUATION_LABELS: Record<Situation, string> = { air: "AIR", counter: "COUNTER", punish: "PUNISH" };
+
+/**
+ * 히트 상황 배지 (air / counter / punish).
+ * 커맨드 아이콘(둥근 버튼·방향키)과 헷갈리지 않도록 오른쪽을 가리키는 리본 모양으로 그린다.
+ */
+function SituationBadge({ situation }: { situation: Situation }) {
+  return (
+    <span className="notation-situation" data-situation={situation} title={SITUATION_LABELS[situation]}>
+      {SITUATION_LABELS[situation]}
+    </span>
+  );
+}
+
+/** 수식어: 히트 상황은 배지, delay 는 글자 */
+function Modifiers({ modifiers }: { modifiers: Modifier[] }) {
+  if (modifiers.length === 0) return null;
+  return (
+    <>
+      {modifiers.map((m) =>
+        isSituation(m) ? (
+          <SituationBadge key={m} situation={m} />
+        ) : (
+          <span key={m} className="text-xs font-semibold uppercase tracking-wide text-muted">
+            {m}
+          </span>
+        ),
+      )}
+      <span className="w-0.5" />
+    </>
+  );
 }
 
 function MoveIcons({ move }: { move: Move }) {
@@ -41,19 +77,14 @@ function MoveIcons({ move }: { move: Move }) {
     case "system":
       return (
         <span className="inline-flex items-center gap-1">
-          {move.modifiers.map((m) => (
-            <ModifierLabel key={m}>{m}</ModifierLabel>
-          ))}
+          <Modifiers modifiers={move.modifiers} />
           <Icon icon={SYSTEM_ICONS[move.value]} />
         </span>
       );
     case "input":
       return (
         <span className="inline-flex items-center gap-0.5">
-          {move.modifiers.map((m) => (
-            <ModifierLabel key={m}>{m}</ModifierLabel>
-          ))}
-          {move.modifiers.length > 0 && <span className="w-0.5" />}
+          <Modifiers modifiers={move.modifiers} />
           {move.direction && directionIcons(move.direction).map((icon, i) => <Icon key={`d${i}`} icon={icon} />)}
           {move.buttons.map((b, i) => (
             <Icon key={`b${i}`} icon={BUTTON_ICONS[b]} />

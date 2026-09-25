@@ -12,7 +12,13 @@ const LEGEND: { notation: string; ko: string; en: string; ja: string }[] = [
   { notation: "236PP → 214KK", ko: "펀치/킥 버튼 2개 (약중강 무관)", en: "Any two punches / kicks", ja: "パンチ/キック2つ同時押し" },
   { notation: "2MK → 5HP", ko: "→ 연결·캔슬", en: "→ link / cancel", ja: "→ つなぎ・キャンセル" },
   { notation: "MP·HP", ko: "· 타겟 콤보", en: "· target combo", ja: "· ターゲットコンボ" },
-  { notation: "air HP → delay 5HP", ko: "air 공중 / delay 딜레이", en: "air = airborne / delay", ja: "air 空中 / delay ディレイ" },
+  {
+    notation: "counter 5HP → punish 2MP → air HP",
+    ko: "히트 상황: counter 카운터 / punish 퍼니시 카운터 / air 공중 (커맨드 앞에)",
+    en: "Hit situation before a command: counter / punish (punish counter) / air",
+    ja: "ヒット状況（コマンドの前）：counter カウンター / punish パニッシュカウンター / air 空中",
+  },
+  { notation: "delay 5HP", ko: "delay 딜레이 입력", en: "delay = delayed input", ja: "delay ディレイ入力" },
   { notation: "DR → DRC → DI", ko: "생 드라이브 러시 / 캔슬 드라이브 러시 / 드라이브 임팩트", en: "Raw Drive Rush / Drive Rush cancel / Drive Impact", ja: "生ドライブラッシュ / キャンセルラッシュ / ドライブインパクト" },
   { notation: "L → M → H → SP → A+M → ANY", ko: "모던 버튼 (A = 어시스트)", en: "Modern buttons (A = assist)", ja: "モダンボタン (A = アシスト)" },
 ];

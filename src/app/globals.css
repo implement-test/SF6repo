@@ -235,6 +235,33 @@ html[data-hide-advanced] .level-chip[data-value="advanced"] {
   text-shadow: 0 1px 2px rgb(0 0 0 / 0.5);
   pointer-events: none;
 }
+/* 히트 상황 배지: 왼쪽이 파이고 오른쪽이 뾰족한 리본. 커맨드 아이콘(원·방향키)과 모양부터 다르게 */
+.notation-situation {
+  --sit-bg: #3ab8ff;
+  --sit-fg: #06131d;
+  display: inline-flex;
+  align-items: center;
+  height: 1.45rem;
+  padding: 0 0.85rem 0 0.7rem;
+  background: var(--sit-bg);
+  color: var(--sit-fg);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 800;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  flex: none;
+  clip-path: polygon(0 0, calc(100% - 0.5rem) 0, 100% 50%, calc(100% - 0.5rem) 100%, 0 100%, 0.4rem 50%);
+}
+.notation-situation[data-situation="counter"] {
+  --sit-bg: #ffd21f;
+  --sit-fg: #1a1400;
+}
+.notation-situation[data-situation="punish"] {
+  --sit-bg: #ff2d87;
+  --sit-fg: #ffffff;
+}
 .notation-icon[data-flip="x"] {
   transform: scaleX(-1);
 }

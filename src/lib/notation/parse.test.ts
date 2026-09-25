@@ -40,6 +40,21 @@ describe("parseNotation", () => {
     ]);
   });
 
+  it("counter / punish / air 는 히트 상황으로 읽는다", () => {
+    expect(parseNotation("counter 5HP → punish 2MP → air HP")).toEqual([
+      [{ kind: "input", modifiers: ["counter"], direction: null, buttons: ["HP"] }],
+      [{ kind: "input", modifiers: ["punish"], direction: "2", buttons: ["MP"] }],
+      [{ kind: "input", modifiers: ["air"], direction: null, buttons: ["HP"] }],
+    ]);
+    expect(parseNotation("Counter delay 5HP")[0][0]).toMatchObject({ modifiers: ["counter", "delay"] });
+  });
+
+  it("히트 상황만 따로 써도 된다", () => {
+    const combo = parseNotation("punish → 2MP");
+    expect(combo[0][0]).toEqual({ kind: "input", modifiers: ["punish"], direction: null, buttons: [] });
+    expect(findUnknownTokens(combo)).toEqual([]);
+  });
+
   it("모던 버튼을 읽는다", () => {
     expect(parseNotation("A+M")[0][0]).toMatchObject({ buttons: ["A", "M"] });
     expect(parseNotation("6SP")[0][0]).toMatchObject({ direction: "6", buttons: ["SP"] });
