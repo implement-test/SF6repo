@@ -2,11 +2,14 @@
 
 import { createContext, lazy, Suspense, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import type { EntityType } from "@/lib/admin/entities";
+import type { AdminInfo } from "@/lib/supabase/browser";
 
 /**
  * 관리자 모드 상태.
  * 방문자에게는 Supabase 클라이언트도, 편집기 코드도 내려가지 않도록
  * 로그인 때 남긴 표시(ADMIN_FLAG)가 있을 때만 동적으로 불러온다.
+ *
+ * 버튼 표시는 편의일 뿐이고, 실제 권한 검사는 DB(RLS)가 한다.
  */
 
 export const ADMIN_FLAG = "sf6r:admin";
@@ -17,10 +20,20 @@ export type EditorRequest = {
   defaults?: Record<string, unknown>;
 };
 
+/**
+ * 편집 대상이 속한 캐릭터.
+ *   숫자 / 숫자 배열 → 그 캐릭터(들) 중 하나라도 맡고 있으면 편집 가능 (Vs 가이드는 [내 캐릭터, 상대])
+ *   undefined        → 공통 데이터 (최고/부 관리자만)
+ */
+export type EditScope = number | number[] | undefined;
+
 type AdminState = {
+  admin: AdminInfo | null;
   isAdmin: boolean;
+  isManager: boolean;
+  canEdit: (scope: EditScope) => boolean;
   openEditor: (req: EditorRequest) => void;
-  /** 로그인/로그아웃 뒤 상태를 다시 확인한다 */
+  /** 로그인/로그아웃/권한 변경 뒤 상태를 다시 확인한다 */
   recheck: () => void;
   /** 저장할 때마다 1씩 늘어난다. 브라우저에서 직접 불러오는 목록은 이 값이 바뀌면 다시 불러온다. */
   dataVersion: number;
@@ -28,7 +41,10 @@ type AdminState = {
 };
 
 const AdminContext = createContext<AdminState>({
+  admin: null,
   isAdmin: false,
+  isManager: false,
+  canEdit: () => false,
   openEditor: () => {},
   recheck: () => {},
   dataVersion: 0,
@@ -49,7 +65,7 @@ function hasFlag() {
 }
 
 export function AdminProvider({ children }: { children: ReactNode }) {
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [admin, setAdmin] = useState<AdminInfo | null>(null);
   const [editor, setEditor] = useState<EditorRequest | null>(null);
   const [nonce, setNonce] = useState(0);
   const [dataVersion, setDataVersion] = useState(0);
@@ -57,43 +73,69 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!hasFlag()) return;
     let cancelled = false;
-    import("@/lib/supabase/browser").then(async ({ supabaseBrowser, checkIsAdmin }) => {
-      const ok = await checkIsAdmin(supabaseBrowser());
+    import("@/lib/supabase/browser").then(async ({ supabaseBrowser, getAdminInfo }) => {
+      const info = await getAdminInfo(supabaseBrowser());
       if (cancelled) return;
-      setIsAdmin(ok);
-      // 세션이 만료됐으면 표시를 지워 다음부터는 불러오지 않는다.
-      if (!ok) localStorage.removeItem(ADMIN_FLAG);
+      setAdmin(info);
+      // 세션이 만료됐거나 해임됐으면 표시를 지워 다음부터는 불러오지 않는다.
+      if (!info) localStorage.removeItem(ADMIN_FLAG);
     });
     return () => {
       cancelled = true;
     };
   }, [nonce]);
 
+  const isManager = admin?.role === "super" || admin?.role === "sub";
+  const canEdit = useCallback(
+    (scope: EditScope) => {
+      if (!admin) return false;
+      if (admin.role === "super" || admin.role === "sub") return true;
+      if (scope === undefined) return false;
+      const ids = Array.isArray(scope) ? scope : [scope];
+      return ids.some((id) => admin.characterIds.includes(id));
+    },
+    [admin],
+  );
+
   const openEditor = useCallback((req: EditorRequest) => setEditor(req), []);
   const recheck = useCallback(() => {
     // 로그아웃으로 표시가 지워졌으면 바로 관리자 모드를 끈다.
-    if (!hasFlag()) setIsAdmin(false);
+    if (!hasFlag()) setAdmin(null);
     setNonce((n) => n + 1);
   }, []);
   const bumpData = useCallback(() => setDataVersion((n) => n + 1), []);
 
   return (
-    <AdminContext.Provider value={{ isAdmin, openEditor, recheck, dataVersion, bumpData }}>
+    <AdminContext.Provider
+      value={{ admin, isAdmin: !!admin, isManager, canEdit, openEditor, recheck, dataVersion, bumpData }}
+    >
       {children}
-      {isAdmin && (
+      {admin && (
         <Suspense>
           <AdminBar />
-          {editor && <EditorPanel key={`${editor.entity}-${editor.id ?? "new"}`} request={editor} onClose={() => setEditor(null)} />}
+          {editor && (
+            <EditorPanel key={`${editor.entity}-${editor.id ?? "new"}`} request={editor} onClose={() => setEditor(null)} />
+          )}
         </Suspense>
       )}
     </AdminContext.Provider>
   );
 }
 
-/** 관리자에게만 보이는 수정 버튼 */
-export function EditButton({ entity, id, label = "수정" }: { entity: EntityType; id: number; label?: string }) {
-  const { isAdmin, openEditor } = useAdmin();
-  if (!isAdmin) return null;
+/** 편집 권한이 있는 관리자에게만 보이는 수정 버튼 */
+export function EditButton({
+  entity,
+  id,
+  scope,
+  label = "수정",
+}: {
+  entity: EntityType;
+  id: number;
+  scope?: EditScope;
+  label?: string;
+}) {
+  const { canEdit, openEditor } = useAdmin();
+  if (!canEdit(scope)) return null;
   return (
     <button
       type="button"
@@ -109,18 +151,20 @@ export function EditButton({ entity, id, label = "수정" }: { entity: EntityTyp
   );
 }
 
-/** 관리자에게만 보이는 추가 버튼 */
+/** 편집 권한이 있는 관리자에게만 보이는 추가 버튼 */
 export function AddButton({
   entity,
   defaults,
+  scope,
   label,
 }: {
   entity: EntityType;
   defaults?: Record<string, unknown>;
+  scope?: EditScope;
   label: string;
 }) {
-  const { isAdmin, openEditor } = useAdmin();
-  if (!isAdmin) return null;
+  const { canEdit, openEditor } = useAdmin();
+  if (!canEdit(scope)) return null;
   return (
     <button
       type="button"

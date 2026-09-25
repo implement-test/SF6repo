@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ENTITIES, type Field } from "@/lib/admin/entities";
 import { findUnknownTokens, parseNotation } from "@/lib/notation/parse";
-import { revalidateSite, supabaseBrowser } from "@/lib/supabase/browser";
+import { describeError, revalidateSite, supabaseBrowser } from "@/lib/supabase/browser";
 import type { ComboStarter, Localized, Patch } from "@/lib/types";
 import { parseYouTube } from "@/lib/youtube";
 import { NotationImage } from "../notation";
 import { useAdmin, type EditorRequest } from "./admin-context";
 import { formatPatchVersion } from "@/lib/patch";
+import { History, useAuthorNames } from "./history";
 
 type Values = Record<string, unknown>;
 const LANGS = [
@@ -28,7 +29,11 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
   const usesPatch = entity.groups.some((g) => g.fields.some((f) => f.type === "patch"));
 
   const [values, setValues] = useState<Values | null>(null);
+  /** 불러왔을 때의 updated_at. 저장할 때 다른 관리자가 먼저 고쳤는지 확인한다. */
+  const [baseUpdatedAt, setBaseUpdatedAt] = useState<string | null>(null);
   const [patches, setPatches] = useState<Patch[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const authors = useAuthorNames();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,7 +49,7 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
       } else {
         const { data, error } = await sb.from(entity.table).select("*").eq("id", request.id).single();
         if (error) {
-          if (!cancelled) setError(error.message);
+          if (!cancelled) setError(describeError(error));
           return;
         }
         initial = data;
@@ -52,6 +57,7 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
       if (cancelled) return;
       setPatches(patchList);
       setValues(initial);
+      setBaseUpdatedAt((initial.updated_at as string | undefined) ?? null);
     })();
     return () => {
       cancelled = true;
@@ -82,27 +88,52 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
     }
     setBusy(true);
     setError(null);
-    const result = isNew
-      ? await sb.from(entity.table).insert({ ...request.defaults, ...payload })
-      : await sb.from(entity.table).update(payload).eq("id", request.id);
-    if (result.error) {
+    const fail = (message: string) => {
       setBusy(false);
-      setError(result.error.message);
-      return;
+      setError(message);
+    };
+
+    if (isNew) {
+      const { error } = await sb.from(entity.table).insert({ ...request.defaults, ...payload });
+      if (error) return fail(describeError(error));
+      return finish();
+    }
+
+    // 불러온 뒤 다른 관리자가 고쳤으면 덮어쓰지 않는다.
+    let query = sb.from(entity.table).update(payload).eq("id", request.id);
+    if (baseUpdatedAt) query = query.eq("updated_at", baseUpdatedAt);
+    const { data, error } = await query.select("id");
+    if (error) return fail(describeError(error));
+    if (!data || data.length === 0) {
+      const { data: current } = await sb.from(entity.table).select("*").eq("id", request.id).maybeSingle();
+      if (current && baseUpdatedAt && current.updated_at !== baseUpdatedAt) {
+        return fail(
+          "다른 관리자가 먼저 수정했습니다. 창을 닫고 다시 열어 최신 내용을 확인하세요. (변경 이력에서 비교할 수 있습니다)",
+        );
+      }
+      return fail("이 항목을 수정할 권한이 없습니다.");
     }
     await finish();
   }
 
   async function remove() {
-    if (!confirm(`이 ${entity.label}을(를) 삭제할까요? 되돌릴 수 없습니다.`)) return;
+    if (!confirm(`이 ${entity.label}을(를) 삭제할까요?\n삭제한 항목은 관리 페이지의 '삭제된 항목'에서 복구할 수 있습니다.`))
+      return;
     setBusy(true);
-    const { error } = await sb.from(entity.table).delete().eq("id", request.id);
-    if (error) {
+    const { data, error } = await sb.from(entity.table).delete().eq("id", request.id).select("id");
+    if (error || !data || data.length === 0) {
       setBusy(false);
-      setError(error.message);
+      setError(error ? describeError(error) : "이 항목을 삭제할 권한이 없습니다.");
       return;
     }
     await finish();
+  }
+
+  /** 변경 이력의 한 시점 내용을 폼에 불러온다 (저장해야 반영된다). */
+  function loadVersion(snapshot: Values) {
+    setValues({ ...snapshot, updated_at: baseUpdatedAt });
+    setShowHistory(false);
+    setError("과거 버전을 불러왔습니다. 확인 후 저장하면 되돌려집니다.");
   }
 
   return (
@@ -129,6 +160,27 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
             <p className="text-muted">{error ?? "불러오는 중…"}</p>
           ) : (
             <div className="flex flex-col gap-7">
+              {!isNew && (
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border border-border bg-surface-2 px-3 py-2 text-xs text-muted">
+                  <span>
+                    작성 <b className="text-fg">{authors.get(values.created_by as string) ?? "—"}</b>
+                  </span>
+                  <span>
+                    최근 수정 <b className="text-fg">{authors.get(values.updated_by as string) ?? "—"}</b>
+                    {typeof values.updated_at === "string" && ` · ${new Date(values.updated_at).toLocaleString()}`}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowHistory((s) => !s)}
+                    className="ml-auto font-semibold text-accent hover:underline"
+                  >
+                    {showHistory ? "이력 닫기" : "변경 이력"}
+                  </button>
+                </div>
+              )}
+              {showHistory && !isNew && (
+                <History table={entity.table} rowId={String(request.id)} authors={authors} onLoad={loadVersion} />
+              )}
               {entity.groups.map((group) => (
                 <fieldset key={group.title} className="flex flex-col gap-3">
                   <legend className="mb-3 flex w-full items-center gap-2 border-b border-border pb-1.5">

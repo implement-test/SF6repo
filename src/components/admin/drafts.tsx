@@ -11,7 +11,8 @@ type Draft = { id: number; title: { ko: string } | null; notation_classic: strin
  * 정적 페이지에는 공개 항목만 들어가므로 비공개 항목은 브라우저에서 직접 불러온다.
  */
 export function DraftCombos({ characterId }: { characterId: number }) {
-  const { isAdmin, dataVersion } = useAdmin();
+  const { canEdit, dataVersion } = useAdmin();
+  const isAdmin = canEdit(characterId);
   const [drafts, setDrafts] = useState<Draft[]>([]);
 
   useEffect(() => {
@@ -39,7 +40,7 @@ export function DraftCombos({ characterId }: { characterId: number }) {
               <NotationText notation={d.notation_classic} />
             </span>
             <span className="ml-auto">
-              <EditButton entity="combo" id={d.id} />
+              <EditButton entity="combo" id={d.id} scope={characterId} />
             </span>
           </li>
         ))}

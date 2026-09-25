@@ -14,12 +14,16 @@ export function ComboCard({
   locale,
   dict,
   latestPatchId,
+  authors,
 }: {
   combo: Combo;
   locale: Locale;
   dict: Dictionary;
   latestPatchId: number | null;
+  authors: Record<string, string>;
 }) {
+  const createdBy = combo.created_by ? authors[combo.created_by] : undefined;
+  const updatedBy = combo.updated_by ? authors[combo.updated_by] : undefined;
   const title = combo.title ? pickLocalized(combo.title, locale) : null;
   const notes = combo.notes ? pickLocalized(combo.notes, locale) : null;
   const outdated = latestPatchId !== null && combo.patch_id !== latestPatchId;
@@ -46,7 +50,7 @@ export function ComboCard({
           {title && !title.translated && <NotTranslatedBadge label={dict.notTranslated} />}
           {outdated && <OutdatedBadge label={dict.patch.outdated} />}
           <span className="ml-auto">
-            <EditButton entity="combo" id={combo.id} />
+            <EditButton entity="combo" id={combo.id} scope={combo.character_id} />
           </span>
         </header>
 
@@ -122,6 +126,21 @@ export function ComboCard({
           </span>
           <span>{combo.created_date}</span>
         </div>
+        {(createdBy || updatedBy) && (
+          <p className="text-xs text-muted">
+            {createdBy && (
+              <>
+                {dict.author.created} <b className="font-semibold text-fg">{createdBy}</b>
+              </>
+            )}
+            {updatedBy && updatedBy !== createdBy && (
+              <>
+                {createdBy && " · "}
+                {dict.author.updated} <b className="font-semibold text-fg">{updatedBy}</b>
+              </>
+            )}
+          </p>
+        )}
       </aside>
 
       {hasMedia && (

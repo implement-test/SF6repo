@@ -19,6 +19,10 @@ type ContentBase = {
   sort_order: number;
   is_published: boolean;
   created_date: string; // YYYY-MM-DD
+  /** 작성자 / 최근 수정자 (admins.user_id). 이름은 author_names 에서 찾는다 */
+  created_by?: string | null;
+  updated_by?: string | null;
+  updated_at?: string;
 };
 
 type Media = {

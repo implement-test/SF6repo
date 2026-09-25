@@ -48,6 +48,15 @@ export async function getLatestPatchId(): Promise<number | null> {
   return (await getPatches())[0]?.id ?? null;
 }
 
+/** 관리자 user_id → 표시 이름 (작성자 표시용) */
+export async function getAuthorNames(): Promise<Record<string, string>> {
+  const c = db();
+  if (!c) return {};
+  // 작성자 이름은 부가 정보라서, 조회에 실패해도 페이지는 그대로 보여 준다.
+  const { data } = await c.from("author_names").select("*");
+  return Object.fromEntries((data ?? []).map((a: { user_id: string; display_name: string }) => [a.user_id, a.display_name]));
+}
+
 export async function getCombos(characterId: number): Promise<Combo[]> {
   const c = db();
   if (!c) return sampleCombos.filter((combo) => combo.character_id === characterId);

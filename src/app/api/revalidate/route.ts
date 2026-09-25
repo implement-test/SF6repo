@@ -13,7 +13,10 @@ export async function POST(request: Request) {
     global: { headers: { Authorization: `Bearer ${token}` } },
     auth: { persistSession: false },
   });
-  const { data, error } = await sb.from("admins").select("user_id").maybeSingle();
+  const { data: user } = await sb.auth.getUser(token);
+  if (!user.user) return Response.json({ error: "unauthorized" }, { status: 401 });
+  // 최고/부 관리자는 모든 관리자 행을 볼 수 있으므로 자기 행으로 좁힌다.
+  const { data, error } = await sb.from("admins").select("user_id").eq("user_id", user.user.id).maybeSingle();
   if (error || !data) return Response.json({ error: "forbidden" }, { status: 403 });
 
   // rewrite 된 실제 경로(/[lang]/...) 기준으로, 루트 레이아웃 아래 전부를 무효화한다.

@@ -24,13 +24,24 @@ npm run lint
    - `supabase/migrations/0001_init.sql`
    - `supabase/migrations/0002_seed.sql`
    - `supabase/migrations/0003_combo_starters.sql`
+   - `supabase/migrations/0004_admin_roles.sql`
 3. Authentication → Sign In / Providers → **Allow new users to sign up 끄기**
-4. Authentication → Users → Add user 로 관리자 계정(이메일+비밀번호) 생성
-5. SQL Editor 에서 관리자 등록
+4. Authentication → Users → Add user 로 최고 관리자 계정(이메일+비밀번호) 생성 (Auto Confirm User 체크)
+5. SQL Editor 에서 최고 관리자 등록 (처음 한 번만)
    ```sql
-   insert into admins (user_id) select id from auth.users where email = '관리자 이메일';
+   insert into admins (user_id, role) select id, 'super' from auth.users where email = '관리자 이메일';
    ```
+   0004 이전에 등록한 관리자는 0004 를 실행할 때 자동으로 최고 관리자가 된다.
 6. Project Settings → API 에서 `Project URL`, `anon public` 키 확인 → `.env.local` 에 입력 (`.env.example` 참고)
+
+### 관리자 추가 (부 관리자 / 캐릭터 관리자)
+
+1. Supabase 대시보드 → Authentication → Users → **Add user** → **Create new user**
+   - 이메일, 임시 비밀번호 입력, **Auto Confirm User** 체크
+2. 사이트 `/admin` → 관리자 → **+ 관리자 추가** → 이메일로 찾아 역할·표시 이름·담당 캐릭터 지정
+3. 새 관리자에게 이메일과 임시 비밀번호를 전달한다. 비밀번호 변경은 대시보드에서 한다
+   (Users → 해당 계정 → Reset password 또는 직접 변경).
+4. 해임은 `/admin` 에서 한다. 로그인 계정 자체를 없애려면 대시보드에서 사용자를 삭제한다.
 
 ## 2. GitHub
 

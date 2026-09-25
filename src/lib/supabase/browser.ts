@@ -14,12 +14,40 @@ export function supabaseBrowser(): SupabaseClient {
   return client;
 }
 
-/** 현재 로그인한 계정이 admins 테이블에 있는지 (RLS 로 자기 행만 보인다) */
-export async function checkIsAdmin(sb: SupabaseClient): Promise<boolean> {
+export type AdminRole = "super" | "sub" | "character";
+
+export type AdminInfo = {
+  userId: string;
+  email: string | null;
+  role: AdminRole;
+  displayName: string;
+  /** 캐릭터 관리자가 맡은 캐릭터 (최고/부 관리자는 모든 캐릭터를 편집할 수 있으므로 비어 있어도 된다) */
+  characterIds: number[];
+};
+
+export const ROLE_LABELS: Record<AdminRole, string> = {
+  super: "최고 관리자",
+  sub: "부 관리자",
+  character: "캐릭터 관리자",
+};
+
+/** 로그인한 계정의 관리자 정보. 관리자가 아니거나 로그인하지 않았으면 null */
+export async function getAdminInfo(sb: SupabaseClient): Promise<AdminInfo | null> {
   const { data: session } = await sb.auth.getSession();
-  if (!session.session) return false;
-  const { data } = await sb.from("admins").select("user_id").maybeSingle();
-  return !!data;
+  const user = session.session?.user;
+  if (!user) return null;
+  const [{ data: me }, { data: chars }] = await Promise.all([
+    sb.from("admins").select("role,display_name").eq("user_id", user.id).maybeSingle(),
+    sb.from("admin_characters").select("character_id").eq("user_id", user.id),
+  ]);
+  if (!me) return null;
+  return {
+    userId: user.id,
+    email: user.email ?? null,
+    role: me.role,
+    displayName: me.display_name ?? "",
+    characterIds: (chars ?? []).map((c) => c.character_id),
+  };
 }
 
 /** 저장 후 정적 페이지를 다시 만들도록 서버에 알린다. */
@@ -28,4 +56,11 @@ export async function revalidateSite(sb: SupabaseClient) {
   const token = data.session?.access_token;
   if (!token) return;
   await fetch("/api/revalidate", { method: "POST", headers: { Authorization: `Bearer ${token}` } });
+}
+
+/** Supabase 오류를 관리자에게 보여 줄 문장으로 */
+export function describeError(error: { code?: string; message: string }): string {
+  if (error.code === "42501" || /row-level security/i.test(error.message)) return "이 작업을 할 권한이 없습니다.";
+  if (error.code === "23505") return "이미 있는 값입니다.";
+  return error.message;
 }

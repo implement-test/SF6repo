@@ -56,6 +56,7 @@ const ko = {
   },
   patch: { outdated: "이전 패치 기준" },
   created: "작성일",
+  author: { created: "작성", updated: "수정" },
   video: { show: "영상 보기", hide: "영상 접기" },
   notationPage: {
     title: "콤보 표기법",
@@ -123,6 +124,7 @@ const en: Dictionary = {
   },
   patch: { outdated: "Older patch" },
   created: "Added",
+  author: { created: "By", updated: "Edited by" },
   video: { show: "Show video", hide: "Hide video" },
   notationPage: {
     title: "Combo notation",
@@ -188,6 +190,7 @@ const ja: Dictionary = {
   },
   patch: { outdated: "旧パッチ基準" },
   created: "作成日",
+  author: { created: "作成", updated: "更新" },
   video: { show: "動画を見る", hide: "動画を閉じる" },
   notationPage: {
     title: "コンボ表記",

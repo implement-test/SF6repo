@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getCharacter, getCombos, getLatestPatchId } from "@/lib/data";
+import { getAuthorNames, getCharacter, getCombos, getLatestPatchId } from "@/lib/data";
 import { hasLocale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { ComboCard } from "@/components/combo-card";
@@ -16,12 +16,16 @@ export default async function CombosPage({ params }: PageProps<"/[lang]/[charact
   if (!character) notFound();
 
   const dict = getDictionary(lang);
-  const [combos, latestPatchId] = await Promise.all([getCombos(character.id), getLatestPatchId()]);
+  const [combos, latestPatchId, authors] = await Promise.all([
+    getCombos(character.id),
+    getLatestPatchId(),
+    getAuthorNames(),
+  ]);
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-end empty:hidden">
-        <AddButton entity="combo" label="콤보 추가" defaults={{ character_id: character.id }} />
+        <AddButton entity="combo" label="콤보 추가" scope={character.id} defaults={{ character_id: character.id }} />
       </div>
       <DraftCombos characterId={character.id} />
       <ComboFilters
@@ -32,7 +36,7 @@ export default async function CombosPage({ params }: PageProps<"/[lang]/[charact
             id: combo.id,
             hitStates: combo.hit_states,
             positionStart: combo.position_start,
-            card: <ComboCard combo={combo} locale={lang} dict={dict} latestPatchId={latestPatchId} />,
+            card: <ComboCard combo={combo} locale={lang} dict={dict} latestPatchId={latestPatchId} authors={authors} />,
           }))}
       />
     </div>
