@@ -69,7 +69,9 @@ export function ComboFilters({ items, dict }: { items: ComboFilterItem[]; dict: 
       </div>
 
       {visible.length === 0 ? (
-        <p className="border border-dashed border-border py-12 text-center text-muted">{dict.combo.empty}</p>
+        <p className="border border-dashed border-border py-12 text-center text-muted">
+          {items.length === 0 ? dict.combo.none : dict.combo.empty}
+        </p>
       ) : (
         <div className="flex flex-col gap-2">
           {visible.map((item) => (
