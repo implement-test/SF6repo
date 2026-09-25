@@ -64,7 +64,7 @@ export const sampleCombos: Combo[] = [
     notation_classic: "2MP → DRC → 5HP → MP·HP → 236HP",
     notation_modern: null,
     extra_routes: [
-      { classic: "2MP → DRC → 5HP → 236236K", modern: null, damage: 3800, drive_cost: 3, sa_cost: 2, frame_after: "다운 +14" },
+      { classic: "2MP → DRC → 5HP → 236236K", modern: null, damage: 3800, drive_cost: 3, sa_cost: 2, frame_after: "다운 +14", note: { ko: "SA2 로 마무리. 게이지가 있을 때만." } },
     ],
     hit_states: ["punish_counter"],
     position_start: "midscreen",

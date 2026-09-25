@@ -18,6 +18,14 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         kind: "added",
         text: {
+          ko: "콤보 메모를 공용·루트별로 나눔. 마지막에 고른 루트의 정보를 계속 표시",
+          en: "Combo notes split into shared and per-route; the last hovered route stays shown",
+          ja: "コンボのメモを共通・ルート別に分割。最後に選んだルートの情報を表示し続ける",
+        },
+      },
+      {
+        kind: "added",
+        text: {
           ko: "한 콤보에 루트 여러 개. 루트에 마우스를 올리면 데미지·프레임 등이 그 루트로 바뀜",
           en: "Combos can hold multiple routes; hover a route to see its damage, frames and gauge cost",
           ja: "1つのコンボに複数ルート。ルートにマウスを重ねるとダメージ・フレームなどがそのルートに切り替わる",

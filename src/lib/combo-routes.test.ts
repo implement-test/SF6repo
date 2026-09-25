@@ -26,9 +26,9 @@ describe("comboRoutes", () => {
 describe("routesToColumns", () => {
   it("첫 번째는 칼럼으로, 나머지는 extra_routes 로 (빈 루트는 버림)", () => {
     const cols = routesToColumns([
-      { classic: " 5LP ", modern: "", damage: 300, drive_cost: 0, sa_cost: 0, frame_after: " +2 " },
-      { classic: "", modern: null, damage: null, drive_cost: 0, sa_cost: 0, frame_after: null },
-      { classic: "5MP", modern: "5M", damage: null, drive_cost: 1, sa_cost: 1, frame_after: null },
+      { classic: " 5LP ", modern: "", damage: 300, drive_cost: 0, sa_cost: 0, frame_after: " +2 ", note: null },
+      { classic: "", modern: null, damage: null, drive_cost: 0, sa_cost: 0, frame_after: null, note: null },
+      { classic: "5MP", modern: "5M", damage: null, drive_cost: 1, sa_cost: 1, frame_after: null, note: null },
     ]);
     expect(cols).toMatchObject({
       notation_classic: "5LP",
@@ -39,7 +39,18 @@ describe("routesToColumns", () => {
     });
   });
 
-  it("루트가 하나도 없으면 null", () => {
-    expect(routesToColumns([])).toBeNull();
+  it("루트가 하나도 없으면 empty", () => {
+    expect(routesToColumns([])).toBe("empty");
+  });
+
+  it("루트 메모: 1번은 route_note, 나머지는 루트 안에. 한국어가 없으면 missing-ko", () => {
+    const r = { classic: "5LP", modern: null, damage: null, drive_cost: 0, sa_cost: 0, frame_after: null };
+    expect(
+      routesToColumns([
+        { ...r, note: { ko: " 공용 아님 ", en: "" } },
+        { ...r, note: { ko: "" } },
+      ]),
+    ).toMatchObject({ route_note: { ko: "공용 아님" }, extra_routes: [{ note: null }] });
+    expect(routesToColumns([{ ...r, note: { ko: "", en: "only en" } }])).toBe("missing-ko");
   });
 });

@@ -178,6 +178,25 @@ export function ComboCard({
             {notes.text} {!notes.translated && <NotTranslatedBadge label={dict.notTranslated} />}
           </p>
         )}
+        {/* 루트별 메모: 지금 고른 루트의 것만 (루트 수치와 함께 바뀐다) */}
+        {routes.some((r) => r.note) && (
+          <RoutePanels
+            panels={routes.map((route, r) => {
+              if (!route.note) return null;
+              const note = pickLocalized(route.note, locale);
+              return (
+                <p key={r} className="border-l-2 border-accent pl-2 text-sm whitespace-pre-line text-muted">
+                  {multiRoute && (
+                    <span className="mr-1.5 text-xs font-bold text-accent">
+                      {dict.combo.route} {r + 1}
+                    </span>
+                  )}
+                  {note.text} {!note.translated && <NotTranslatedBadge label={dict.notTranslated} />}
+                </p>
+              );
+            })}
+          />
+        )}
 
         {linkedSetups.length > 0 && (
           <div className="flex flex-wrap items-center gap-1.5">

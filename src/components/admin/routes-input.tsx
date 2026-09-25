@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComboRoute } from "@/lib/types";
+import type { ComboRoute, Localized } from "@/lib/types";
 import { emptyRoute } from "@/lib/combo-routes";
 import { NotationRow, inputClass } from "./starters-input";
 
@@ -119,6 +119,10 @@ export function RoutesInput({
                 />
               </label>
             </div>
+            {/* 루트가 여러 개일 때만: 이 루트만의 메모 (공용 메모는 '설명'의 메모 칸) */}
+            {(routes.length > 1 || r.note) && (
+              <RouteNoteInput value={r.note} onChange={(note) => update(i, { note })} />
+            )}
           </li>
         ))}
       </ol>
@@ -130,6 +134,40 @@ export function RoutesInput({
         + 루트 추가
       </button>
       {help && <span className="text-xs text-muted">{help}</span>}
+    </div>
+  );
+}
+
+const NOTE_LANGS = [
+  { key: "ko", placeholder: "한국어 (메모가 있으면 필수)" },
+  { key: "en", placeholder: "English (선택)" },
+  { key: "ja", placeholder: "日本語 (선택)" },
+] as const;
+
+/** 루트별 메모 (ko / en / ja). 줄바꿈은 그대로 표시된다 */
+function RouteNoteInput({
+  value,
+  onChange,
+}: {
+  value: Localized | null;
+  onChange: (v: Localized | null) => void;
+}) {
+  const note: Partial<Localized> = value ?? {};
+  return (
+    <div className="flex flex-col gap-1.5 border-t border-border pt-2">
+      <span className="text-xs text-muted">이 루트만의 메모</span>
+      {NOTE_LANGS.map((lang) => (
+        <div key={lang.key} className="grid grid-cols-[3.2rem_1fr] items-start gap-2">
+          <span className="pt-1.5 text-xs font-bold uppercase text-muted">{lang.key}</span>
+          <textarea
+            rows={1}
+            value={note[lang.key] ?? ""}
+            onChange={(e) => onChange({ ...note, [lang.key]: e.target.value } as Localized)}
+            placeholder={lang.placeholder}
+            className={`${inputClass} field-sizing-content min-h-9 resize-y`}
+          />
+        </div>
+      ))}
     </div>
   );
 }

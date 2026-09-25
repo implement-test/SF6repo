@@ -148,7 +148,18 @@ export const ENTITIES: Record<EntityType, Entity> = {
         ],
       },
       { title: "기타", fields: [{ key: "difficulty", label: "입력 난이도", type: "select", options: DIFFICULTY }] },
-      { title: "설명", fields: [{ key: "notes", label: "메모", type: "localized", multiline: true }] },
+      {
+        title: "설명",
+        fields: [
+          {
+            key: "notes",
+            label: "메모 (공용)",
+            type: "localized",
+            multiline: true,
+            help: "모든 루트에 공통인 메모. 루트가 여러 개면 루트 칸에서 루트별 메모도 쓸 수 있습니다.",
+          },
+        ],
+      },
       MEDIA_GROUP,
       META_GROUP,
     ],
@@ -157,7 +168,7 @@ export const ENTITIES: Record<EntityType, Entity> = {
       starters: [],
       hit_states: ["normal"],
       position_start: "midscreen",
-      routes: [{ classic: "", modern: null, damage: null, drive_cost: 0, sa_cost: 0, frame_after: null }],
+      routes: [{ classic: "", modern: null, damage: null, drive_cost: 0, sa_cost: 0, frame_after: null, note: null }],
       difficulty: "normal",
     }),
   },

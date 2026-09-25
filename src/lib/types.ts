@@ -92,6 +92,8 @@ export type ComboRoute = {
   drive_cost: number;
   sa_cost: number;
   frame_after: string | null;
+  /** 이 루트만의 메모 (콤보 메모는 모든 루트 공용) */
+  note: Localized | null;
 };
 
 export type Combo = ContentBase &
@@ -102,6 +104,8 @@ export type Combo = ContentBase &
     starters: StarterGroup[];
     /** 2번째부터의 루트 (첫 번째 루트는 아래 칼럼들). comboRoutes() 로 합쳐 쓴다 */
     extra_routes?: ComboRoute[];
+    /** 루트 1의 메모 (2번째부터는 extra_routes 안에) */
+    route_note?: Localized | null;
     /** 첫 번째 루트 */
     notation_classic: string;
     notation_modern: string | null;

@@ -647,7 +647,8 @@ function buildPayload(fields: Field[], values: Values): { payload: Values; probl
       case "routes": {
         // 첫 번째 루트는 기존 칼럼, 나머지는 extra_routes 로 나눠 저장한다
         const columns = routesToColumns((raw as ComboRoute[] | null) ?? []);
-        if (!columns) return { payload, problem: "루트 1의 클래식 표기를 입력하세요." };
+        if (columns === "empty") return { payload, problem: "루트 1의 클래식 표기를 입력하세요." };
+        if (columns === "missing-ko") return { payload, problem: "루트 메모: 한국어는 필수입니다." };
         Object.assign(payload, columns);
         break;
       }
