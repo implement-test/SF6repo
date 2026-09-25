@@ -1,4 +1,4 @@
-import type { Character, Combo, Patch } from "@/lib/types";
+import type { Character, Combo, Patch, Setup, SetupComboLink, SetupSituation } from "@/lib/types";
 
 /**
  * Supabase 환경변수가 없을 때 쓰는 예시 데이터.
@@ -42,6 +42,7 @@ export const sampleCombos: Combo[] = [
     hit_states: ["normal"],
     position_start: "midscreen",
     frame_after: "+32",
+    end_position: "midscreen",
     drive_cost: 0,
     sa_cost: 0,
     damage: null,
@@ -60,6 +61,7 @@ export const sampleCombos: Combo[] = [
     hit_states: ["punish_counter"],
     position_start: "midscreen",
     frame_after: "다운 +30",
+    end_position: "corner",
     drive_cost: 3,
     sa_cost: 0,
     damage: null,
@@ -79,6 +81,7 @@ export const sampleCombos: Combo[] = [
     hit_states: ["corner_impact_stun"],
     position_start: "corner",
     frame_after: "다운 +30",
+    end_position: "corner",
     drive_cost: 1,
     sa_cost: 1,
     damage: null,
@@ -87,4 +90,66 @@ export const sampleCombos: Combo[] = [
     sort_order: 3,
     created_date: "2026-09-20",
   },
+];
+
+export const sampleSituations: SetupSituation[] = [
+  { slug: "oki", name: { ko: "기상 공격", en: "Okizeme", ja: "起き攻め" }, sort_order: 1 },
+  { slug: "safe_jump", name: { ko: "안전 점프", en: "Safe jump", ja: "詐欺飛び" }, sort_order: 2 },
+  { slug: "after_throw", name: { ko: "잡기 후", en: "After throw", ja: "投げ後" }, sort_order: 3 },
+  { slug: "after_combo", name: { ko: "콤보 후", en: "After combo", ja: "コンボ後" }, sort_order: 4 },
+];
+
+const setupBase = {
+  character_id: 1,
+  patch_id: 1,
+  is_published: true,
+  media_url: null,
+  youtube_url: null,
+  youtube_start: null,
+  difficulty: "normal",
+  created_date: "2026-09-25",
+} as const;
+
+export const sampleSetups: Setup[] = [
+  {
+    ...setupBase,
+    id: 1,
+    title: { ko: "[예시] 코너 기상 압박", en: "[Sample] Corner oki" },
+    situations: ["oki", "after_combo"],
+    notation_classic: "66 → delay 5MP",
+    notation_modern: null,
+    description: { ko: "예시 설명입니다. 실제 공략 내용이 아닙니다." },
+    target_level: "intermediate",
+    sort_order: 1,
+    options: [
+      { label: "A", classic: "2MK → DRC → 5HP", modern: null, description: { ko: "가드 시 이어서 압박" }, youtube_url: null },
+      { label: "B", classic: "LPLK", modern: "LM", description: { ko: "잡기" }, youtube_url: null },
+    ],
+    practice: {
+      guard: "all",
+      playback: "random",
+      wakeup: ["2LP", "LPLK"],
+      after_guard: { count: 1, slots: ["2LP", "4"] },
+      after_hit: [],
+      notes: { ko: "더미 위치: 코너" },
+    },
+  },
+  {
+    ...setupBase,
+    id: 2,
+    title: { ko: "[예시] 잡기 후 상황" },
+    situations: ["after_throw"],
+    notation_classic: null,
+    notation_modern: null,
+    description: null,
+    target_level: "beginner",
+    sort_order: 2,
+    options: [{ label: "A", classic: "66 → 5LP", modern: null, description: null, youtube_url: null }],
+    practice: null,
+  },
+];
+
+export const sampleSetupLinks: SetupComboLink[] = [
+  { id: 1, setup_id: 1, combo_id: 2, sort_order: 0 },
+  { id: 2, setup_id: 1, combo_id: 3, sort_order: 1 },
 ];

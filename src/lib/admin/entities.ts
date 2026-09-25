@@ -17,11 +17,19 @@ export type Field = { key: string; label: string; help?: string; required?: bool
   | { type: "date" }
   | { type: "checkbox" }
   | { type: "patch" }
+  /** 셋업 상황 태그 (setup_situations 에서 불러온다) */
+  | { type: "situations" }
+  /** 셋업 옵션 A/B/... */
+  | { type: "setupOptions" }
+  /** 트레이닝 모드 더미 설정 */
+  | { type: "practice" }
+  /** 이 셋업으로 이어지는 콤보. 칼럼이 아니라 setup_combos 연결 표에 저장한다 */
+  | { type: "comboLinks" }
 );
 
 export type FieldGroup = { title: string; fields: Field[] };
 
-export type EntityType = "combo" | "patch";
+export type EntityType = "combo" | "patch" | "setup";
 
 export type Entity = {
   table: string;
@@ -55,6 +63,11 @@ const POSITIONS: Option[] = [
   { value: "near_corner", label: "코너 근처" },
   { value: "corner", label: "코너" },
   { value: "other", label: "기타" },
+];
+
+const END_POSITIONS: Option[] = [
+  { value: "midscreen", label: "필드" },
+  { value: "corner", label: "코너" },
 ];
 
 const HIT_STATES: Option[] = [
@@ -148,6 +161,14 @@ export const ENTITIES: Record<EntityType, Entity> = {
           { key: "drive_cost", label: "드라이브 소모 (칸)", type: "number", step: 0.5, min: 0, max: 6 },
           { key: "sa_cost", label: "SA 소모 (칸)", type: "number", step: 1, min: 0, max: 3 },
           { key: "frame_after", label: "콤보 후 프레임", type: "text", help: "예: +32, 다운 +30" },
+          {
+            key: "end_position",
+            label: "콤보 후 위치",
+            type: "select",
+            options: END_POSITIONS,
+            nullable: true,
+            help: "셋업 화면에 표시됩니다.",
+          },
           { key: "difficulty", label: "입력 난이도", type: "select", options: DIFFICULTY },
         ],
       },
@@ -161,10 +182,51 @@ export const ENTITIES: Record<EntityType, Entity> = {
       hit_states: ["normal"],
       position_start: "midscreen",
       frame_after: null,
+      end_position: null,
       drive_cost: 0,
       sa_cost: 0,
       damage: null,
       difficulty: "normal",
+    }),
+  },
+
+  setup: {
+    table: "setups",
+    label: "셋업",
+    groups: [
+      {
+        title: "셋업",
+        fields: [
+          { key: "title", label: "제목", type: "localized", required: true },
+          { key: "situations", label: "상황", type: "situations", wide: true },
+          {
+            key: "combo_links",
+            label: "이 셋업으로 이어지는 콤보",
+            type: "comboLinks",
+            wide: true,
+            help: "콤보의 루트(마무리 루트), 콤보 후 위치, 콤보 후 프레임이 셋업에 표시됩니다. 잡기 후 셋업처럼 콤보가 없어도 됩니다.",
+          },
+          { key: "notation_classic", label: "셋업 입력 (클래식)", type: "notation", wide: true, help: "옵션으로 갈라지기 전 공통 부분 (없으면 비움)" },
+          { key: "notation_modern", label: "셋업 입력 (모던)", type: "notation", wide: true },
+          { key: "description", label: "설명", type: "localized", multiline: true },
+        ],
+      },
+      { title: "프랙티스 설정", fields: [{ key: "practice", label: "트레이닝 모드 더미 설정", type: "practice", wide: true }] },
+      { title: "옵션", fields: [{ key: "options", label: "옵션", type: "setupOptions", wide: true }] },
+      { title: "기타", fields: [{ key: "difficulty", label: "입력 난이도", type: "select", options: DIFFICULTY }] },
+      MEDIA_GROUP,
+      META_GROUP,
+    ],
+    defaults: () => ({
+      ...metaDefaults(),
+      situations: [],
+      options: [
+        { label: "A", classic: "", modern: null, description: null, youtube_url: null },
+        { label: "B", classic: "", modern: null, description: null, youtube_url: null },
+      ],
+      practice: null,
+      difficulty: "normal",
+      combo_links: [],
     }),
   },
 

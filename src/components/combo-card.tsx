@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Combo } from "@/lib/types";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
@@ -15,12 +16,17 @@ export function ComboCard({
   dict,
   latestPatchId,
   authors,
+  characterSlug,
+  linkedSetups = [],
 }: {
   combo: Combo;
   locale: Locale;
   dict: Dictionary;
   latestPatchId: number | null;
   authors: Record<string, string>;
+  characterSlug: string;
+  /** 이 콤보에서 이어지는 셋업. preview 는 마우스를 올렸을 때 보여 줄 텍스트 */
+  linkedSetups?: { id: number; title: string; preview: string }[];
 }) {
   const createdBy = combo.created_by ? authors[combo.created_by] : undefined;
   const updatedBy = combo.updated_by ? authors[combo.updated_by] : undefined;
@@ -101,6 +107,22 @@ export function ComboCard({
             {notes.text} {!notes.translated && <NotTranslatedBadge label={dict.notTranslated} />}
           </p>
         )}
+
+        {linkedSetups.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="eyebrow">{dict.setup.linked}</span>
+            {linkedSetups.map((s) => (
+              <Link
+                key={s.id}
+                href={`/${characterSlug}/setups#setup-${s.id}`}
+                title={s.preview}
+                className="skew border border-highlight/60 px-2.5 py-0.5 text-xs font-bold text-highlight-text transition-colors hover:bg-highlight hover:text-highlight-fg"
+              >
+                <span>{s.title} →</span>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
       <aside className="flex flex-col justify-between gap-3 border-t border-border bg-surface-2/60 px-4 py-4 md:border-l md:border-t-0">
@@ -113,10 +135,20 @@ export function ComboCard({
             <p className="mt-1 text-xs text-muted">* {dict.combo.damageBasis}</p>
           )}
         </div>
-        {combo.frame_after && (
-          <div>
-            <p className="eyebrow">{dict.combo.frameAfter}</p>
-            <p className="display text-2xl tabular-nums">{combo.frame_after}</p>
+        {(combo.frame_after || combo.end_position) && (
+          <div className="flex flex-wrap gap-x-5 gap-y-2">
+            {combo.frame_after && (
+              <div>
+                <p className="eyebrow">{dict.combo.frameAfter}</p>
+                <p className="display text-2xl tabular-nums">{combo.frame_after}</p>
+              </div>
+            )}
+            {combo.end_position && (
+              <div>
+                <p className="eyebrow">{dict.setup.endPosition}</p>
+                <p className="display text-2xl">{dict.position[combo.end_position]}</p>
+              </div>
+            )}
           </div>
         )}
         <div className="flex flex-col gap-1.5">

@@ -18,6 +18,22 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         kind: "added",
         text: {
+          ko: "셋업 페이지: 이어지는 콤보, 프랙티스 설정, 옵션 A/B",
+          en: "Setups page: leading combos, training settings, options A/B",
+          ja: "セットプレイページ：つながるコンボ、トレーニング設定、択A/B",
+        },
+      },
+      {
+        kind: "added",
+        text: {
+          ko: "콤보에서 연결된 셋업 바로가기 (미리보기 포함), 콤보 후 위치 표시",
+          en: "Links from combos to their setups (with preview), position after combo",
+          ja: "コンボから関連セットプレイへのリンク（プレビュー付き）、コンボ後の位置表示",
+        },
+      },
+      {
+        kind: "added",
+        text: {
           ko: "콤보 표기에 히트 상황 배지 (air · counter · punish)",
           en: "Hit situation badges in combo notation (air, counter, punish)",
           ja: "コンボ表記にヒット状況バッジ（air・counter・punish）",

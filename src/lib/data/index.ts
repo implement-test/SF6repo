@@ -1,7 +1,14 @@
 import "server-only";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import type { Character, Combo, Patch } from "@/lib/types";
-import { sampleCharacters, sampleCombos, samplePatches } from "./sample";
+import type { Character, Combo, Patch, Setup, SetupComboLink, SetupSituation } from "@/lib/types";
+import {
+  sampleCharacters,
+  sampleCombos,
+  samplePatches,
+  sampleSetupLinks,
+  sampleSetups,
+  sampleSituations,
+} from "./sample";
 
 /**
  * 방문자 페이지용 데이터 조회.
@@ -61,4 +68,29 @@ export async function getCombos(characterId: number): Promise<Combo[]> {
   const c = db();
   if (!c) return sampleCombos.filter((combo) => combo.character_id === characterId);
   return rows<Combo>(c.from("combos").select("*").eq("character_id", characterId).order("sort_order"));
+}
+
+export async function getSetupSituations(): Promise<SetupSituation[]> {
+  const c = db();
+  if (!c) return sampleSituations;
+  return rows<SetupSituation>(c.from("setup_situations").select("*").order("sort_order"));
+}
+
+export async function getSetups(characterId: number): Promise<Setup[]> {
+  const c = db();
+  if (!c) return sampleSetups.filter((s) => s.character_id === characterId);
+  const list = await rows<Setup>(
+    c.from("setups").select("*").eq("character_id", characterId).order("sort_order").order("id"),
+  );
+  // 0007 마이그레이션 전 데이터도 보여 줄 수 있게 기본값을 채운다.
+  return list.map((s) => ({ ...s, options: s.options ?? [], practice: s.practice ?? null }));
+}
+
+/** 셋업 ↔ 콤보 연결 (이 캐릭터의 셋업만). 연결 표가 없거나 실패해도 페이지는 그대로 보여 준다. */
+export async function getSetupComboLinks(setupIds: number[]): Promise<SetupComboLink[]> {
+  const c = db();
+  if (!c) return sampleSetupLinks.filter((l) => setupIds.includes(l.setup_id));
+  if (setupIds.length === 0) return [];
+  const { data } = await c.from("setup_combos").select("*").in("setup_id", setupIds).order("sort_order");
+  return (data ?? []) as SetupComboLink[];
 }

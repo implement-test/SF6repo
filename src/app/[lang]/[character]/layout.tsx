@@ -7,6 +7,7 @@ import { ContentFilters } from "@/components/prefs-controls";
 import { CharacterNav } from "@/components/character-nav";
 import { formatPatchVersion } from "@/lib/patch";
 import { PresetButton } from "@/components/admin/preset-button";
+import { HashHighlight } from "@/components/hash-highlight";
 
 export async function generateStaticParams() {
   const characters = await getCharacters();
@@ -64,6 +65,7 @@ export default async function CharacterLayout({ children, params }: LayoutProps<
       <ContentFilters dict={dict} />
 
       <div>{children}</div>
+      <HashHighlight />
     </div>
   );
 }

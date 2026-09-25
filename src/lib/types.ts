@@ -85,6 +85,53 @@ export type Combo = ContentBase &
     damage: number | null;
     /** 콤보 후 프레임 (예: "+32", "다운 +30") */
     frame_after: string | null;
+    /** 콤보 후 위치 (셋업 화면용 정보) */
+    end_position: ScreenPosition | null;
     difficulty: Difficulty;
     notes: Localized | null;
   };
+
+// ───────────────────────── 셋업 ─────────────────────────
+
+export type SetupSituation = { slug: string; name: Localized; sort_order: number };
+
+/** 옵션 A / B / ... */
+export type SetupOption = {
+  label: string;
+  classic: string;
+  modern: string | null;
+  description: Localized | null;
+  youtube_url: string | null;
+};
+
+export type GuardSetting = "all" | "none" | "after_first" | "random";
+export const GUARD_SETTINGS: GuardSetting[] = ["all", "none", "after_first", "random"];
+
+/**
+ * 트레이닝 모드 더미 설정. 리버설 슬롯은 콤보 표기로 적는다 (2LP, LPLK, 4 …).
+ * 녹화 슬롯이 여러 개면 기본은 랜덤 재생.
+ */
+export type PracticeConfig = {
+  guard: GuardSetting | null;
+  playback: "random" | "sequential";
+  wakeup: string[];
+  after_guard: { count: number | null; slots: string[] };
+  after_hit: string[];
+  notes: Localized | null;
+};
+
+export type Setup = ContentBase &
+  Media & {
+    character_id: number;
+    title: Localized;
+    situations: string[];
+    /** 셋업 입력 (옵션으로 갈라지기 전 공통 부분) */
+    notation_classic: string | null;
+    notation_modern: string | null;
+    description: Localized | null;
+    difficulty: Difficulty;
+    options: SetupOption[];
+    practice: PracticeConfig | null;
+  };
+
+export type SetupComboLink = { id: number; setup_id: number; combo_id: number; sort_order: number };

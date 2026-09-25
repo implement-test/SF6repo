@@ -5,13 +5,21 @@ import { useRouter } from "next/navigation";
 import { ENTITIES, type Field } from "@/lib/admin/entities";
 import { findUnknownTokens, parseNotation } from "@/lib/notation/parse";
 import { describeError, revalidateSite, supabaseBrowser } from "@/lib/supabase/browser";
-import type { ComboStarter, Localized, Patch } from "@/lib/types";
+import type { ComboStarter, Localized, Patch, PracticeConfig, SetupOption } from "@/lib/types";
 import { parseYouTube } from "@/lib/youtube";
 import { NotationImage } from "../notation";
 import { useAdmin, type EditorRequest } from "./admin-context";
 import { formatPatchVersion } from "@/lib/patch";
 import { History, useAuthorNames } from "./history";
 import { StartersInput, cleanStarters, inputClass } from "./starters-input";
+import {
+  ComboLinksInput,
+  OptionsInput,
+  PracticeInput,
+  SituationsInput,
+  cleanOptions,
+  cleanPractice,
+} from "./setup-fields";
 
 type Values = Record<string, unknown>;
 const LANGS = [
@@ -28,8 +36,11 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
   const sb = supabaseBrowser();
   const isNew = request.id === undefined;
   const usesPatch = entity.groups.some((g) => g.fields.some((f) => f.type === "patch"));
+  const usesComboLinks = entity.groups.some((g) => g.fields.some((f) => f.type === "comboLinks"));
 
   const [values, setValues] = useState<Values | null>(null);
+  /** 불러왔을 때 연결돼 있던 콤보 (셋업). 저장할 때 달라진 것만 반영한다. */
+  const [initialLinks, setInitialLinks] = useState<number[]>([]);
   /** 불러왔을 때의 updated_at. 저장할 때 다른 관리자가 먼저 고쳤는지 확인한다. */
   const [baseUpdatedAt, setBaseUpdatedAt] = useState<string | null>(null);
   const [patches, setPatches] = useState<Patch[]>([]);
@@ -54,16 +65,44 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
           return;
         }
         initial = data;
+        if (usesComboLinks) {
+          const { data: links } = await sb
+            .from("setup_combos")
+            .select("combo_id")
+            .eq("setup_id", request.id)
+            .order("sort_order");
+          initial.combo_links = (links ?? []).map((l) => l.combo_id);
+        }
       }
       if (cancelled) return;
       setPatches(patchList);
       setValues(initial);
+      setInitialLinks((initial.combo_links as number[] | undefined) ?? []);
       setBaseUpdatedAt((initial.updated_at as string | undefined) ?? null);
     })();
     return () => {
       cancelled = true;
     };
-  }, [sb, entity, isNew, request.id, request.defaults, usesPatch]);
+  }, [sb, entity, isNew, request.id, request.defaults, usesPatch, usesComboLinks]);
+
+  /** 셋업 ↔ 콤보 연결 맞추기: 빠진 것은 지우고, 나머지는 순서까지 저장 */
+  async function syncComboLinks(setupId: number): Promise<string | null> {
+    if (!usesComboLinks || !values) return null;
+    const wanted = (values.combo_links as number[] | undefined) ?? [];
+    const removed = initialLinks.filter((id) => !wanted.includes(id));
+    if (removed.length) {
+      const { error } = await sb.from("setup_combos").delete().eq("setup_id", setupId).in("combo_id", removed);
+      if (error) return describeError(error);
+    }
+    if (wanted.length) {
+      const { error } = await sb.from("setup_combos").upsert(
+        wanted.map((combo_id, sort_order) => ({ setup_id: setupId, combo_id, sort_order })),
+        { onConflict: "setup_id,combo_id" },
+      );
+      if (error) return describeError(error);
+    }
+    return null;
+  }
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -95,8 +134,14 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
     };
 
     if (isNew) {
-      const { error } = await sb.from(entity.table).insert({ ...request.defaults, ...payload });
+      const { data: inserted, error } = await sb
+        .from(entity.table)
+        .insert({ ...request.defaults, ...payload })
+        .select("id")
+        .single();
       if (error) return fail(describeError(error));
+      const linkError = await syncComboLinks(inserted.id);
+      if (linkError) return fail(`저장했지만 콤보 연결에 실패했습니다: ${linkError}`);
       return finish();
     }
 
@@ -114,6 +159,8 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
       }
       return fail("이 항목을 수정할 권한이 없습니다.");
     }
+    const linkError = await syncComboLinks(request.id!);
+    if (linkError) return fail(`저장했지만 콤보 연결에 실패했습니다: ${linkError}`);
     await finish();
   }
 
@@ -132,7 +179,8 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
 
   /** 변경 이력의 한 시점 내용을 폼에 불러온다 (저장해야 반영된다). */
   function loadVersion(snapshot: Values) {
-    setValues({ ...snapshot, updated_at: baseUpdatedAt });
+    // 연결 콤보는 이력에 없는 따로 저장되는 값이라 지금 값을 유지한다.
+    setValues((current) => ({ ...snapshot, combo_links: current?.combo_links, updated_at: baseUpdatedAt }));
     setShowHistory(false);
     setError("과거 버전을 불러왔습니다. 확인 후 저장하면 되돌려집니다.");
   }
@@ -330,6 +378,26 @@ function FieldInput({
         />
       );
 
+    case "situations":
+      return <SituationsInput label={field.label} value={(value as string[] | null) ?? []} onChange={onChange} />;
+
+    case "comboLinks":
+      return (
+        <ComboLinksInput
+          label={field.label}
+          help={field.help}
+          characterId={characterId}
+          value={(value as number[] | null) ?? []}
+          onChange={onChange}
+        />
+      );
+
+    case "setupOptions":
+      return <OptionsInput value={(value as SetupOption[] | null) ?? []} onChange={onChange} />;
+
+    case "practice":
+      return <PracticeInput value={(value as PracticeConfig | null) ?? null} onChange={onChange} />;
+
     case "text":
     case "url": {
       const text = (value as string | null) ?? "";
@@ -486,6 +554,18 @@ function buildPayload(fields: Field[], values: Values): { payload: Values; probl
         break;
       case "starters":
         payload[field.key] = cleanStarters(raw as ComboStarter[] | null);
+        break;
+      case "setupOptions":
+        payload[field.key] = cleanOptions(raw as SetupOption[] | null);
+        break;
+      case "practice":
+        payload[field.key] = cleanPractice(raw as PracticeConfig | null);
+        break;
+      case "situations":
+        payload[field.key] = (raw as string[] | null) ?? [];
+        break;
+      case "comboLinks":
+        // 칼럼이 아니라 setup_combos 에 따로 저장한다 (syncComboLinks)
         break;
       case "date":
         // 비워 두면 보내지 않는다 (DB 기본값 = 오늘)
