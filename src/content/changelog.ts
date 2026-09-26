@@ -19,6 +19,15 @@ export const CHANGELOG: ChangelogEntry[] = [
         kind: "added",
         adminOnly: true,
         text: {
+          ko: "Ultimate Frame Data 에서 31명의 커맨드·프레임 데이터를 가져오는 SQL (비공개 등록)",
+          en: "SQL to import moves and frame data for 31 characters from Ultimate Frame Data (unpublished)",
+          ja: "Ultimate Frame Data から31キャラの技・フレームデータを取り込むSQL（非公開で登録）",
+        },
+      },
+      {
+        kind: "added",
+        adminOnly: true,
+        text: {
           ko: "커맨드 리스트 '표 붙여넣기': 엑셀·시트·웹 표를 붙여 넣고 미리 본 뒤 한 번에 등록",
           en: "Command list 'Paste table': paste from Excel, Sheets or web tables, preview, and import in bulk",
           ja: "コマンドリスト「表を貼り付け」：Excel・シート・Webの表を貼り付けてプレビュー後に一括登録",

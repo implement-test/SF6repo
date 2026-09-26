@@ -79,6 +79,7 @@ const ko = {
     onHit: "히트",
     onBlock: "가드",
     empty: "아직 커맨드가 없습니다.",
+    source: "일부 프레임 데이터 출처:",
   },
   vs: {
     opponent: "상대 캐릭터",
@@ -221,6 +222,7 @@ const en: Dictionary = {
     onHit: "On hit",
     onBlock: "On block",
     empty: "No moves yet.",
+    source: "Some frame data from",
   },
   vs: {
     opponent: "Opponent",
@@ -361,6 +363,7 @@ const ja: Dictionary = {
     onHit: "ヒット",
     onBlock: "ガード",
     empty: "まだコマンドがありません。",
+    source: "一部フレームデータの出典：",
   },
   vs: {
     opponent: "対戦相手",

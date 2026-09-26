@@ -81,6 +81,13 @@ export default async function MovesPage({ params }: PageProps<"/[lang]/[characte
                 ))}
               </section>
             ))}
+          {/* 커맨드 표 일부를 가져온 곳 (scripts/import-ufd.mjs) */}
+          <p className="text-right text-xs text-muted">
+            {dict.moves.source}{" "}
+            <a href="https://ultimateframedata.com/sf6/" target="_blank" rel="noreferrer" className="underline hover:text-fg">
+              Ultimate Frame Data
+            </a>
+          </p>
         </>
       )}
     </div>
