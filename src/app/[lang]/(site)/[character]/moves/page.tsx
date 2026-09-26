@@ -7,6 +7,8 @@ import { MoveCard } from "@/components/move-card";
 import { AddButton } from "@/components/admin/admin-context";
 import { DraftItems } from "@/components/admin/drafts";
 import { ReorderButton } from "@/components/admin/reorder-button";
+import { MoveImportButton } from "@/components/admin/move-import-button";
+import { pickLocalized } from "@/lib/i18n/localized";
 
 export const revalidate = 3600;
 
@@ -31,6 +33,7 @@ export default async function MovesPage({ params }: PageProps<"/[lang]/[characte
   return (
     <div className="flex flex-col gap-6">
       <div className="flex justify-end gap-2 empty:hidden">
+        <MoveImportButton characterId={character.id} characterName={pickLocalized(character.name, "ko").text} />
         <ReorderButton table="moves" characterId={character.id} label="커맨드" />
         <AddButton entity="move" label="커맨드 추가" scope={character.id} defaults={{ character_id: character.id }} />
       </div>

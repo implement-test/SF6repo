@@ -16,6 +16,15 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-09-26",
     items: [
       {
+        kind: "added",
+        adminOnly: true,
+        text: {
+          ko: "커맨드 리스트 '표 붙여넣기': 엑셀·시트·웹 표를 붙여 넣고 미리 본 뒤 한 번에 등록",
+          en: "Command list 'Paste table': paste from Excel, Sheets or web tables, preview, and import in bulk",
+          ja: "コマンドリスト「表を貼り付け」：Excel・シート・Webの表を貼り付けてプレビュー後に一括登録",
+        },
+      },
+      {
         kind: "changed",
         adminOnly: true,
         text: {
