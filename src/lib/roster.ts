@@ -1,4 +1,5 @@
 import type { Localized } from "./types";
+import { BANNER_ASSETS } from "./banner-assets";
 
 /**
  * SF6 전체 캐릭터 (Vs 가이드의 상대 선택용).
@@ -119,62 +120,84 @@ export const rosterBySlug = (slug: string) => ROSTER.find((r) => r.slug === slug
  */
 const OFFICIAL_BASE = "https://www.streetfighter.com/6/assets/images/character";
 
-/** 캐릭터 선택용 컬러 이미지 (575×625, 이름이 새겨진 기울어진 카드) */
+/**
+ * 캐릭터 선택용 컬러 이미지 (이름이 새겨진 기울어진 카드).
+ * 줄여 둔 파일(public/characters, scripts/crop-banners.mjs)이 있으면 그것을, 없으면 공식 원본을 쓴다.
+ */
 export function rosterImage(slug: string): string | null {
   const r = rosterBySlug(slug);
-  return r ? `${OFFICIAL_BASE}/select_character${r.officialNo}_over.png` : null;
+  if (!r) return null;
+  if (BANNER_ASSETS[slug]?.select) return `/characters/${slug}-select.webp`;
+  return `${OFFICIAL_BASE}/select_character${r.officialNo}_over.png`;
 }
 
 /**
  * 공식 캐릭터 페이지(넓은 화면)의 배치를 그대로 옮긴 값. 모두 페이지 폭 대비 % (공식 폴더 이름 기준).
- *   [캐릭터 이미지 왼쪽, 위, 폭]  — 높이는 이미지 비율대로
+ *   [캐릭터 상자 왼쪽, 위, 폭, 높이] — 이미지는 상자 안에 비율을 지켜 가운데 맞춤 (object-fit: contain)
  * 배경은 폭 105%, 가운데·위쪽 맞춤. 공식 페이지는 맨 위 메뉴가 폭의 5.08% 만큼 덮고,
  * 그 아래 폭의 21.2% 높이가 첫 화면에 보인다 — 배너는 이 구간을 보여 준다.
  */
 export const BANNER_LAYOUT = { menu: 5.08, height: 21.2, backgroundWidth: 105.04 } as const;
 
-const FIGURE: Record<string, [number, number, number]> = {
-  aki: [3.78, -15.7, 78.78],
-  alex: [14.81, -11.5, 63.81],
-  arjun: [19.54, 4.79, 56.72],
-  blanka: [18.49, -3.9, 69.85],
-  cammy: [19.01, 5.25, 57.77],
-  chunli: [27.94, -5.72, 54.09],
-  cviper: [18.49, -0.21, 62.23],
-  deejay: [0.11, 2.1, 78.36],
-  dhalsim: [17.96, 1.58, 73.53],
-  ed: [13.76, 0.06, 60.66],
-  ehonda: [15.86, -16.69, 78.78],
-  elena: [-11.45, -36.71, 86.61],
-  gouki_akuma: [18.49, -5.2, 68.01],
-  guile: [21.64, 8.4, 51.47],
-  ingrid: [12.19, -11.5, 70.9],
-  jamie: [28.73, 2.1, 55.3],
-  jp: [25.74, 3.15, 47.69],
-  juri: [23.74, 0, 68.27],
-  ken: [13.24, 0, 68.27],
-  kimberly: [28.99, 0, 73.53],
-  lily: [9.56, -11.69, 78.36],
-  luke: [26.63, 3.68, 55.3],
-  mai: [21.12, -10.45, 61.87],
-  manon: [-0.78, 2.1, 97.37],
-  marisa: [23.22, 2.1, 61.97],
-  rashid: [10.09, -10.45, 100.83],
-  ryu: [23.74, 5.25, 55.3],
-  sagat: [11.66, -0.21, 70.9],
-  terry: [11.92, -5.2, 61.87],
-  vega_mbison: [23.74, -0.47, 56.3],
-  yasmine: [14.29, -17.01, 74.44],
-  zangief: [18.49, 3.68, 57.77],
+const FIGURE: Record<string, [number, number, number, number]> = {
+  aki: [3.78, -15.7, 78.78, 94.53],
+  alex: [14.81, -11.5, 63.81, 88.48],
+  arjun: [19.54, 4.79, 56.72, 78.65],
+  blanka: [18.49, -3.9, 69.85, 75.21],
+  cammy: [19.01, 5.25, 57.77, 69.59],
+  chunli: [27.94, -5.72, 54.09, 86.39],
+  cviper: [18.49, -0.21, 62.23, 80.7],
+  deejay: [0.11, 2.1, 78.36, 69.43],
+  dhalsim: [17.96, 1.58, 73.53, 72.32],
+  ed: [13.76, 0.06, 60.66, 73.16],
+  ehonda: [15.86, -16.69, 78.78, 94.37],
+  elena: [-11.45, -36.71, 86.61, 126.61],
+  gouki_akuma: [18.49, -5.2, 68.01, 82.87],
+  guile: [21.64, 8.4, 51.47, 69.69],
+  ingrid: [12.19, -11.5, 70.9, 98.31],
+  jamie: [28.73, 2.1, 55.3, 72.26],
+  jp: [25.74, 3.15, 47.69, 77.46],
+  juri: [23.74, 0, 68.27, 59.61],
+  ken: [13.24, 0, 68.27, 77.99],
+  kimberly: [28.99, 0, 73.53, 74.1],
+  lily: [9.56, -11.69, 78.36, 88.91],
+  luke: [26.63, 3.68, 55.3, 73.58],
+  mai: [21.12, -10.45, 61.87, 90.44],
+  manon: [-0.78, 2.1, 97.37, 77.62],
+  marisa: [23.22, 2.1, 61.97, 77.04],
+  rashid: [10.09, -10.45, 100.83, 94.53],
+  ryu: [23.74, 5.25, 55.3, 77.04],
+  sagat: [11.66, -0.21, 70.9, 91.93],
+  terry: [11.92, -5.2, 61.87, 90.44],
+  vega_mbison: [23.74, -0.47, 56.3, 82.56],
+  yasmine: [14.29, -17.01, 74.44, 103.23],
+  zangief: [18.49, 3.68, 57.77, 64.23],
 };
 
-/** 캐릭터 페이지 상단 배너: 배경 그림 + 캐릭터 이미지 (글자는 없음) */
-export function rosterBanner(
-  slug: string,
-): { background: string; figure: string; left: number; top: number; width: number } | null {
+/** 배너 무대 위의 이미지 하나. 좌표는 무대 폭 대비 % (세로 0 ~ BANNER_LAYOUT.height). 높이가 없으면 이미지 비율대로 */
+export type BannerLayer = { src: string; left: number; top: number; width: number; height?: number };
+
+/**
+ * 캐릭터 페이지 상단 배너: 배경 그림 + 캐릭터 이미지 (글자는 없음).
+ * 배너에 보이는 부분만 잘라 둔 파일(public/characters)이 있으면 그것을, 없으면 공식 원본을 공식 배치대로 놓는다.
+ */
+export function rosterBanner(slug: string): { background: BannerLayer; figure: BannerLayer } | null {
   const r = rosterBySlug(slug);
   if (!r) return null;
   const dir = `${OFFICIAL_BASE}/${r.officialDir}`;
-  const [left, top, width] = FIGURE[r.officialDir] ?? [20, 0, 60];
-  return { background: `${dir}/bg_${r.officialDir}.jpg`, figure: `${dir}/${r.officialDir}.png`, left, top, width };
+  const [left, top, width, height] = FIGURE[r.officialDir] ?? [20, 0, 60, 88];
+  const local = BANNER_ASSETS[slug];
+  return {
+    background: local?.background
+      ? { src: `/characters/${slug}-bg.webp`, ...local.background }
+      : {
+          src: `${dir}/bg_${r.officialDir}.jpg`,
+          left: (100 - BANNER_LAYOUT.backgroundWidth) / 2,
+          top: -BANNER_LAYOUT.menu,
+          width: BANNER_LAYOUT.backgroundWidth,
+        },
+    figure: local?.figure
+      ? { src: `/characters/${slug}-figure.webp`, ...local.figure }
+      : { src: `${dir}/${r.officialDir}.png`, left, top: top - BANNER_LAYOUT.menu, width, height },
+  };
 }

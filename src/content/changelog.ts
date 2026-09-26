@@ -18,6 +18,14 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         kind: "changed",
         text: {
+          ko: "캐릭터 배너·목록 이미지를 보이는 부분만 잘라 가볍게 (페이지당 수 MB → 수백 KB)",
+          en: "Character banner and roster images cropped and compressed (MBs → a few hundred KB per page)",
+          ja: "キャラのバナー・一覧画像を表示部分だけ切り出して軽量化（1ページ数MB→数百KB）",
+        },
+      },
+      {
+        kind: "changed",
+        text: {
           ko: "Vs 가이드 상대 선택: 초기 로스터 한 줄 6명, 시즌별 한 줄 4명, 이미지·이름 크게",
           en: "Vs opponent picker: 6 per row for the launch roster, 4 per row per season, larger images and names",
           ja: "Vs相手選択：初期ロスターは1行6人、シーズンは1行4人、画像と名前を大きく",

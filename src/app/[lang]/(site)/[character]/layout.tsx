@@ -9,7 +9,7 @@ import { formatPatchVersion } from "@/lib/patch";
 import { PresetButton } from "@/components/admin/preset-button";
 import { HashHighlight } from "@/components/hash-highlight";
 import { VsOpponentPicker } from "@/components/vs-opponent-picker";
-import { BANNER_LAYOUT, rosterBanner } from "@/lib/roster";
+import { rosterBanner } from "@/lib/roster";
 
 export async function generateStaticParams() {
   const characters = await getCharacters();
@@ -32,7 +32,7 @@ export default async function CharacterLayout({ children, params }: LayoutProps<
         className={`relative -mx-4 overflow-hidden border-y border-border bg-surface px-4 sm:mx-0 sm:border-x ${banner ? "h-44 sm:h-auto sm:aspect-[100/21.2]" : "stripes"}`}
       >
         {banner ? (
-          // 공식 캐릭터 페이지 첫 화면에서 맨 위 메뉴를 뺀 구간을 그대로 옮긴다 (배치 값은 roster.ts 의 공식 값).
+          // 공식 캐릭터 페이지 첫 화면에서 맨 위 메뉴를 뺀 구간을 그대로 옮긴다 (배치는 roster.ts 의 rosterBanner).
           // 무대(stage)의 폭을 기준(cqw)으로 배경·캐릭터를 놓아, 화면 폭이 달라도 같은 구도가 된다.
           // 좁은 화면에서는 무대를 52rem 로 두고 가운데를 보여 준다.
           <>
@@ -40,24 +40,21 @@ export default async function CharacterLayout({ children, params }: LayoutProps<
               aria-hidden
               className="pointer-events-none absolute inset-y-0 left-1/2 w-[max(100%,52rem)] -translate-x-1/2 overflow-hidden [container-type:inline-size]"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element -- 공식 사이트 이미지를 그대로 불러온다 */}
-              <img
-                alt=""
-                src={banner.background}
-                className="absolute left-1/2 max-w-none -translate-x-1/2"
-                style={{ top: `-${BANNER_LAYOUT.menu}cqw`, width: `${BANNER_LAYOUT.backgroundWidth}cqw` }}
-              />
-              {/* eslint-disable-next-line @next/next/no-img-element -- 공식 사이트 이미지를 그대로 불러온다 */}
-              <img
-                alt=""
-                src={banner.figure}
-                className="absolute max-w-none"
-                style={{
-                  left: `${banner.left}cqw`,
-                  top: `${banner.top - BANNER_LAYOUT.menu}cqw`,
-                  width: `${banner.width}cqw`,
-                }}
-              />
+              {[banner.background, banner.figure].map((layer) => (
+                // eslint-disable-next-line @next/next/no-img-element -- 잘라 둔 정적 이미지(없으면 공식 원본)
+                <img
+                  key={layer.src}
+                  alt=""
+                  src={layer.src}
+                  className="absolute max-w-none object-contain"
+                  style={{
+                    left: `${layer.left}cqw`,
+                    top: `${layer.top}cqw`,
+                    width: `${layer.width}cqw`,
+                    height: layer.height === undefined ? undefined : `${layer.height}cqw`,
+                  }}
+                />
+              ))}
             </div>
             {/* 이름·버튼이 잘 보이도록 왼쪽 아래만 살짝 어둡게 */}
             <div

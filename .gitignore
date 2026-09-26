@@ -45,3 +45,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# 공식 캐릭터 원본 이미지 (scripts/crop-banners.mjs 입력, 저작물이라 올리지 않음)
+/image-src/

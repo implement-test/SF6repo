@@ -1,7 +1,17 @@
 # 캐릭터 원본 이미지 주소
 
-공식 사이트(https://www.streetfighter.com/6/ko-kr/character) 의 이미지. 사이트는 지금 이 주소를 그대로 불러온다 (`src/lib/roster.ts` 의 `rosterImage` / `rosterBanner`).
-서버에서 직접 내려받는 것은 막혀 있어서(403), 파일로 받으려면 브라우저에서 주소를 열어 "다른 이름으로 저장" 한다.
+공식 사이트(https://www.streetfighter.com/6/ko-kr/character) 의 이미지.
+서버에서 직접 내려받는 것은 막혀 있어서(403), 브라우저에서 주소를 열어 "다른 이름으로 저장" 한다.
+
+## 사이트에 넣는 방법
+
+1. 원본을 `image-src/` 에 저장한다 (git 에 올리지 않음)
+   - `image-src/{폴더}/bg_{폴더}.jpg`, `image-src/{폴더}/{폴더}.png` (폴더 = 공식 폴더 이름, 예: `gouki_akuma`)
+   - `image-src/select_characters/{slug}.png` (목록 카드, 우리 slug 이름, 예: `akuma.png`)
+2. `node scripts/crop-banners.mjs` — 배너에 보이는 부분만 잘라 `public/characters/` 에 WebP 로 저장하고 `src/lib/banner-assets.ts` 를 다시 만든다
+3. 잘라 둔 파일이 없는 캐릭터는 아래 공식 주소를 그대로 불러온다
+
+공식 사이트가 이미지를 바꾸면 원본을 다시 받아 2번을 실행한다. 배치값이 바뀌었으면 `src/lib/roster.ts` 의 `FIGURE` 도 다시 잰다.
 
 | 종류 | 주소 규칙 | 크기 | 쓰는 곳 |
 |---|---|---|---|

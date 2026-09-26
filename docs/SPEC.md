@@ -115,8 +115,9 @@
 
 - 32명 전원의 페이지가 있다 (`/{slug}`, 0015). 순서·이름·분류는 `src/lib/roster.ts` 와 같다
 - 상단 배너: 공식 캐릭터 페이지(넓은 화면) 첫 화면에서 맨 위 메뉴를 뺀 구간을 그대로 옮긴다 — 배경 그림(`bg_{dir}.jpg`) + 캐릭터 이미지(`{dir}.png`). 글자는 이미지가 아니라 우리 것
-  - 공식 이미지는 서버에서 내려받는 것이 막혀 있어(403) 공식 주소를 그대로 불러온다 (`rosterImage` / `rosterBanner`). 공식 사이트 구조가 바뀌면 이 두 함수만 고친다
-  - 배치는 공식 페이지에서 잰 값(`BANNER_LAYOUT`, 캐릭터별 `FIGURE`: 폭 대비 %)을 그대로 쓴다. 임의로 조절하지 않는다. 좁은 화면에서는 같은 구도를 52rem 폭으로 그려 가운데를 보여 준다
+  - 이미지는 배너에 보이는 부분만 잘라 WebP 로 줄인 파일(`public/characters/{slug}-bg|figure|select.webp`)을 쓴다. 원본(`image-src/`, git 제외)을 두고 `node scripts/crop-banners.mjs` 를 실행하면 잘라 두고 위치값(`src/lib/banner-assets.ts`)도 만든다. 원본 64MB → 약 5.5MB
+  - 잘라 둔 파일이 없는 캐릭터는 공식 주소를 그대로 불러온다 (`rosterImage` / `rosterBanner`)
+  - 배치는 공식 페이지에서 잰 값(`BANNER_LAYOUT`, 캐릭터별 `FIGURE`: 상자 왼쪽·위·폭·높이, 폭 대비 %, 상자 안에서 이미지는 가운데 맞춤)을 그대로 쓴다. 임의로 조절하지 않는다. 좁은 화면에서는 같은 구도를 52rem 폭으로 그려 가운데를 보여 준다
   - `characters.portrait_url` 을 넣으면 홈 목록에서는 그것이 우선
 - 홈 캐릭터 목록: 공식 캐릭터 목록의 컬러 이미지
 
