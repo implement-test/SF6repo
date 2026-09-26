@@ -8,6 +8,7 @@
  *   air HP                히트 상황: 공중 (counter = 카운터, punish = 퍼니시 카운터, guard = 가드시킴)
  *   delay 5HP             딜레이 입력
  *   DR / DRC / DI         생 드라이브 러시 / 캔슬 드라이브 러시 / 드라이브 임팩트
+ *   parry                 저스트 패리
  *   f.throw / b.throw     앞잡기 / 뒤잡기
  *   L M H SP A            모던 버튼 (A = AUTO)
  *   (텍스트)              괄호 안은 그대로 메모로 표시
@@ -27,7 +28,7 @@ export type Button = ClassicButton | ModernButton;
 export type Move =
   /** hits: "5HP(2)" 처럼 몇 번째 타격인지 */
   | { kind: "input"; modifiers: Modifier[]; direction: string | null; buttons: Button[]; hits?: number }
-  | { kind: "system"; modifiers: Modifier[]; value: "DR" | "DRC" | "DI" }
+  | { kind: "system"; modifiers: Modifier[]; value: "DR" | "DRC" | "DI" | "PARRY" }
   /** 잡기: f.throw = 앞잡기, b.throw = 뒤잡기, throw = 방향 없음 */
   | { kind: "throw"; modifiers: Modifier[]; direction: "f" | "b" | null }
   | { kind: "note"; text: string }
@@ -45,7 +46,7 @@ const MODIFIERS: Record<string, Modifier> = {
   guard: "guard",
   delay: "delay",
 };
-const SYSTEM = new Set(["DR", "DRC", "DI"]);
+const SYSTEM = new Set(["DR", "DRC", "DI", "PARRY"]);
 
 // 길이가 긴 것부터 매칭해야 HP 가 H + P 로 쪼개지지 않는다.
 const BUTTON_TOKENS: [string, Button[]][] = [
@@ -89,7 +90,7 @@ export function displayNotation(src: string): string {
       i % 2 === 1
         ? part
         : part.replace(
-            /\b(\d*)((?:lp|mp|hp|lk|mk|hk|pp|kk|sp|p|k|l|m|h)+|drc|dr|di)\b/gi,
+            /\b(\d*)((?:lp|mp|hp|lk|mk|hk|pp|kk|sp|p|k|l|m|h)+|parry|drc|dr|di)\b/gi,
             (_, digits: string, buttons: string) => digits + buttons.toUpperCase(),
           ),
     )
@@ -121,7 +122,7 @@ function parseMove(src: string): Move {
 
   const word = words[0];
   const upper = word.toUpperCase();
-  if (SYSTEM.has(upper)) return { kind: "system", modifiers, value: upper as "DR" | "DRC" | "DI" };
+  if (SYSTEM.has(upper)) return { kind: "system", modifiers, value: upper as "DR" | "DRC" | "DI" | "PARRY" };
 
   const thr = /^(?:([fb])\.)?throw$/i.exec(word);
   if (thr) return { kind: "throw", modifiers, direction: (thr[1]?.toLowerCase() as "f" | "b" | undefined) ?? null };

@@ -142,3 +142,14 @@ describe("displayNotation", () => {
     expect(displayNotation("punish 5hp")).toBe("punish 5HP");
   });
 });
+
+describe("parry", () => {
+  it("parry 는 저스트 패리 시스템 기호", () => {
+    expect(parseNotation("parry → 5HP")[0][0]).toEqual({ kind: "system", modifiers: [], value: "PARRY" });
+    expect(findUnknownTokens(parseNotation("punish parry → 2MP"))).toEqual([]);
+  });
+
+  it("텍스트로는 PARRY", () => {
+    expect(displayNotation("parry > 5hp")).toBe("PARRY → 5HP");
+  });
+});

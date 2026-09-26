@@ -16,6 +16,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-09-26",
     items: [
       {
+        kind: "added",
+        text: {
+          ko: "콤보 표기에 parry(저스트 패리) 아이콘 추가",
+          en: "Added a parry (Perfect Parry) icon to combo notation",
+          ja: "コンボ表記に parry（ジャストパリィ）アイコンを追加",
+        },
+      },
+      {
         kind: "changed",
         text: {
           ko: "YouTube 영상 기본 화질을 1080p 로 요청하고 플레이어를 더 크게",

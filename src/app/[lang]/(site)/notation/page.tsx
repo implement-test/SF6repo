@@ -22,6 +22,7 @@ const LEGEND: { notation: string; ko: string; en: string; ja: string }[] = [
   { notation: "66 → 44", ko: "앞대쉬 / 뒷대쉬", en: "Forward dash / back dash", ja: "前ステップ / バックステップ" },
   { notation: "f.throw → b.throw", ko: "앞잡기 / 뒤잡기", en: "Forward throw / back throw", ja: "前投げ / 後ろ投げ" },
   { notation: "DR → DRC → DI", ko: "생 드라이브 러시 / 캔슬 드라이브 러시 / 드라이브 임팩트", en: "Raw Drive Rush / Drive Rush cancel / Drive Impact", ja: "生ドライブラッシュ / キャンセルラッシュ / ドライブインパクト" },
+  { notation: "parry → 5HP", ko: "parry 저스트 패리", en: "parry: Perfect Parry", ja: "parry ジャストパリィ" },
   { notation: "L → M → H → SP → A+M → ANY", ko: "모던 버튼 (A = 어시스트)", en: "Modern buttons (A = assist)", ja: "モダンボタン (A = アシスト)" },
 ];
 

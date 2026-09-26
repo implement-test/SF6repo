@@ -72,8 +72,9 @@ export const BUTTON_ICONS: Record<Button, IconRef> = {
   ANY: { src: "/icons/modern-any.png", alt: "ANY" },
 };
 
-export const SYSTEM_ICONS: Record<"DR" | "DRC" | "DI", IconRef> = {
+export const SYSTEM_ICONS: Record<"DR" | "DRC" | "DI" | "PARRY", IconRef> = {
   DR: { src: "/icons/dr.svg", wide: true, alt: "DR" },
   DRC: { src: "/icons/drc.svg", wide: true, alt: "DRC" },
   DI: { src: "/icons/di.png", wide: true, alt: "DI" },
+  PARRY: { src: "/icons/parry.svg", wide: true, alt: "PARRY" },
 };

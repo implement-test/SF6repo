@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 100" width="240" height="100">
+  <!-- 저스트 패리: DR·DRC 와 같은 판 모양, 드라이브 게이지의 초록 -->
+  <rect x="1.5" y="1.5" width="237" height="97" rx="14" fill="#1E8A4C" stroke="#FFFFFF" stroke-opacity="0.26" stroke-width="3"/>
+  <g fill="#FFFFFF" fill-rule="evenodd">
+    <!-- P -->
+    <path d="M18 20H44L54 30V46L44 56H31V80H18ZM31 32V44H39L41 42V34L39 32Z"/>
+    <!-- A -->
+    <path d="M60 80V32L72 20H84L96 32V80H83V62H73V80ZM73 36L76 33H80L83 36V50H73Z"/>
+    <!-- R -->
+    <path d="M102 20H128L138 30V46L132 52L138 80H124L119 56H115V80H102ZM115 32V44H123L125 42V34L123 32Z"/>
+    <!-- R -->
+    <path d="M144 20H170L180 30V46L174 52L180 80H166L161 56H157V80H144ZM157 32V44H165L167 42V34L165 32Z"/>
+    <!-- Y -->
+    <path d="M186 20H199L204 38L209 20H222L211 52V80H197V52Z"/>
+  </g>
+</svg>
