@@ -75,7 +75,6 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
                   </span>
                   <div className="relative p-3">
                     <span className={portrait ? "sr-only" : "display block text-3xl uppercase group-hover:text-accent"}>{name}</span>
-                    <span className="brand-bar mt-2 block h-1 w-0 transition-all duration-300 group-hover:w-full" />
                   </div>
                 </Link>
               </li>
