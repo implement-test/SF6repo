@@ -17,6 +17,15 @@ export const CHANGELOG: ChangelogEntry[] = [
     items: [
       {
         kind: "changed",
+        adminOnly: true,
+        text: {
+          ko: "편집 창에 작성 중인 내용을 브라우저에 저장 — 새로 고치거나 페이지를 옮겨도 다시 열면 복원 (7일 보관)",
+          en: "Unsaved editor input is kept in the browser and restored after a refresh or navigation (kept 7 days)",
+          ja: "編集中の内容をブラウザに保存し、再読み込みやページ移動後も復元（7日間保持）",
+        },
+      },
+      {
+        kind: "changed",
         text: {
           ko: "Vs 가이드 주제 변경: 윕퍼 노릴 동작 · 가드 후 딜캐 · 압박 사이 끼어들기 · 날먹/무뇌패턴 파해 · 주요 셋업",
           en: "Vs guide topics: whiff punishes, punishes on block, gaps in pressure, beating cheap patterns, key setups",

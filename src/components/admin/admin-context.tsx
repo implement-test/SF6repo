@@ -1,7 +1,6 @@
 "use client";
 
 import { createContext, lazy, Suspense, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
-import { usePathname } from "next/navigation";
 import type { EntityType } from "@/lib/admin/entities";
 import type { AdminInfo } from "@/lib/supabase/browser";
 
@@ -25,10 +24,35 @@ export type EditorRequest = {
 };
 
 /**
- * 저장하지 않고 닫은 편집 창의 내용. 같은 페이지에 있는 동안 다시 열면 복원한다
- * (다른 페이지로 옮기거나 새로 고치면 사라진다).
+ * 저장하지 않은 편집 창의 내용. 입력하는 동안 브라우저(localStorage)에 저장해 두고,
+ * 같은 항목의 창을 다시 열면 복원한다 — 창을 닫거나 새로 고치거나 페이지를 옮겨도 남는다.
+ * 저장·삭제하거나 '처음부터 다시' 를 누르면 지우고, 7일이 지나면 버린다.
  */
 export type EditorDraft = { values: Record<string, unknown>; initialLinks: number[]; baseUpdatedAt: string | null };
+
+type StoredDraft = { draft: EditorDraft; savedAt: number };
+
+const DRAFTS_KEY = "sf6r:editor-drafts";
+const DRAFT_TTL = 7 * 24 * 60 * 60 * 1000;
+
+function readDrafts(): Map<string, StoredDraft> {
+  try {
+    const raw = JSON.parse(localStorage.getItem(DRAFTS_KEY) ?? "{}") as Record<string, StoredDraft>;
+    const now = Date.now();
+    return new Map(Object.entries(raw).filter(([, d]) => d && now - d.savedAt < DRAFT_TTL));
+  } catch {
+    return new Map();
+  }
+}
+
+function writeDrafts(drafts: Map<string, StoredDraft>) {
+  try {
+    if (drafts.size === 0) localStorage.removeItem(DRAFTS_KEY);
+    else localStorage.setItem(DRAFTS_KEY, JSON.stringify(Object.fromEntries(drafts)));
+  } catch {
+    // 저장소를 쓸 수 없으면 메모리에만 남는다
+  }
+}
 
 /** 편집 창 하나를 가리키는 열쇠. 복사하기로 연 창은 기억하지 않는다 */
 export function draftKey(req: EditorRequest): string | null {
@@ -133,15 +157,26 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   }, []);
   const bumpData = useCallback(() => setDataVersion((n) => n + 1), []);
 
-  // 작성 중이던 편집 창 내용. 페이지를 옮기면 비운다
-  const drafts = useRef(new Map<string, EditorDraft>());
-  const pathname = usePathname();
-  useEffect(() => {
-    drafts.current.clear();
-  }, [pathname]);
-  const getDraft = useCallback((key: string) => drafts.current.get(key), []);
-  const setDraft = useCallback((key: string, draft: EditorDraft) => void drafts.current.set(key, draft), []);
-  const clearDraft = useCallback((key: string) => void drafts.current.delete(key), []);
+  // 작성 중이던 편집 창 내용. 브라우저에 저장해 새로 고쳐도 남는다 (저장소를 못 쓰면 메모리에만)
+  const drafts = useRef<Map<string, StoredDraft> | null>(null);
+  const store = useCallback(() => {
+    if (!drafts.current) drafts.current = readDrafts();
+    return drafts.current;
+  }, []);
+  const getDraft = useCallback((key: string) => store().get(key)?.draft, [store]);
+  const setDraft = useCallback(
+    (key: string, draft: EditorDraft) => {
+      store().set(key, { draft, savedAt: Date.now() });
+      writeDrafts(store());
+    },
+    [store],
+  );
+  const clearDraft = useCallback(
+    (key: string) => {
+      if (store().delete(key)) writeDrafts(store());
+    },
+    [store],
+  );
 
   return (
     <AdminContext.Provider

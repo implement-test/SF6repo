@@ -119,10 +119,19 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
     };
   }, [sb, entity, isNew, request.id, request.defaults, request.initial, usesPatch, usesComboLinks, key, getDraft, reloadN]);
 
-  // 닫힐 때(저장·삭제 없이) 바뀐 내용이 있으면 기억해 둔다
+  // 작성 중인 내용을 브라우저에 저장한다: 입력하는 동안 잠깐 멈출 때마다, 그리고 창이 닫힐 때.
+  // 새로 고침은 창이 닫히는 과정 없이 일어나므로 입력 중에 계속 저장해 둔다. 바뀐 게 없으면 지운다.
   useEffect(() => {
-    latest.current = values ? { values, initialLinks, baseUpdatedAt } : null;
-  }, [values, initialLinks, baseUpdatedAt]);
+    const snapshot = values ? { values, initialLinks, baseUpdatedAt } : null;
+    latest.current = snapshot;
+    if (!key || !snapshot || saved.current) return;
+    const timer = setTimeout(() => {
+      if (saved.current) return;
+      if (JSON.stringify(snapshot.values) === loaded.current) clearDraft(key);
+      else setDraft(key, snapshot);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [values, initialLinks, baseUpdatedAt, key, setDraft, clearDraft]);
   useEffect(
     () => () => {
       if (!key || saved.current || !latest.current) return;
