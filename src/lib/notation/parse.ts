@@ -5,7 +5,7 @@
  *   2MK → 5HP → 236HP    `→` 연결/캔슬 (입력 편의상 `->`, `>` 도 허용)
  *   MP·HP                 `·` 타겟 콤보 (`・` 도 허용)
  *   236PP / 236KK         약중강 구분 없는 버튼 2개
- *   air HP                히트 상황: 공중 (counter = 카운터, punish = 퍼니시 카운터)
+ *   air HP                히트 상황: 공중 (counter = 카운터, punish = 퍼니시 카운터, guard = 가드시킴)
  *   delay 5HP             딜레이 입력
  *   DR / DRC / DI         생 드라이브 러시 / 캔슬 드라이브 러시 / 드라이브 임팩트
  *   f.throw / b.throw     앞잡기 / 뒤잡기
@@ -14,10 +14,10 @@
  */
 
 /** 커맨드가 아니라 히트 상황. 커맨드와 구분되는 배지로 그린다. */
-export type Situation = "air" | "counter" | "punish";
+export type Situation = "air" | "counter" | "punish" | "guard";
 export type Modifier = Situation | "delay";
 
-export const SITUATIONS: Situation[] = ["air", "counter", "punish"];
+export const SITUATIONS: Situation[] = ["air", "counter", "punish", "guard"];
 export const isSituation = (m: Modifier): m is Situation => (SITUATIONS as string[]).includes(m);
 
 export type ClassicButton = "LP" | "MP" | "HP" | "LK" | "MK" | "HK" | "P" | "K";
@@ -38,7 +38,13 @@ export type Step = Move[];
 /** `→` 로 연결된 전체 콤보 */
 export type Combo = Step[];
 
-const MODIFIERS: Record<string, Modifier> = { air: "air", counter: "counter", punish: "punish", delay: "delay" };
+const MODIFIERS: Record<string, Modifier> = {
+  air: "air",
+  counter: "counter",
+  punish: "punish",
+  guard: "guard",
+  delay: "delay",
+};
 const SYSTEM = new Set(["DR", "DRC", "DI"]);
 
 // 길이가 긴 것부터 매칭해야 HP 가 H + P 로 쪼개지지 않는다.

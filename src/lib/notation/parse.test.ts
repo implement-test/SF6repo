@@ -40,6 +40,10 @@ describe("parseNotation", () => {
     ]);
   });
 
+  it("guard 는 가드 상황으로 읽는다", () => {
+    expect(parseNotation("guard 2LK → 5LP")[0][0]).toEqual({ kind: "input", modifiers: ["guard"], direction: "2", buttons: ["LK"] });
+  });
+
   it("counter / punish / air 는 히트 상황으로 읽는다", () => {
     expect(parseNotation("counter 5HP → punish 2MP → air HP")).toEqual([
       [{ kind: "input", modifiers: ["counter"], direction: null, buttons: ["HP"] }],

@@ -378,6 +378,11 @@ article[id] {
   --sit-bg: #ff2d87;
   --sit-fg: #ffffff;
 }
+/* 가드: 맞지 않고 막힌 상황이라 방패 같은 은회색 */
+.notation-situation[data-situation="guard"] {
+  --sit-bg: #b9c4d6;
+  --sit-fg: #111827;
+}
 .notation-icon[data-flip="x"] {
   transform: scaleX(-1);
 }

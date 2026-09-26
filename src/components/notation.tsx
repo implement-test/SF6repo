@@ -35,10 +35,10 @@ function Icon({ icon }: { icon: IconRef }) {
   );
 }
 
-const SITUATION_LABELS: Record<Situation, string> = { air: "AIR", counter: "COUNTER", punish: "PUNISH" };
+const SITUATION_LABELS: Record<Situation, string> = { air: "AIR", counter: "COUNTER", punish: "PUNISH", guard: "GUARD" };
 
 /**
- * 히트 상황 배지 (air / counter / punish).
+ * 히트 상황 배지 (air / counter / punish / guard).
  * 커맨드 아이콘(둥근 버튼·방향키)과 헷갈리지 않도록 오른쪽을 가리키는 리본 모양으로 그린다.
  */
 function SituationBadge({ situation }: { situation: Situation }) {

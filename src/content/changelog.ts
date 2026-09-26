@@ -16,6 +16,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-09-26",
     items: [
       {
+        kind: "added",
+        text: {
+          ko: "콤보 표기에 guard(가드시킴) 배지 추가",
+          en: "Added a guard (blocked) badge to combo notation",
+          ja: "コンボ表記に guard（ガードさせる）バッジを追加",
+        },
+      },
+      {
         kind: "changed",
         adminOnly: true,
         text: {
