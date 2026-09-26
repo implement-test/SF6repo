@@ -17,6 +17,15 @@ export const CHANGELOG: ChangelogEntry[] = [
     items: [
       {
         kind: "changed",
+        adminOnly: true,
+        text: {
+          ko: "편집 창을 저장 없이 닫아도 같은 페이지에 있는 동안은 작성하던 내용을 다시 불러옴",
+          en: "Closing the editor without saving keeps your unsaved input while you stay on the page",
+          ja: "編集パネルを保存せずに閉じても、同じページにいる間は入力内容を復元",
+        },
+      },
+      {
+        kind: "changed",
         text: {
           ko: "텍스트 표시에서 버튼 기호(LP·MP·HP…, DR·DRC·DI)를 대문자로",
           en: "Text display shows button notation (LP, MP, HP…, DR, DRC, DI) in uppercase",

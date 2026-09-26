@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, lazy, Suspense, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, lazy, Suspense, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import type { EntityType } from "@/lib/admin/entities";
 import type { AdminInfo } from "@/lib/supabase/browser";
 
@@ -24,6 +25,18 @@ export type EditorRequest = {
 };
 
 /**
+ * 저장하지 않고 닫은 편집 창의 내용. 같은 페이지에 있는 동안 다시 열면 복원한다
+ * (다른 페이지로 옮기거나 새로 고치면 사라진다).
+ */
+export type EditorDraft = { values: Record<string, unknown>; initialLinks: number[]; baseUpdatedAt: string | null };
+
+/** 편집 창 하나를 가리키는 열쇠. 복사하기로 연 창은 기억하지 않는다 */
+export function draftKey(req: EditorRequest): string | null {
+  if (req.initial) return null;
+  return `${req.entity}:${req.id ?? "new"}:${JSON.stringify(req.defaults ?? {})}`;
+}
+
+/**
  * 편집 대상이 속한 캐릭터.
  *   숫자 / 숫자 배열 → 그 캐릭터(들) 중 하나라도 맡고 있으면 편집 가능 (Vs 가이드는 [내 캐릭터, 상대])
  *   undefined        → 공통 데이터 (최고/부 관리자만)
@@ -41,6 +54,9 @@ type AdminState = {
   /** 저장할 때마다 1씩 늘어난다. 브라우저에서 직접 불러오는 목록은 이 값이 바뀌면 다시 불러온다. */
   dataVersion: number;
   bumpData: () => void;
+  getDraft: (key: string) => EditorDraft | undefined;
+  setDraft: (key: string, draft: EditorDraft) => void;
+  clearDraft: (key: string) => void;
 };
 
 const AdminContext = createContext<AdminState>({
@@ -52,6 +68,9 @@ const AdminContext = createContext<AdminState>({
   recheck: () => {},
   dataVersion: 0,
   bumpData: () => {},
+  getDraft: () => undefined,
+  setDraft: () => {},
+  clearDraft: () => {},
 });
 
 export const useAdmin = () => useContext(AdminContext);
@@ -114,9 +133,31 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   }, []);
   const bumpData = useCallback(() => setDataVersion((n) => n + 1), []);
 
+  // 작성 중이던 편집 창 내용. 페이지를 옮기면 비운다
+  const drafts = useRef(new Map<string, EditorDraft>());
+  const pathname = usePathname();
+  useEffect(() => {
+    drafts.current.clear();
+  }, [pathname]);
+  const getDraft = useCallback((key: string) => drafts.current.get(key), []);
+  const setDraft = useCallback((key: string, draft: EditorDraft) => void drafts.current.set(key, draft), []);
+  const clearDraft = useCallback((key: string) => void drafts.current.delete(key), []);
+
   return (
     <AdminContext.Provider
-      value={{ admin, isAdmin: !!admin, isManager, canEdit, openEditor, recheck, dataVersion, bumpData }}
+      value={{
+        admin,
+        isAdmin: !!admin,
+        isManager,
+        canEdit,
+        openEditor,
+        recheck,
+        dataVersion,
+        bumpData,
+        getDraft,
+        setDraft,
+        clearDraft,
+      }}
     >
       {children}
       {admin && (

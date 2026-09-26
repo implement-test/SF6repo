@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ENTITIES, today, type Field } from "@/lib/admin/entities";
 import { findUnknownTokens, parseNotation } from "@/lib/notation/parse";
@@ -15,7 +15,7 @@ import { LocalizedListInput, cleanLocalizedList } from "./localized-list-input";
 import { VsActionsInput, cleanVsActions } from "./vs-actions-input";
 import { normalizeVsActions } from "@/lib/vs-actions";
 import { NotationImage } from "../notation";
-import { useAdmin, type EditorRequest } from "./admin-context";
+import { draftKey, useAdmin, type EditorDraft, type EditorRequest } from "./admin-context";
 import { formatPatchVersion } from "@/lib/patch";
 import { History, useAuthorNames } from "./history";
 import { StarterGroupsInput, cleanStarterGroups, inputClass } from "./starters-input";
@@ -52,7 +52,8 @@ const LANGS = [
 export default function EditorPanel({ request, onClose }: { request: EditorRequest; onClose: () => void }) {
   const entity = ENTITIES[request.entity];
   const router = useRouter();
-  const { bumpData, openEditor } = useAdmin();
+  const { bumpData, openEditor, getDraft, setDraft, clearDraft } = useAdmin();
+  const key = draftKey(request);
   const sb = supabaseBrowser();
   const isNew = request.id === undefined;
   const usesPatch = entity.groups.some((g) => g.fields.some((f) => f.type === "patch"));
@@ -68,6 +69,14 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
   const authors = useAuthorNames();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** 닫기 전에 작성하던 내용을 복원했는지 */
+  const [restored, setRestored] = useState(false);
+  /** '처음부터 다시' 를 누르면 늘려서 다시 불러온다 */
+  const [reloadN, setReloadN] = useState(0);
+  /** 불러온 그대로의 내용 (닫을 때 바뀐 것이 있는지 비교) */
+  const loaded = useRef<string | null>(null);
+  const saved = useRef(false);
+  const latest = useRef<EditorDraft | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -96,14 +105,40 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
       }
       if (cancelled) return;
       setPatches(patchList);
-      setValues(normalizeValues(initial));
-      setInitialLinks((initial.combo_links as number[] | undefined) ?? []);
-      setBaseUpdatedAt((initial.updated_at as string | undefined) ?? null);
+      const normalized = normalizeValues(initial);
+      loaded.current = JSON.stringify(normalized);
+      // 저장하지 않고 닫았던 내용이 있으면 그것으로
+      const draft = key ? getDraft(key) : undefined;
+      setRestored(!!draft);
+      setValues(draft ? draft.values : normalized);
+      setInitialLinks(draft ? draft.initialLinks : ((initial.combo_links as number[] | undefined) ?? []));
+      setBaseUpdatedAt(draft ? draft.baseUpdatedAt : ((initial.updated_at as string | undefined) ?? null));
     })();
     return () => {
       cancelled = true;
     };
-  }, [sb, entity, isNew, request.id, request.defaults, request.initial, usesPatch, usesComboLinks]);
+  }, [sb, entity, isNew, request.id, request.defaults, request.initial, usesPatch, usesComboLinks, key, getDraft, reloadN]);
+
+  // 닫힐 때(저장·삭제 없이) 바뀐 내용이 있으면 기억해 둔다
+  useEffect(() => {
+    latest.current = values ? { values, initialLinks, baseUpdatedAt } : null;
+  }, [values, initialLinks, baseUpdatedAt]);
+  useEffect(
+    () => () => {
+      if (!key || saved.current || !latest.current) return;
+      if (JSON.stringify(latest.current.values) === loaded.current) clearDraft(key);
+      else setDraft(key, latest.current);
+    },
+    [key, setDraft, clearDraft],
+  );
+
+  /** 기억해 둔 내용을 버리고 처음 상태로 다시 불러온다 */
+  function startOver() {
+    if (key) clearDraft(key);
+    setRestored(false);
+    setError(null);
+    setReloadN((n) => n + 1);
+  }
 
   /** 셋업 ↔ 콤보 연결 맞추기: 빠진 것은 지우고, 나머지는 순서까지 저장 */
   async function syncComboLinks(setupId: number): Promise<string | null> {
@@ -133,6 +168,9 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
   const set = (key: string, value: unknown) => setValues((v) => ({ ...v, [key]: value }));
 
   async function finish() {
+    // 저장·삭제했으면 기억해 둔 내용은 필요 없다
+    saved.current = true;
+    if (key) clearDraft(key);
     await revalidateSite(sb);
     bumpData();
     router.refresh();
@@ -261,6 +299,14 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
             <p className="text-muted">{error ?? "불러오는 중…"}</p>
           ) : (
             <div className="flex flex-col gap-7">
+              {restored && (
+                <p className="flex flex-wrap items-center gap-2 border border-highlight/50 bg-highlight/10 px-3 py-2 text-sm">
+                  창을 닫기 전에 작성하던 내용을 불러왔습니다.
+                  <button type="button" onClick={startOver} className="ml-auto font-semibold text-highlight-text hover:underline">
+                    처음부터 다시
+                  </button>
+                </p>
+              )}
               {isNew && request.initial && (
                 <p className="border border-accent/40 bg-accent/10 px-3 py-2 text-sm">
                   원본 내용을 복사했습니다. 필요한 부분을 고친 뒤 <b>저장</b>하면 새 항목이 만들어집니다. (공개는 꺼진 상태로 시작합니다)
