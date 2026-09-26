@@ -18,7 +18,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         kind: "added",
         text: {
-          ko: "캐릭터별 추천 영상 탭 (썸네일을 누르면 재생, 영상 언어로 거르기)",
+          ko: "캐릭터별 추천 영상 탭 (썸네일을 누르면 재생, 영상 언어로 거르기, 상단 필터 없음)",
           en: "Recommended videos tab per character (click a thumbnail to play, filter by language)",
           ja: "キャラ別のおすすめ動画タブ（サムネイルで再生、言語で絞り込み）",
         },

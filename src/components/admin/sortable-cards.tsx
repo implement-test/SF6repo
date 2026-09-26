@@ -22,6 +22,7 @@ export function SortableCards({
   items,
   visibleIds,
   className,
+  levelFilter = true,
 }: {
   table: "combos" | "setups" | "vs_guides" | "moves" | "videos";
   characterId: number;
@@ -30,6 +31,8 @@ export function SortableCards({
   /** 필터를 통과한 항목 */
   visibleIds: Set<number>;
   className: string;
+  /** false 면 방문자의 대상 수준 숨김을 적용하지 않는다 (필터 바가 없는 탭) */
+  levelFilter?: boolean;
 }) {
   const { canEdit } = useAdmin();
   const router = useRouter();
@@ -63,7 +66,7 @@ export function SortableCards({
         {ids
           .filter((id) => visibleIds.has(id))
           .map((id) => (
-            <div key={id} data-level={byId.get(id)!.level}>
+            <div key={id} data-level={levelFilter ? byId.get(id)!.level : undefined}>
               {byId.get(id)!.card}
             </div>
           ))}
@@ -72,7 +75,7 @@ export function SortableCards({
   }
 
   // 관리자 화면: 방문자 설정으로 숨긴 대상 수준의 카드는 아예 그리지 않아, ▲▼ 가 보이는 카드끼리 움직이게 한다
-  const shown = ids.filter((id) => visibleIds.has(id) && !isHidden(byId.get(id)!.level));
+  const shown = ids.filter((id) => visibleIds.has(id) && (!levelFilter || !isHidden(byId.get(id)!.level)));
 
   /** dragged 를 target 의 앞(after=false)이나 뒤로 옮긴다 */
   function move(dragged: number, target: number, after: boolean) {

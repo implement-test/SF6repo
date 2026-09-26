@@ -99,8 +99,8 @@ function FilterGroup({ label, sub, children }: { label: string; sub: string; chi
 }
 
 /** 캐릭터 페이지 상단: 대상 수준 / 콤보 표시 / 조작 방식 */
-/** 콘텐츠 목록 탭(콤보·셋업·Vs 가이드)에서만 보인다. 개요(/{캐릭터})·커맨드 리스트에는 거를 목록이 없어서 숨긴다 */
-const HIDE_FILTERS_ON = [new RegExp(`^(/(${LOCALES.join("|")}))?/[^/]+/?$`), /\/moves\/?$/];
+/** 콘텐츠 목록 탭(콤보·셋업·Vs 가이드)에서만 보인다. 개요(/{캐릭터})·커맨드 리스트·추천 영상에서는 숨긴다 */
+const HIDE_FILTERS_ON = [new RegExp(`^(/(${LOCALES.join("|")}))?/[^/]+/?$`), /\/(moves|videos)\/?$/];
 
 export function ContentFilters({ dict }: { dict: Dictionary }) {
   const [prefs, update] = usePrefs();

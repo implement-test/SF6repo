@@ -4,11 +4,10 @@ import { useState, type ReactNode } from "react";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { VIDEO_LANGUAGES, type TargetLevel, type VideoLanguage } from "@/lib/types";
 import { SortableCards } from "./admin/sortable-cards";
-import { useHiddenLevels } from "./use-hidden-levels";
 
 export type VideoListItem = { id: number; level: TargetLevel; language: VideoLanguage; card: ReactNode };
 
-/** 추천 영상 목록: 영상 언어로 거르기 + 대상 수준 숨김 반영. 관리자는 카드 옆에서 순서를 바꾼다 */
+/** 추천 영상 목록: 영상 언어로 거르기. 상단 필터 바가 없는 탭이라 대상 수준 숨김은 적용하지 않는다. 관리자는 카드 옆에서 순서를 바꾼다 */
 export function VideoList({
   items,
   dict,
@@ -19,10 +18,9 @@ export function VideoList({
   characterId: number;
 }) {
   const [languages, setLanguages] = useState<VideoLanguage[]>([]);
-  const isHidden = useHiddenLevels();
   const present = VIDEO_LANGUAGES.filter((l) => items.some((i) => i.language === l));
   const visible = items.filter((i) => languages.length === 0 || languages.includes(i.language));
-  const shownCount = visible.filter((i) => !isHidden(i.level)).length;
+  const shownCount = visible.length;
 
   return (
     <div className="flex flex-col gap-4">
@@ -62,6 +60,7 @@ export function VideoList({
           items={items}
           visibleIds={new Set(visible.map((i) => i.id))}
           className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
+          levelFilter={false}
         />
       )}
     </div>
