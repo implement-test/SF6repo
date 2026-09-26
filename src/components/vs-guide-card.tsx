@@ -47,7 +47,7 @@ export function VsGuideCard({
       <header className="flex flex-wrap items-center gap-2">
         <LevelBadge level={guide.target_level} label={dict.level[guide.target_level]} />
         <PositionBadge label={`VS ${opponentName}`} />
-        <Tag tone="accent">{dict.vs.topics[guide.topic]}</Tag>
+        <Tag tone="accent">{dict.vs.topics[guide.topic] ?? guide.topic}</Tag>
         {title && <h2 className="font-bold">{title.text}</h2>}
         {title && !title.translated && <NotTranslatedBadge label={dict.notTranslated} />}
         {outdated && <OutdatedBadge label={dict.patch.outdated} />}

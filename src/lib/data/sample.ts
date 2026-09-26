@@ -207,7 +207,7 @@ export const sampleVsGuides: VsGuide[] = [
     ...vsBase,
     id: 1,
     opponent: "ryu",
-    topic: "general",
+    topic: "cheese",
     title: { ko: "[예시] 거리 싸움 기본" },
     body: { ko: "장풍은 점프로 넘기보다 중거리에서 드라이브 임팩트로 받아친다.\n근거리에서는 무리하지 말고 잡기 심리." },
     sort_order: 1,

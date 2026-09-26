@@ -16,6 +16,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-09-26",
     items: [
       {
+        kind: "changed",
+        text: {
+          ko: "Vs 가이드 주제 변경: 윕퍼 노릴 동작 · 가드 후 딜캐 · 압박 사이 끼어들기 · 날먹/무뇌패턴 파해 · 주요 셋업",
+          en: "Vs guide topics: whiff punishes, punishes on block, gaps in pressure, beating cheap patterns, key setups",
+          ja: "Vsガイドのトピック変更：差し返し・ガード後の確定反撃・攻めの割り込み・安易なパターン対策・主要なセットプレイ",
+        },
+      },
+      {
         kind: "added",
         text: {
           ko: "콤보 표기에 guard(가드시킴) 배지 추가",

@@ -207,9 +207,9 @@ export type SetupComboLink = { id: number; setup_id: number; combo_id: number; s
 
 // ───────────────────────── Vs 가이드 ─────────────────────────
 
-/** 전체적인 운영 팁 / 윕퍼 노릴 만한 동작 / 가드 후 확정 딜캐 / 압박 중 끼어드는 지점 / 기타 */
-export type VsTopic = "general" | "whiff_punish" | "block_punish" | "pressure_gap" | "other";
-export const VS_TOPICS: VsTopic[] = ["general", "whiff_punish", "block_punish", "pressure_gap", "other"];
+/** 윕퍼 노릴 동작 / 가드 후 딜캐 / 압박 사이 끼어들기 / 날먹·무뇌패턴 파해 / 주요 셋업 */
+export type VsTopic = "whiff_punish" | "block_punish" | "pressure_gap" | "cheese" | "setup";
+export const VS_TOPICS: VsTopic[] = ["whiff_punish", "block_punish", "pressure_gap", "cheese", "setup"];
 
 /** Vs 가이드의 관련 동작·대응 하나 (선택지): 표기 + 이 선택지만의 설명 */
 export type VsAction = { classic: string; modern: string | null; note: Localized | null };

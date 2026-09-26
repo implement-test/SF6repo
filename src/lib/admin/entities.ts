@@ -87,11 +87,11 @@ const OPPONENTS: Option[] = ROSTER.map((c) => ({
 }));
 
 const VS_TOPICS: Option[] = [
-  { value: "general", label: "전체적인 운영 팁" },
-  { value: "whiff_punish", label: "윕퍼 노릴 만한 동작" },
-  { value: "block_punish", label: "가드 후 확정 딜캐" },
-  { value: "pressure_gap", label: "압박 중 끼어드는 지점" },
-  { value: "other", label: "기타" },
+  { value: "whiff_punish", label: "윕퍼 노릴 동작" },
+  { value: "block_punish", label: "가드 후 딜캐" },
+  { value: "pressure_gap", label: "압박 사이 끼어들기" },
+  { value: "cheese", label: "날먹/무뇌패턴 파해" },
+  { value: "setup", label: "주요 셋업" },
 ];
 
 const HIT_STATES: Option[] = [
@@ -331,7 +331,7 @@ export const ENTITIES: Record<EntityType, Entity> = {
       MEDIA_GROUP,
       META_GROUP,
     ],
-    defaults: () => ({ ...metaDefaults(), opponent: null, topic: "general", actions: [] }),
+    defaults: () => ({ ...metaDefaults(), opponent: null, topic: "whiff_punish", actions: [] }),
   },
 
   patch: {
