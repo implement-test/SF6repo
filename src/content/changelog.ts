@@ -19,6 +19,15 @@ export const CHANGELOG: ChangelogEntry[] = [
         kind: "added",
         adminOnly: true,
         text: {
+          ko: "커맨드·콤보·셋업·Vs 가이드의 비공개 목록에서 하나씩 또는 모두 한 번에 공개",
+          en: "Publish drafts one by one or all at once from the draft list on moves, combos, setups and Vs guides",
+          ja: "コマンド・コンボ・セットプレイ・Vsガイドの非公開一覧から個別または一括で公開",
+        },
+      },
+      {
+        kind: "added",
+        adminOnly: true,
+        text: {
           ko: "Ultimate Frame Data 에서 31명의 커맨드·프레임 데이터를 가져오는 SQL (비공개 등록)",
           en: "SQL to import moves and frame data for 31 characters from Ultimate Frame Data (unpublished)",
           ja: "Ultimate Frame Data から31キャラの技・フレームデータを取り込むSQL（非公開で登録）",

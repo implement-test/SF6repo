@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { EntityType } from "@/lib/admin/entities";
 import { EditButton, useAdmin } from "./admin-context";
 import { NotationText } from "../notation";
@@ -18,8 +19,9 @@ export function listColumns(table: string): string {
 type Draft = { id: number; title: { ko: string } | null; notation_classic: string | null };
 
 /**
- * 관리자에게만 보이는 비공개 항목 목록 (콤보, 셋업 …).
+ * 관리자에게만 보이는 비공개 항목 목록 (커맨드, 콤보, 셋업, Vs 가이드).
  * 정적 페이지에는 공개 항목만 들어가므로 비공개 항목은 브라우저에서 직접 불러온다.
+ * 하나씩 또는 모두 한 번에 공개할 수 있다.
  */
 export function DraftItems({
   table,
@@ -32,9 +34,32 @@ export function DraftItems({
   characterId: number;
   label: string;
 }) {
-  const { canEdit, dataVersion } = useAdmin();
+  const { canEdit, dataVersion, bumpData } = useAdmin();
+  const router = useRouter();
   const isAdmin = canEdit(characterId);
   const [drafts, setDrafts] = useState<Draft[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  /** 공개로 바꾼다 (ids 가 여러 개면 한 번 확인) */
+  async function publish(ids: number[]) {
+    if (ids.length === 0) return;
+    if (ids.length > 1 && !confirm(`비공개 ${label} ${ids.length}개를 모두 공개할까요?`)) return;
+    setBusy(true);
+    setError(null);
+    const { supabaseBrowser, revalidateSite, describeError } = await import("@/lib/supabase/browser");
+    const sb = supabaseBrowser();
+    const { data, error } = await sb.from(table).update({ is_published: true }).in("id", ids).select("id");
+    if (error || !data?.length) {
+      setBusy(false);
+      setError(error ? describeError(error) : "공개할 권한이 없습니다.");
+      return;
+    }
+    await revalidateSite(sb);
+    setBusy(false);
+    bumpData();
+    router.refresh();
+  }
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -53,10 +78,22 @@ export function DraftItems({
   if (!isAdmin || drafts.length === 0) return null;
   return (
     <section className="flex flex-col gap-2 border border-dashed border-accent/60 p-3">
-      <p className="eyebrow text-accent!">
-        비공개 {label} ({drafts.length}) — 관리자에게만 보임
-      </p>
-      <ul className="flex flex-col divide-y divide-border">
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="eyebrow text-accent!">
+          비공개 {label} ({drafts.length}) — 관리자에게만 보임
+        </p>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => publish(drafts.map((d) => d.id))}
+          className="skew ml-auto bg-accent px-3 py-1 text-xs font-bold text-accent-fg disabled:opacity-50"
+        >
+          <span>{busy ? "공개하는 중…" : `모두 공개 (${drafts.length})`}</span>
+        </button>
+      </div>
+      {error && <p className="text-sm text-warn">{error}</p>}
+      {/* 항목이 많으면 목록 안에서 스크롤 */}
+      <ul className="flex max-h-80 flex-col divide-y divide-border overflow-y-auto">
         {drafts.map((d) => (
           <li key={d.id} className="flex items-center gap-3 py-2">
             <span className="font-semibold">{d.title?.ko}</span>
@@ -65,7 +102,15 @@ export function DraftItems({
                 <NotationText notation={d.notation_classic} />
               </span>
             )}
-            <span className="ml-auto">
+            <span className="ml-auto flex shrink-0 items-center gap-1.5">
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => publish([d.id])}
+                className="border border-highlight/60 px-2 py-1 text-xs font-bold text-highlight-text hover:bg-highlight hover:text-highlight-fg disabled:opacity-40"
+              >
+                공개
+              </button>
               <EditButton entity={entity} id={d.id} scope={characterId} />
             </span>
           </li>
