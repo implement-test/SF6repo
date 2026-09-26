@@ -5,6 +5,16 @@ import type { EntityType } from "@/lib/admin/entities";
 import { EditButton, useAdmin } from "./admin-context";
 import { NotationText } from "../notation";
 
+/**
+ * 관리자 목록(비공개 항목, 순서 변경)에 보여 줄 칸: 제목과 대표 표기.
+ * 표마다 칸 이름이 달라서 이름을 맞춰 읽는다 (커맨드: name → title, input_classic → notation_classic).
+ */
+export function listColumns(table: string): string {
+  if (table === "moves") return "id,title:name,notation_classic:input_classic";
+  if (table === "vs_guides") return "id,title";
+  return "id,title,notation_classic";
+}
+
 type Draft = { id: number; title: { ko: string } | null; notation_classic: string | null };
 
 /**
@@ -31,12 +41,12 @@ export function DraftItems({
     import("@/lib/supabase/browser").then(({ supabaseBrowser }) =>
       supabaseBrowser()
         .from(table)
-        // 커맨드 표는 칸 이름이 달라서 이름을 바꿔 읽는다
-        .select(table === "moves" ? "id,title:name,notation_classic:input_classic" : "id,title,notation_classic")
+        .select(listColumns(table))
         .eq("character_id", characterId)
         .eq("is_published", false)
         .order("sort_order")
-        .then(({ data }) => setDrafts(data ?? [])),
+        // 칸 이름을 표마다 바꿔 읽어서 타입을 직접 맞춘다
+        .then(({ data }) => setDrafts((data ?? []) as unknown as Draft[])),
     );
   }, [isAdmin, table, characterId, dataVersion]);
 

@@ -13,6 +13,7 @@ import type {
 } from "@/lib/types";
 import { normalizeOptions, normalizePractice } from "@/lib/setup";
 import { normalizeStarterGroups } from "@/lib/starters";
+import { normalizeVsActions } from "@/lib/vs-actions";
 import {
   sampleCharacters,
   sampleCombos,
@@ -170,7 +171,7 @@ export async function getVsGuides(characterId: number): Promise<VsGuide[]> {
     .eq("character_id", characterId)
     .order("sort_order")
     .order("id");
-  return (data ?? []) as VsGuide[];
+  return ((data ?? []) as VsGuide[]).map((g) => ({ ...g, actions: normalizeVsActions(g.actions) }));
 }
 
 const localizedList = (v: unknown) => (Array.isArray(v) ? v.filter((x) => x && typeof x === "object" && x.ko) : []);

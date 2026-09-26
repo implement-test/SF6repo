@@ -144,18 +144,20 @@ const NOTE_LANGS = [
   { key: "ja", placeholder: "日本語 (선택)" },
 ] as const;
 
-/** 루트별 메모 (ko / en / ja). 줄바꿈은 그대로 표시된다 */
-function RouteNoteInput({
+/** 항목 하나의 메모 (ko / en / ja). 줄바꿈은 그대로 표시된다 (루트별 메모, Vs 선택지 설명) */
+export function RouteNoteInput({
   value,
   onChange,
+  label = "이 루트만의 메모",
 }: {
   value: Localized | null;
   onChange: (v: Localized | null) => void;
+  label?: string;
 }) {
   const note: Partial<Localized> = value ?? {};
   return (
     <div className="flex flex-col gap-1.5 border-t border-border pt-2">
-      <span className="text-xs text-muted">이 루트만의 메모</span>
+      <span className="text-xs text-muted">{label}</span>
       {NOTE_LANGS.map((lang) => (
         <div key={lang.key} className="grid grid-cols-[3.2rem_1fr] items-start gap-2">
           <span className="pt-1.5 text-xs font-bold uppercase text-muted">{lang.key}</span>

@@ -5,13 +5,15 @@ import { useRouter } from "next/navigation";
 import { ENTITIES, today, type Field } from "@/lib/admin/entities";
 import { findUnknownTokens, parseNotation } from "@/lib/notation/parse";
 import { describeError, revalidateSite, supabaseBrowser } from "@/lib/supabase/browser";
-import type { ComboRoute, Localized, Patch, PracticeConfig, SetupOption, StarterGroup } from "@/lib/types";
+import type { ComboRoute, Localized, Patch, PracticeConfig, SetupOption, StarterGroup, VsAction } from "@/lib/types";
 import { parseYouTube } from "@/lib/youtube";
 import { normalizeOptions, normalizePractice } from "@/lib/setup";
 import { normalizeStarterGroups } from "@/lib/starters";
 import { comboRoutes, routesToColumns } from "@/lib/combo-routes";
 import { RoutesInput } from "./routes-input";
 import { LocalizedListInput, cleanLocalizedList } from "./localized-list-input";
+import { VsActionsInput, cleanVsActions } from "./vs-actions-input";
+import { normalizeVsActions } from "@/lib/vs-actions";
 import { NotationImage } from "../notation";
 import { useAdmin, type EditorRequest } from "./admin-context";
 import { formatPatchVersion } from "@/lib/patch";
@@ -35,6 +37,7 @@ function normalizeValues(v: Values): Values {
   if ("options" in out) out.options = normalizeOptions(out.options);
   if ("practice" in out) out.practice = normalizePractice(out.practice);
   if ("starters" in out) out.starters = normalizeStarterGroups(out.starters);
+  if ("actions" in out) out.actions = normalizeVsActions(out.actions);
   // 콤보: 칼럼(첫 번째 루트) + extra_routes 를 루트 목록 하나로
   if (!("routes" in out) && "drive_cost" in out) out.routes = comboRoutes(out as Parameters<typeof comboRoutes>[0]);
   return out;
@@ -448,6 +451,16 @@ function FieldInput({
         />
       );
 
+    case "vsActions":
+      return (
+        <VsActionsInput
+          label={field.label}
+          help={field.help}
+          value={(value as VsAction[] | null) ?? []}
+          onChange={onChange}
+        />
+      );
+
     case "localizedList":
       return (
         <LocalizedListInput
@@ -656,6 +669,12 @@ function buildPayload(fields: Field[], values: Values): { payload: Values; probl
       case "starters":
         payload[field.key] = cleanStarterGroups(raw as StarterGroup[] | null);
         break;
+      case "vsActions": {
+        const list = cleanVsActions(raw as VsAction[] | null);
+        if (list === "missing-ko") return { payload, problem: `${field.label}: 설명의 한국어는 필수입니다.` };
+        payload[field.key] = list;
+        break;
+      }
       case "localizedList": {
         const list = cleanLocalizedList(raw as Partial<Localized>[] | null);
         if (list === "missing-ko") return { payload, problem: `${field.label}: 한국어는 필수입니다.` };

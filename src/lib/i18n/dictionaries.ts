@@ -82,6 +82,7 @@ const ko = {
   },
   vs: {
     opponent: "상대 캐릭터",
+    actions: "관련 동작 · 대응",
     all: "전체",
     expand: "펼치기",
     collapse: "접기",
@@ -223,6 +224,7 @@ const en: Dictionary = {
   },
   vs: {
     opponent: "Opponent",
+    actions: "Related moves / responses",
     all: "All",
     expand: "Show",
     collapse: "Hide",
@@ -362,6 +364,7 @@ const ja: Dictionary = {
   },
   vs: {
     opponent: "対戦相手",
+    actions: "関連する技・対応",
     all: "すべて",
     expand: "開く",
     collapse: "閉じる",

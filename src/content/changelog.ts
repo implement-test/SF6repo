@@ -16,6 +16,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-09-26",
     items: [
       {
+        kind: "changed",
+        text: {
+          ko: "Vs 가이드: 공용 내용 + 관련 동작·대응을 여러 선택지로, 선택지마다 설명",
+          en: "Vs guides: shared text plus multiple related moves/responses, each with its own note",
+          ja: "Vsガイド：共通の内容＋複数の関連技・対応（選択肢ごとに説明）",
+        },
+      },
+      {
         kind: "added",
         text: {
           ko: "개요(소개 · 장점 · 단점 · 클래식/모던 차이) 와 커맨드 리스트(분류별 기술 카드 + 프레임 데이터)",

@@ -14,6 +14,8 @@ export type Field = { key: string; label: string; help?: string; required?: bool
   | { type: "starters" }
   /** 한 줄씩 적는 다국어 목록 (장점 / 단점 …) */
   | { type: "localizedList" }
+  /** Vs 가이드의 관련 동작·대응 (선택지별 표기와 설명) */
+  | { type: "vsActions" }
   /** 콤보 루트 여러 개 + 루트별 수치. 첫 번째는 칼럼, 나머지는 extra_routes 에 저장 */
   | { type: "routes" }
   | { type: "text" | "url" }
@@ -316,21 +318,20 @@ export const ENTITIES: Record<EntityType, Entity> = {
           { key: "opponent", label: "상대 캐릭터", type: "select", options: OPPONENTS, required: true },
           { key: "topic", label: "주제", type: "select", options: VS_TOPICS },
           { key: "title", label: "제목", type: "localized" },
-          { key: "body", label: "내용", type: "localized", multiline: true },
+          { key: "body", label: "공용 내용", type: "localized", multiline: true, help: "모든 선택지에 공통인 설명" },
           {
-            key: "notation_classic",
-            label: "관련 동작·대응 (클래식)",
-            type: "notation",
+            key: "actions",
+            label: "관련 동작 · 대응 (선택지별)",
+            type: "vsActions",
             wide: true,
-            help: "상대 기술이나 대응 콤보를 표기로 보여 줄 때 (없으면 비움)",
+            help: "상대 기술이나 대응 방법을 선택지로 나눠 적고, 선택지마다 설명을 붙입니다.",
           },
-          { key: "notation_modern", label: "관련 동작·대응 (모던)", type: "notation", wide: true },
         ],
       },
       MEDIA_GROUP,
       META_GROUP,
     ],
-    defaults: () => ({ ...metaDefaults(), opponent: null, topic: "general" }),
+    defaults: () => ({ ...metaDefaults(), opponent: null, topic: "general", actions: [] }),
   },
 
   patch: {

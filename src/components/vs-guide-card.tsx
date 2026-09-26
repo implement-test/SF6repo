@@ -10,7 +10,7 @@ import { ItemMedia } from "./media";
 import { EditButton } from "./admin/admin-context";
 import { FavoriteButton } from "./favorite-button";
 
-/** Vs 가이드 한 항목: [대상 수준] [VS 상대] [주제] 제목 → 표기 → 내용 → 영상 */
+/** Vs 가이드 한 항목: [대상 수준] [VS 상대] [주제] 제목 → 공용 내용 → 관련 동작·대응(선택지별 표기와 설명) → 영상 */
 export function VsGuideCard({
   guide,
   locale,
@@ -57,20 +57,38 @@ export function VsGuideCard({
         </span>
       </header>
 
-      {guide.notation_classic && (
-        <div className="border-l-2 border-accent bg-inset px-3 py-3">
-          <ControlNotation
-            classic={guide.notation_classic}
-            modern={guide.notation_modern}
-            classicOnlyLabel={dict.combo.classicOnly}
-          />
-        </div>
-      )}
-
+      {/* 공용 내용 */}
       {body && (
         <p className="text-sm whitespace-pre-line">
           {body.text} {!body.translated && <NotTranslatedBadge label={dict.notTranslated} />}
         </p>
+      )}
+
+      {/* 관련 동작·대응: 선택지마다 표기와 설명 */}
+      {guide.actions.length > 0 && (
+        <section className="flex flex-col gap-1.5">
+          <h3 className="eyebrow">{dict.vs.actions}</h3>
+          <ol className="flex flex-col border-l-2 border-accent bg-inset">
+            {guide.actions.map((action, i) => {
+              const note = action.note ? pickLocalized(action.note, locale) : null;
+              return (
+                <li key={i} className="flex gap-3 px-3 py-2.5 not-first:border-t not-first:border-border">
+                  <span className="display w-4 shrink-0 pt-0.5 text-right text-base text-muted">{i + 1}</span>
+                  <div className="flex min-w-0 flex-col gap-1.5">
+                    {action.classic && (
+                      <ControlNotation classic={action.classic} modern={action.modern} classicOnlyLabel={dict.combo.classicOnly} />
+                    )}
+                    {note && (
+                      <p className="text-sm whitespace-pre-line text-muted">
+                        {note.text} {!note.translated && <NotTranslatedBadge label={dict.notTranslated} />}
+                      </p>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
       )}
 
       {hasMedia && (

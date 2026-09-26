@@ -1,4 +1,4 @@
-import type { Character, CharacterOverview, Move, Combo, Patch, Setup, SetupComboLink, SetupSituation, VsGuide } from "@/lib/types";
+import type { Character, CharacterOverview, Move, VsAction, Combo, Patch, Setup, SetupComboLink, SetupSituation, VsGuide } from "@/lib/types";
 import { ROSTER } from "@/lib/roster";
 
 /**
@@ -197,8 +197,7 @@ const vsBase = {
   media_url: null,
   youtube_url: null,
   youtube_start: null,
-  notation_classic: null,
-  notation_modern: null,
+  actions: [] as VsAction[],
   target_level: "beginner",
   created_date: "2026-09-26",
 } as const;
@@ -219,8 +218,12 @@ export const sampleVsGuides: VsGuide[] = [
     opponent: "ryu",
     topic: "block_punish",
     title: { ko: "[예시] 승룡권 가드 후" },
-    body: null,
-    notation_classic: "5HP → 236HP",
+    body: { ko: "거리와 게이지에 따라 고른다. 공용 설명 예시." },
+    actions: [
+      { classic: "5HP → 236HP", modern: null, note: { ko: "가까울 때 기본 확정. 데미지 우선." } },
+      { classic: "2MK → DRC → 5HP", modern: null, note: { ko: "드라이브 게이지가 있을 때. 코너 운반." } },
+      { classic: "214214P", modern: "SP", note: { ko: "SA 게이지가 있으면 최대 데미지." } },
+    ],
     target_level: "intermediate",
     sort_order: 2,
   },

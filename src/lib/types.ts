@@ -211,6 +211,9 @@ export type SetupComboLink = { id: number; setup_id: number; combo_id: number; s
 export type VsTopic = "general" | "whiff_punish" | "block_punish" | "pressure_gap" | "other";
 export const VS_TOPICS: VsTopic[] = ["general", "whiff_punish", "block_punish", "pressure_gap", "other"];
 
+/** Vs 가이드의 관련 동작·대응 하나 (선택지): 표기 + 이 선택지만의 설명 */
+export type VsAction = { classic: string; modern: string | null; note: Localized | null };
+
 export type VsGuide = ContentBase &
   Media & {
     character_id: number;
@@ -218,10 +221,10 @@ export type VsGuide = ContentBase &
     opponent: string;
     topic: VsTopic;
     title: Localized | null;
+    /** 공용 내용 */
     body: Localized | null;
-    /** 관련 동작·대응 표기 (선택) */
-    notation_classic: string | null;
-    notation_modern: string | null;
+    /** 관련 동작·대응 (선택지별 표기와 설명) */
+    actions: VsAction[];
   };
 
 // ───────────────────────── 개요 ─────────────────────────

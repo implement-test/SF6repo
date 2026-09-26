@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { describeError, revalidateSite, supabaseBrowser } from "@/lib/supabase/browser";
 import { useAdmin } from "./admin-context";
 import { NotationText } from "../notation";
+import { listColumns } from "./drafts";
 
 type Item = {
   id: number;
@@ -40,14 +41,13 @@ export default function ReorderPanel({
 
   useEffect(() => {
     sb.from(table)
-      // 커맨드 표는 칸 이름이 달라서 이름을 바꿔 읽는다 (name → title, input_classic → notation_classic)
-      .select(table === "moves" ? "id,title:name,notation_classic:input_classic,is_published,sort_order" : "id,title,notation_classic,is_published,sort_order")
+      .select(`${listColumns(table)},is_published,sort_order` as string)
       .eq("character_id", characterId)
       .order("sort_order")
       .order("id")
       .then(({ data, error }) => {
         if (error) setError(describeError(error));
-        const list = (data ?? []) as Item[];
+        const list = (data ?? []) as unknown as Item[];
         setItems(list);
         setOriginal(list.map((i) => i.id));
       });
