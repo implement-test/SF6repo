@@ -94,9 +94,10 @@ for (const [slug, dir] of Object.entries(official)) {
     after += kb(out);
   }
   if (fs.existsSync(selFile)) {
-    // 목록 카드: 화면에서 최대 약 200px → 2배 해상도로 400px
+    // 목록 카드: 화면에서 최대 약 290px 폭으로 그려지고 고해상도 화면(2~3배)에서는 그 이상이 필요해서,
+    // 줄이지 않고 원본 해상도(575px) 그대로 WebP 로만 바꾼다
     const out = path.join(OUT, `${slug}-select.webp`);
-    await sharp(selFile).resize({ width: 400 }).webp({ quality: 80, alphaQuality: 90 }).toFile(out);
+    await sharp(selFile).webp({ quality: 85, alphaQuality: 90 }).toFile(out);
     entry.select = true;
     before += kb(selFile);
     after += kb(out);
