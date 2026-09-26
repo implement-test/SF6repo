@@ -19,6 +19,15 @@ export const CHANGELOG: ChangelogEntry[] = [
         kind: "added",
         adminOnly: true,
         text: {
+          ko: "Vs 가이드를 다른 캐릭터로 복사, 다른 캐릭터의 Vs 가이드를 검색해서 가져오기",
+          en: "Copy a Vs guide to another character, and search other characters' guides to import",
+          ja: "Vsガイドを別キャラへコピー、他キャラのVsガイドを検索して取り込み",
+        },
+      },
+      {
+        kind: "added",
+        adminOnly: true,
+        text: {
           ko: "커맨드·콤보·셋업·Vs 가이드의 비공개 목록에서 하나씩 또는 모두 한 번에 공개",
           en: "Publish drafts one by one or all at once from the draft list on moves, combos, setups and Vs guides",
           ja: "コマンド・コンボ・セットプレイ・Vsガイドの非公開一覧から個別または一括で公開",

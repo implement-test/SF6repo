@@ -31,6 +31,7 @@ export default async function VsPage({ params }: PageProps<"/[lang]/[character]/
       <VsGuideList
         dict={dict}
         characterId={character.id}
+        characterName={character.name.ko}
         items={guides
           .filter((g) => g.is_published)
           .map((guide) => ({

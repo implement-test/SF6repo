@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ENTITIES, today, type Field } from "@/lib/admin/entities";
+import { ENTITIES, type Field } from "@/lib/admin/entities";
+import { copyValues } from "@/lib/admin/copy";
+import { VsCopyTo } from "./vs-copy";
 import { findUnknownTokens, parseNotation } from "@/lib/notation/parse";
 import { describeError, revalidateSite, supabaseBrowser } from "@/lib/supabase/browser";
 import type { ComboRoute, Localized, Patch, PracticeConfig, SetupOption, StarterGroup, VsAction } from "@/lib/types";
@@ -261,16 +263,20 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
    */
   function duplicate() {
     if (!values || request.id === undefined) return;
-    const copy: Values = {};
-    for (const field of entity.groups.flatMap((g) => g.fields)) copy[field.key] = values[field.key];
-    const title = values.title as Localized | null | undefined;
-    if (title?.ko) copy.title = { ...title, ko: `${title.ko} (복사본)` };
-    copy.created_date = today();
-    copy.is_published = false;
     openEditor({
       entity: request.entity,
       defaults: typeof values.character_id === "number" ? { character_id: values.character_id } : undefined,
-      initial: copy,
+      initial: copyValues(request.entity, values, { markCopy: true }),
+    });
+  }
+
+  /** Vs 가이드: 다른 캐릭터(와 상대)로 복사한 새 항목 창을 연다 */
+  function copyToCharacter(characterId: number, opponent: string) {
+    if (!values) return;
+    openEditor({
+      entity: "vs",
+      defaults: { character_id: characterId },
+      initial: { ...copyValues("vs", values), opponent },
     });
   }
 
@@ -318,7 +324,8 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
               )}
               {isNew && request.initial && (
                 <p className="border border-accent/40 bg-accent/10 px-3 py-2 text-sm">
-                  원본 내용을 복사했습니다. 필요한 부분을 고친 뒤 <b>저장</b>하면 새 항목이 만들어집니다. (공개는 꺼진 상태로 시작합니다)
+                  원본 내용을 불러왔습니다. 필요한 부분을 고친 뒤 <b>저장</b>하면 새 항목이 만들어집니다.
+                  {request.initial.is_published === false && " (공개는 꺼진 상태로 시작합니다)"}
                 </p>
               )}
               {!isNew && (
@@ -390,6 +397,14 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
               >
                 복사
               </button>
+            )}
+            {!isNew && request.entity === "vs" && values && (
+              <VsCopyTo
+                disabled={busy}
+                currentCharacterId={values.character_id as number}
+                opponent={values.opponent as string}
+                onCopy={copyToCharacter}
+              />
             )}
             <button type="button" onClick={onClose} className="ml-auto px-3 py-1.5 text-sm font-semibold text-muted hover:text-fg">
               취소

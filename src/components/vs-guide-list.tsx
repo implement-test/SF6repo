@@ -8,6 +8,7 @@ import { setVsCounts, useVsOpponent } from "@/lib/vs-store";
 import { SortableCards } from "./admin/sortable-cards";
 import { AddButton } from "./admin/admin-context";
 import { ReorderButton } from "./admin/reorder-button";
+import { VsImportButton } from "./admin/vs-import-button";
 import { FavoriteFilter } from "./favorite-button";
 import { useHiddenLevels } from "./use-hidden-levels";
 
@@ -21,10 +22,13 @@ export function VsGuideList({
   items,
   dict,
   characterId,
+  characterName,
 }: {
   items: VsListItem[];
   dict: Dictionary;
   characterId: number;
+  /** 관리자 화면용 (한국어) */
+  characterName: string;
 }) {
   const opponent = useVsOpponent();
   const [topics, setTopics] = useState<VsTopic[]>([]);
@@ -50,6 +54,7 @@ export function VsGuideList({
   // 관리자 버튼: 새 항목은 지금 고른 상대로 시작한다
   const adminActions = (
     <div className="flex justify-end gap-2 empty:hidden">
+      <VsImportButton characterId={characterId} characterName={characterName} opponent={opponent} />
       <ReorderButton table="vs_guides" characterId={characterId} label="Vs 가이드" />
       <AddButton
         entity="vs"
