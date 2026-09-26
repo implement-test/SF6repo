@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { LOCALES, LOCALE_COOKIE, LOCALE_LABELS, type Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
@@ -99,8 +99,12 @@ function FilterGroup({ label, sub, children }: { label: string; sub: string; chi
 }
 
 /** 캐릭터 페이지 상단: 대상 수준 / 콤보 표시 / 조작 방식 */
+/** 콘텐츠 목록 탭(콤보·셋업·Vs 가이드)에서만 보인다. 개요(/{캐릭터})·커맨드 리스트에는 거를 목록이 없어서 숨긴다 */
+const HIDE_FILTERS_ON = [new RegExp(`^(/(${LOCALES.join("|")}))?/[^/]+/?$`), /\/moves\/?$/];
+
 export function ContentFilters({ dict }: { dict: Dictionary }) {
   const [prefs, update] = usePrefs();
+  const pathname = usePathname();
 
   function toggleLevel(level: (typeof TARGET_LEVELS)[number]) {
     const hidden = prefs.hidden.includes(level)
@@ -108,6 +112,8 @@ export function ContentFilters({ dict }: { dict: Dictionary }) {
       : [...prefs.hidden, level];
     update({ hidden });
   }
+
+  if (HIDE_FILTERS_ON.some((re) => re.test(pathname))) return null;
 
   return (
     <div className="flex flex-wrap gap-x-8 gap-y-3 border border-border bg-surface px-4 py-3">
