@@ -56,6 +56,6 @@ describe("parseYouTube", () => {
   it("임베드 주소를 만든다", () => {
     expect(youTubeEmbedUrl("dQw4w9WgXcQ", 90)).toContain("youtube-nocookie.com/embed/dQw4w9WgXcQ?");
     expect(youTubeEmbedUrl("dQw4w9WgXcQ", 90)).toContain("start=90");
-    expect(youTubeEmbedUrl("dQw4w9WgXcQ", null)).toContain("vq=hd720");
+    expect(youTubeEmbedUrl("dQw4w9WgXcQ", null)).toContain("vq=hd1080");
   });
 });

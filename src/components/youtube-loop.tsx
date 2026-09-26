@@ -95,7 +95,7 @@ export function YouTubeLoop({
         videoId: id,
         width: "100%",
         height: "100%",
-        playerVars: { start, rel: 0, modestbranding: 1, playsinline: 1, vq: "hd720" },
+        playerVars: { start, rel: 0, modestbranding: 1, playsinline: 1, vq: "hd1080" },
         events: {
           onStateChange: (e) => {
             if (e.data === ENDED && loopingRef.current) {

@@ -16,6 +16,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-09-26",
     items: [
       {
+        kind: "changed",
+        text: {
+          ko: "YouTube 영상 기본 화질을 1080p 로 요청하고 플레이어를 더 크게",
+          en: "YouTube videos request 1080p by default with a larger player",
+          ja: "YouTube 動画の既定画質を1080pに、プレーヤーを大きく",
+        },
+      },
+      {
         kind: "added",
         text: {
           ko: "캐릭터별 추천 영상 탭 (썸네일을 누르면 재생, 영상 언어로 거르기, 상단 필터 없음)",

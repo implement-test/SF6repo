@@ -38,11 +38,11 @@ function parseTime(value: string | null): number | null {
 
 /**
  * 개인정보 보호 모드(youtube-nocookie) 임베드 주소.
- * vq=hd720 은 720p 를 요청하지만 YouTube 가 무시할 수 있다. 실제 화질은 플레이어 크기로 정해지므로
- * 플레이어를 720p 가 선택되는 크기로 둔다 (src/components/media.tsx).
+ * vq=hd1080 은 1080p 를 요청하지만 YouTube 가 무시할 수 있다. 실제 화질은 플레이어 크기(와 화면 배율)로
+ * 정해지므로 플레이어를 카드 폭 전체로 크게 둔다 (src/components/media.tsx).
  */
 export function youTubeEmbedUrl(id: string, start: number | null, end: number | null = null): string {
-  const params = new URLSearchParams({ rel: "0", modestbranding: "1", vq: "hd720" });
+  const params = new URLSearchParams({ rel: "0", modestbranding: "1", vq: "hd1080" });
   if (start) params.set("start", String(start));
   if (end) params.set("end", String(end));
   return `https://www.youtube-nocookie.com/embed/${id}?${params}`;
