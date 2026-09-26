@@ -66,12 +66,15 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
                   ) : (
                     <div aria-hidden className="stripes absolute inset-0" />
                   )}
-                  <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-bg-deep via-bg-deep/40 to-transparent" />
+                  {/* 이미지에 이름이 새겨져 있어서, 이미지가 있으면 이름 글자·어두운 그라데이션을 빼고 번호만 둔다 */}
+                  {!portrait && (
+                    <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-bg-deep via-bg-deep/40 to-transparent" />
+                  )}
                   <span className="display absolute left-3 top-2 text-sm text-muted">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   <div className="relative p-3">
-                    <span className="display block text-3xl uppercase group-hover:text-accent">{name}</span>
+                    <span className={portrait ? "sr-only" : "display block text-3xl uppercase group-hover:text-accent"}>{name}</span>
                     <span className="brand-bar mt-2 block h-1 w-0 transition-all duration-300 group-hover:w-full" />
                   </div>
                 </Link>
