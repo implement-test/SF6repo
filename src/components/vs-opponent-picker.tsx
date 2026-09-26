@@ -85,10 +85,8 @@ export function VsOpponentPicker({ dict, locale }: { dict: Dictionary; locale: L
                         onClick={() => pick(on ? null : c.slug)}
                         className="group relative flex min-w-0 flex-col items-center gap-1.5 p-1 outline-2 -outline-offset-2 outline-transparent transition-colors hover:outline-border-strong aria-pressed:outline-accent"
                       >
+                        {/* 이미지에 이름이 새겨져 있어 따로 글자를 달지 않는다 (이름은 title·alt 로) */}
                         <Portrait slug={c.slug} label={name(c.slug)} className="aspect-[575/625] w-full" />
-                        <span className="w-full truncate text-center text-sm font-bold text-muted group-hover:text-fg group-aria-pressed:text-accent">
-                          {name(c.slug)}
-                        </span>
                         {count > 0 && (
                           <span className="absolute top-1 right-1 min-w-5 bg-accent px-1.5 text-center text-xs leading-5 font-bold text-accent-fg">
                             {count}
