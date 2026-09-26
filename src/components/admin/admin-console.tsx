@@ -9,10 +9,11 @@ import { ADMIN_FLAG, AddButton, EditButton, useAdmin } from "./admin-context";
 import { AdminSection } from "./admin-section";
 import { AdminUsers } from "./admin-users";
 import { DeletedItems } from "./deleted-items";
+import { PatchReview } from "./patch-review";
 
 type Status = "loading" | "signed-out" | "not-admin" | "admin" | "error";
 
-/** /admin: 로그인, 내 계정, 관리자 관리, 패치, 삭제된 항목 */
+/** /admin: 로그인, 내 계정, 관리자 관리, 패치, 패치 갱신, 삭제된 항목 */
 export function AdminConsole() {
   const sb = supabaseBrowser();
   const { admin, isManager, recheck } = useAdmin();
@@ -98,6 +99,7 @@ export function AdminConsole() {
       <MyAccount onSignOut={signOut} />
       {isManager && <AdminUsers />}
       {isManager && <PatchManager />}
+      <PatchReview />
       <DeletedItems />
     </div>
   );

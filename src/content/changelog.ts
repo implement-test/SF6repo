@@ -16,6 +16,15 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-09-26",
     items: [
       {
+        kind: "added",
+        adminOnly: true,
+        text: {
+          ko: "관리 페이지에 패치 갱신: 이전 패치 기준 항목을 모아 보고 '변경 없음' 으로 한 번에 최신 패치로",
+          en: "Patch review in the admin page: list items on older patches and mark them current in bulk",
+          ja: "管理ページにパッチ更新：旧パッチ基準の項目を一覧で確認し、まとめて最新パッチに",
+        },
+      },
+      {
         kind: "changed",
         adminOnly: true,
         text: {
