@@ -102,18 +102,22 @@ function buttons(text) {
 /** "Down, Down-Forward, Forward + Light Punch" → "236LP" (모르는 말이 있으면 null) */
 function inputSequence(text) {
   const t = clean(text);
-  const plus = t.lastIndexOf("+");
-  const dirPart = plus >= 0 ? t.slice(0, plus) : "";
-  const btnPart = plus >= 0 ? t.slice(plus + 1) : t;
-  const btn = buttons(btnPart);
-  if (!btn) return null;
-  if (!dirPart.trim()) return btn;
-  const dirs = dirPart
-    .toLowerCase()
-    .split(/\s*,\s*/)
-    .filter(Boolean)
-    .map((d) => DIRS[d.trim()]);
-  return dirs.every(Boolean) ? dirs.join("") + btn : null;
+  // 방향과 버튼을 가르는 + 를 찾는다. 동시 누르기("Back + LP+MP")가 있을 수 있어
+  // 왼쪽이 모두 방향인 + 중 첫 번째를 쓴다
+  const pluses = [...t.matchAll(/\+/g)].map((m) => m.index);
+  for (const plus of [-1, ...pluses]) {
+    const dirPart = plus >= 0 ? t.slice(0, plus) : "";
+    const btn = buttons(plus >= 0 ? t.slice(plus + 1) : t);
+    if (!btn) continue;
+    if (!dirPart.trim()) return btn;
+    const dirs = dirPart
+      .toLowerCase()
+      .split(/\s*,\s*/)
+      .filter(Boolean)
+      .map((d) => DIRS[d.trim()]);
+    if (dirs.every(Boolean)) return dirs.join("") + btn;
+  }
+  return null;
 }
 
 /** "Standing Light Punch" → { notation: "5LP", ko: "서서 약펀치" } */
