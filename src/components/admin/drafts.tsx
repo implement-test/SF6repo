@@ -12,7 +12,7 @@ import { NotationText } from "../notation";
  */
 export function listColumns(table: string): string {
   if (table === "moves") return "id,title:name,notation_classic:input_classic";
-  if (table === "vs_guides") return "id,title";
+  if (table === "vs_guides" || table === "videos") return "id,title";
   return "id,title,notation_classic";
 }
 

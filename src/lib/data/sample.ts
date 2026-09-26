@@ -1,4 +1,4 @@
-import type { Character, CharacterOverview, Move, VsAction, Combo, Patch, Setup, SetupComboLink, SetupSituation, VsGuide } from "@/lib/types";
+import type { Character, CharacterOverview, Move, Video, VsAction, Combo, Patch, Setup, SetupComboLink, SetupSituation, VsGuide } from "@/lib/types";
 import { ROSTER } from "@/lib/roster";
 
 /**
@@ -272,4 +272,41 @@ export const sampleMoves: Move[] = [
   { ...moveBase, id: 2, sort_order: 2, category: "normal", name: { ko: "[예시] 앉아 중킥" }, input_classic: "2MK", input_modern: "2M", damage: "500", startup: "8", active: "3", recovery: "17", on_hit: "-2", on_block: "-6", notes: { ko: "캔슬 가능한 하단 견제기" } },
   { ...moveBase, id: 3, sort_order: 3, category: "special", name: { ko: "[예시] 돌진기" }, input_classic: "236HP", input_modern: "SP", damage: "1000", startup: "14", active: "8", recovery: "22", on_hit: "다운", on_block: "-12" },
   { ...moveBase, id: 4, sort_order: 4, category: "super", name: { ko: "[예시] SA1" }, input_classic: "236236P", damage: "2000", startup: "9", active: "4", recovery: "40", on_hit: "다운", on_block: "-25" },
+];
+
+export const sampleVideos: Video[] = [
+  {
+    id: 1,
+    character_id: 1,
+    title: { ko: "[예시] 테리 기초 가이드" },
+    description: { ko: "기본기와 필살기 사용법을 정리한 영상." },
+    youtube_url: "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+    youtube_start: null,
+    youtube_end: null,
+    youtube_loop: false,
+    channel: "예시 채널",
+    language: "ko",
+    target_level: "beginner",
+    patch_id: 1,
+    sort_order: 1,
+    is_published: true,
+    created_date: "2026-09-26",
+  },
+  {
+    id: 2,
+    character_id: 1,
+    title: { ko: "[예시] 코너 운반 콤보 모음" },
+    description: null,
+    youtube_url: "https://youtu.be/aqz-KE-bpKQ?t=42",
+    youtube_start: 42,
+    youtube_end: 60,
+    youtube_loop: true,
+    channel: "Example Channel",
+    language: "en",
+    target_level: "intermediate",
+    patch_id: 1,
+    sort_order: 2,
+    is_published: true,
+    created_date: "2026-09-26",
+  },
 ];

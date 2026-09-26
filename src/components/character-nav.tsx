@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 
-const SECTIONS = ["overview", "moves", "combos", "setups", "vs"] as const;
+const SECTIONS = ["overview", "moves", "combos", "setups", "vs", "videos"] as const;
 
 /** SF6 메뉴처럼 기울어진 탭. 선택된 탭은 마젠타로 채운다. */
 export function CharacterNav({ slug, labels }: { slug: string; labels: Dictionary["nav"] }) {

@@ -23,7 +23,7 @@ export function SortableCards({
   visibleIds,
   className,
 }: {
-  table: "combos" | "setups" | "vs_guides" | "moves";
+  table: "combos" | "setups" | "vs_guides" | "moves" | "videos";
   characterId: number;
   /** 공개 항목 전체 (지금 순서대로) */
   items: Item[];

@@ -18,6 +18,7 @@ const TABLE_LABELS: Record<string, string> = {
   vs_patterns: "패턴 대응",
   vs_guides: "Vs 가이드",
   character_overviews: "개요",
+  videos: "추천 영상",
   glossary: "용어",
   patches: "패치",
   starter_presets: "시동기 프리셋",

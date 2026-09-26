@@ -17,6 +17,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     items: [
       {
         kind: "added",
+        text: {
+          ko: "캐릭터별 추천 영상 탭 (썸네일을 누르면 재생, 영상 언어로 거르기)",
+          en: "Recommended videos tab per character (click a thumbnail to play, filter by language)",
+          ja: "キャラ別のおすすめ動画タブ（サムネイルで再生、言語で絞り込み）",
+        },
+      },
+      {
+        kind: "added",
         adminOnly: true,
         text: {
           ko: "Vs 가이드를 다른 캐릭터로 복사, 다른 캐릭터의 Vs 가이드를 검색해서 가져오기",

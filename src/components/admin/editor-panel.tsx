@@ -205,7 +205,7 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
     if (isNew) {
       // 콤보·셋업은 새 항목을 목록 맨 아래에 둔다 (순서는 '순서 변경'에서 바꾼다)
       const order: Values = {};
-      if (typeof request.defaults?.character_id === "number" && ["combos", "setups", "vs_guides", "moves"].includes(entity.table)) {
+      if (typeof request.defaults?.character_id === "number" && ["combos", "setups", "vs_guides", "moves", "videos"].includes(entity.table)) {
         const { data: last } = await sb
           .from(entity.table)
           .select("sort_order")

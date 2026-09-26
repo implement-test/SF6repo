@@ -244,3 +244,22 @@ export type CharacterOverview = {
   updated_by?: string | null;
   updated_at?: string;
 };
+
+// ───────────────────────── 추천 영상 ─────────────────────────
+
+export type VideoLanguage = "ko" | "en" | "ja" | "other";
+export const VIDEO_LANGUAGES: VideoLanguage[] = ["ko", "en", "ja", "other"];
+
+/** 캐릭터별 추천 영상 (YouTube) */
+export type Video = ContentBase & {
+  character_id: number;
+  title: Localized;
+  description: Localized | null;
+  youtube_url: string;
+  youtube_start: number | null;
+  youtube_end: number | null;
+  youtube_loop: boolean;
+  /** 채널 이름 (출처) */
+  channel: string | null;
+  language: VideoLanguage;
+};

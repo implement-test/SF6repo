@@ -9,6 +9,7 @@ import type {
   Setup,
   SetupComboLink,
   SetupSituation,
+  Video,
   VsGuide,
 } from "@/lib/types";
 import { normalizeOptions, normalizePractice } from "@/lib/setup";
@@ -23,6 +24,7 @@ import {
   sampleSituations,
   sampleMoves,
   sampleOverviews,
+  sampleVideos,
   sampleVsGuides,
 } from "./sample";
 
@@ -196,4 +198,12 @@ export async function getMoves(characterId: number): Promise<Move[]> {
   if (!c) return sampleMoves.filter((m) => m.character_id === characterId);
   const { data } = await c.from("moves").select("*").eq("character_id", characterId).order("sort_order").order("id");
   return (data ?? []) as Move[];
+}
+
+/** 추천 영상. 표가 아직 없으면(0020 실행 전) 빈 목록 */
+export async function getVideos(characterId: number): Promise<Video[]> {
+  const c = db();
+  if (!c) return sampleVideos.filter((v) => v.character_id === characterId);
+  const { data } = await c.from("videos").select("*").eq("character_id", characterId).order("sort_order").order("id");
+  return (data ?? []) as Video[];
 }

@@ -19,6 +19,7 @@ const KINDS = [
   { table: "moves", entity: "move", label: "커맨드" },
   { table: "vs_guides", entity: "vs", label: "Vs 가이드" },
   { table: "character_overviews", entity: "overview", label: "개요" },
+  { table: "videos", entity: "video", label: "추천 영상" },
 ] as const;
 
 type Kind = (typeof KINDS)[number];
@@ -45,6 +46,8 @@ function hrefFor(item: Item, slug: string): string {
       return `/${slug}/moves#move-${id}`;
     case "vs_guides":
       return `/${slug}/vs?vs=${opponent}#vs-${id}`;
+    case "videos":
+      return `/${slug}/videos#video-${id}`;
     default:
       return `/${slug}`;
   }

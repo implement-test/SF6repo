@@ -39,7 +39,7 @@ export type Field = { key: string; label: string; help?: string; required?: bool
 
 export type FieldGroup = { title: string; fields: Field[] };
 
-export type EntityType = "combo" | "patch" | "setup" | "vs" | "overview" | "move";
+export type EntityType = "combo" | "patch" | "setup" | "vs" | "overview" | "move" | "video";
 
 export type Entity = {
   table: string;
@@ -69,6 +69,13 @@ const POSITIONS: Option[] = [
   { value: "other", label: "기타" },
 ];
 
+
+const VIDEO_LANGUAGES: Option[] = [
+  { value: "ko", label: "한국어" },
+  { value: "en", label: "영어" },
+  { value: "ja", label: "일본어" },
+  { value: "other", label: "기타" },
+];
 
 const MOVE_CATEGORIES: Option[] = [
   { value: "normal", label: "기본기" },
@@ -306,6 +313,28 @@ export const ENTITIES: Record<EntityType, Entity> = {
       META_GROUP,
     ],
     defaults: () => ({ ...metaDefaults(), category: "normal" }),
+  },
+
+  video: {
+    table: "videos",
+    label: "추천 영상",
+    groups: [
+      {
+        title: "추천 영상",
+        fields: [
+          { key: "title", label: "제목", type: "localized", required: true },
+          { key: "youtube_url", label: "YouTube URL", type: "url", required: true, wide: true, help: "링크에 t= 가 있으면 그 시점부터 재생합니다." },
+          { key: "youtube_start", label: "구간 시작", type: "clock", help: "예: 1:23 또는 83(초). 입력하면 링크의 t= 보다 우선합니다." },
+          { key: "youtube_end", label: "구간 끝", type: "clock", help: "비우면 영상 끝까지 재생합니다." },
+          { key: "youtube_loop", label: "구간 반복", type: "checkbox", help: "구간 시작~끝을 계속 반복합니다 (구간 끝이 있어야 합니다)." },
+          { key: "channel", label: "채널 이름", type: "text", help: "출처로 카드에 표시됩니다." },
+          { key: "language", label: "영상 언어", type: "select", options: VIDEO_LANGUAGES },
+          { key: "description", label: "설명", type: "localized", multiline: true },
+        ],
+      },
+      META_GROUP,
+    ],
+    defaults: () => ({ ...metaDefaults(), language: "ko", youtube_loop: false }),
   },
 
   vs: {

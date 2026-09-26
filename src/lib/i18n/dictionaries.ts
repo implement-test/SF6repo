@@ -21,6 +21,7 @@ const ko = {
     combos: "콤보",
     setups: "셋업",
     vs: "Vs 가이드",
+    videos: "추천 영상",
     glossary: "용어집",
     notation: "표기법",
   },
@@ -80,6 +81,12 @@ const ko = {
     onBlock: "가드",
     empty: "아직 커맨드가 없습니다.",
     source: "일부 프레임 데이터 출처:",
+  },
+  videos: {
+    empty: "아직 추천 영상이 없습니다.",
+    none: "조건에 맞는 영상이 없습니다.",
+    play: "재생",
+    languages: { ko: "한국어", en: "영어", ja: "일본어", other: "기타 언어" },
   },
   vs: {
     opponent: "상대 캐릭터",
@@ -164,6 +171,7 @@ const en: Dictionary = {
     combos: "Combos",
     setups: "Setups",
     vs: "Vs guide",
+    videos: "Videos",
     glossary: "Glossary",
     notation: "Notation",
   },
@@ -223,6 +231,12 @@ const en: Dictionary = {
     onBlock: "On block",
     empty: "No moves yet.",
     source: "Some frame data from",
+  },
+  videos: {
+    empty: "No videos yet.",
+    none: "No videos match these filters.",
+    play: "Play",
+    languages: { ko: "Korean", en: "English", ja: "Japanese", other: "Other" },
   },
   vs: {
     opponent: "Opponent",
@@ -305,6 +319,7 @@ const ja: Dictionary = {
     combos: "コンボ",
     setups: "セットプレイ",
     vs: "キャラ対策",
+    videos: "おすすめ動画",
     glossary: "用語集",
     notation: "表記法",
   },
@@ -364,6 +379,12 @@ const ja: Dictionary = {
     onBlock: "ガード",
     empty: "まだコマンドがありません。",
     source: "一部フレームデータの出典：",
+  },
+  videos: {
+    empty: "まだおすすめ動画がありません。",
+    none: "条件に合う動画がありません。",
+    play: "再生",
+    languages: { ko: "韓国語", en: "英語", ja: "日本語", other: "その他" },
   },
   vs: {
     opponent: "対戦相手",
