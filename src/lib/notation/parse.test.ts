@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { findUnknownTokens, normalizeNotation, parseNotation } from "./parse";
+import { displayNotation, findUnknownTokens, normalizeNotation, parseNotation } from "./parse";
 import { directionIcons } from "./icons";
 
 describe("normalizeNotation", () => {
@@ -122,5 +122,19 @@ describe("directionIcons", () => {
     expect(directionIcons("3")[0]).toMatchObject({ src: "/icons/dir-9.webp", flip: "y" });
     expect(directionIcons("7")[0]).toMatchObject({ src: "/icons/dir-9.webp", flip: "x" });
     expect(directionIcons("8")[0]).toMatchObject({ src: "/icons/dir-2.webp", flip: "y" });
+  });
+});
+
+describe("displayNotation", () => {
+  it("버튼과 시스템 기호는 대문자로", () => {
+    expect(displayNotation("counter 2lk > lk > 236lk")).toBe("counter 2LK → LK → 236LK");
+    expect(displayNotation("2mp -> drc > 5hp・hp")).toBe("2MP → DRC → 5HP·HP");
+    expect(displayNotation("j.hp > 5pp > 236kk")).toBe("j.HP → 5PP → 236KK");
+    expect(displayNotation("2m > sp")).toBe("2M → SP");
+  });
+
+  it("괄호 안 메모와 일반 단어는 그대로", () => {
+    expect(displayNotation("(hold lp) delay 5hp > f.throw")).toBe("(hold lp) delay 5HP → f.throw");
+    expect(displayNotation("punish 5hp")).toBe("punish 5HP");
   });
 });

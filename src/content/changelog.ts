@@ -18,6 +18,14 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         kind: "changed",
         text: {
+          ko: "텍스트 표시에서 버튼 기호(LP·MP·HP…, DR·DRC·DI)를 대문자로",
+          en: "Text display shows button notation (LP, MP, HP…, DR, DRC, DI) in uppercase",
+          ja: "テキスト表示でボタン表記（LP・MP・HP…、DR・DRC・DI）を大文字に",
+        },
+      },
+      {
+        kind: "changed",
+        text: {
           ko: "Vs 가이드: 공용 내용 + 관련 동작·대응을 여러 선택지로, 선택지마다 설명",
           en: "Vs guides: shared text plus multiple related moves/responses, each with its own note",
           ja: "Vsガイド：共通の内容＋複数の関連技・対応（選択肢ごとに説明）",

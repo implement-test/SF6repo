@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import {
   isSituation,
-  normalizeNotation,
+  displayNotation,
   parseNotation,
   type Modifier,
   type Move,
@@ -145,7 +145,7 @@ export function NotationImage({ notation }: { notation: string }) {
 }
 
 export function NotationText({ notation }: { notation: string }) {
-  return <span className="font-mono text-[0.95rem] leading-relaxed break-words">{normalizeNotation(notation)}</span>;
+  return <span className="font-mono text-[0.95rem] leading-relaxed break-words">{displayNotation(notation)}</span>;
 }
 
 /** 방문자 설정(텍스트/이미지)에 따라 둘 중 하나가 보인다. */

@@ -72,6 +72,24 @@ export function normalizeNotation(src: string): string {
     .trim();
 }
 
+/**
+ * 텍스트로 보여 줄 표기: 표준 기호로 바꾸고 버튼·시스템 기호를 대문자로 (2lk → 2LK, drc → DRC).
+ * 괄호 안 메모와 counter · delay · f.throw 같은 단어는 그대로 둔다.
+ */
+export function displayNotation(src: string): string {
+  return normalizeNotation(src)
+    .split(/(\([^)]*\))/)
+    .map((part, i) =>
+      i % 2 === 1
+        ? part
+        : part.replace(
+            /\b(\d*)((?:lp|mp|hp|lk|mk|hk|pp|kk|sp|p|k|l|m|h)+|drc|dr|di)\b/gi,
+            (_, digits: string, buttons: string) => digits + buttons.toUpperCase(),
+          ),
+    )
+    .join("");
+}
+
 function parseButtons(src: string): Button[] | null {
   const out: Button[] = [];
   let rest = src.replace(/\+/g, "");
