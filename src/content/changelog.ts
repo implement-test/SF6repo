@@ -16,6 +16,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-09-26",
     items: [
       {
+        kind: "added",
+        text: {
+          ko: "개요(소개 · 장점 · 단점 · 클래식/모던 차이) 와 커맨드 리스트(분류별 기술 카드 + 프레임 데이터)",
+          en: "Overview (summary, strengths, weaknesses, classic/modern differences) and command list (moves by category with frame data)",
+          ja: "概要（紹介・長所・短所・クラシック/モダンの違い）とコマンドリスト（分類別の技カード＋フレームデータ）",
+        },
+      },
+      {
         kind: "changed",
         text: {
           ko: "개요·커맨드 리스트 탭에서는 상단 필터(대상·표시·조작) 숨김",

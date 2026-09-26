@@ -12,6 +12,8 @@ export type Field = { key: string; label: string; help?: string; required?: bool
   | { type: "localized"; multiline?: boolean }
   | { type: "notation" }
   | { type: "starters" }
+  /** 한 줄씩 적는 다국어 목록 (장점 / 단점 …) */
+  | { type: "localizedList" }
   /** 콤보 루트 여러 개 + 루트별 수치. 첫 번째는 칼럼, 나머지는 extra_routes 에 저장 */
   | { type: "routes" }
   | { type: "text" | "url" }
@@ -35,7 +37,7 @@ export type Field = { key: string; label: string; help?: string; required?: bool
 
 export type FieldGroup = { title: string; fields: Field[] };
 
-export type EntityType = "combo" | "patch" | "setup" | "vs";
+export type EntityType = "combo" | "patch" | "setup" | "vs" | "overview" | "move";
 
 export type Entity = {
   table: string;
@@ -65,6 +67,16 @@ const POSITIONS: Option[] = [
   { value: "other", label: "기타" },
 ];
 
+
+const MOVE_CATEGORIES: Option[] = [
+  { value: "normal", label: "기본기" },
+  { value: "unique", label: "특수기" },
+  { value: "target_combo", label: "타겟 콤보" },
+  { value: "throw", label: "잡기" },
+  { value: "drive", label: "드라이브 시스템" },
+  { value: "special", label: "필살기" },
+  { value: "super", label: "슈퍼 아츠" },
+];
 
 /** 상대 캐릭터 (로스터 순서, 분류 이름을 붙여서) */
 const OPPONENTS: Option[] = ROSTER.map((c) => ({
@@ -224,6 +236,74 @@ export const ENTITIES: Record<EntityType, Entity> = {
       practice: null,
       combo_links: [],
     }),
+  },
+
+  overview: {
+    table: "character_overviews",
+    label: "개요",
+    groups: [
+      {
+        title: "개요",
+        fields: [
+          {
+            key: "summary",
+            label: "캐릭터 소개",
+            type: "localized",
+            multiline: true,
+            help: "어떤 캐릭터인지, 기본 운영을 글로 설명합니다. 줄바꿈은 그대로 보입니다.",
+          },
+          { key: "pros", label: "장점", type: "localizedList", wide: true },
+          { key: "cons", label: "단점", type: "localizedList", wide: true },
+          {
+            key: "modern_notes",
+            label: "클래식 / 모던 차이",
+            type: "localizedList",
+            wide: true,
+            help: "모던에서 달라지는 점 (어시스트 콤보, 없는 기술, SP 버튼 필살기 등)",
+          },
+        ],
+      },
+      {
+        title: "관리",
+        fields: [
+          { key: "patch_id", label: "기준 패치", type: "patch" },
+          { key: "created_date", label: "작성일", type: "date" },
+          { key: "is_published", label: "공개", type: "checkbox" },
+        ],
+      },
+    ],
+    defaults: () => ({ created_date: today(), is_published: true, summary: null, pros: [], cons: [], modern_notes: [] }),
+  },
+
+  move: {
+    table: "moves",
+    label: "커맨드",
+    groups: [
+      {
+        title: "커맨드",
+        fields: [
+          { key: "category", label: "분류", type: "select", options: MOVE_CATEGORIES },
+          { key: "name", label: "기술 이름", type: "localized", required: true },
+          { key: "input_classic", label: "커맨드 (클래식)", type: "notation", required: true, wide: true },
+          { key: "input_modern", label: "커맨드 (모던)", type: "notation", wide: true, help: "비워 두면 '클래식 전용'으로 표시됩니다." },
+        ],
+      },
+      {
+        title: "프레임",
+        fields: [
+          { key: "damage", label: "데미지", type: "text", help: "예: 800, 600×2" },
+          { key: "startup", label: "발생", type: "text" },
+          { key: "active", label: "지속", type: "text" },
+          { key: "recovery", label: "경직", type: "text" },
+          { key: "on_hit", label: "히트 시", type: "text", help: "예: +4, 다운" },
+          { key: "on_block", label: "가드 시", type: "text", help: "예: -6" },
+        ],
+      },
+      { title: "설명", fields: [{ key: "notes", label: "설명", type: "localized", multiline: true }] },
+      MEDIA_GROUP,
+      META_GROUP,
+    ],
+    defaults: () => ({ ...metaDefaults(), category: "normal" }),
   },
 
   vs: {

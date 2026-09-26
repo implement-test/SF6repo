@@ -1,4 +1,4 @@
-import type { Character, Combo, Patch, Setup, SetupComboLink, SetupSituation, VsGuide } from "@/lib/types";
+import type { Character, CharacterOverview, Move, Combo, Patch, Setup, SetupComboLink, SetupSituation, VsGuide } from "@/lib/types";
 import { ROSTER } from "@/lib/roster";
 
 /**
@@ -233,4 +233,40 @@ export const sampleVsGuides: VsGuide[] = [
     body: { ko: "가드 후 약간 멀어지므로 2MK 로 끼어든다." },
     sort_order: 3,
   },
+];
+
+export const sampleOverviews: CharacterOverview[] = [
+  {
+    id: 1,
+    character_id: 1,
+    summary: {
+      ko: "[예시] 돌진기와 대공이 모두 갖춰진 올라운더.\n중거리에서 기본기로 견제하다가 드라이브 러시로 파고드는 운영이 기본이다.",
+    },
+    pros: [{ ko: "[예시] 믿을 만한 무적 대공" }, { ko: "[예시] 코너 운반력이 좋은 콤보" }],
+    cons: [{ ko: "[예시] 돌진기는 가드되면 반격 확정" }, { ko: "[예시] 장거리 견제 수단이 적음" }],
+    modern_notes: [{ ko: "[예시] 어시스트 콤보로 기본 콤보가 쉬워짐" }, { ko: "[예시] 일부 커맨드 기본기는 모던에 없음" }],
+    patch_id: 1,
+    is_published: true,
+    created_date: "2026-09-26",
+  },
+];
+
+const moveBase = {
+  character_id: 1,
+  patch_id: 1,
+  is_published: true,
+  media_url: null,
+  youtube_url: null,
+  youtube_start: null,
+  target_level: "beginner",
+  created_date: "2026-09-26",
+  notes: null,
+  input_modern: null,
+} as const;
+
+export const sampleMoves: Move[] = [
+  { ...moveBase, id: 1, sort_order: 1, category: "normal", name: { ko: "[예시] 서서 약펀치" }, input_classic: "5LP", input_modern: "5L", damage: "300", startup: "4", active: "3", recovery: "7", on_hit: "+4", on_block: "-1" },
+  { ...moveBase, id: 2, sort_order: 2, category: "normal", name: { ko: "[예시] 앉아 중킥" }, input_classic: "2MK", input_modern: "2M", damage: "500", startup: "8", active: "3", recovery: "17", on_hit: "-2", on_block: "-6", notes: { ko: "캔슬 가능한 하단 견제기" } },
+  { ...moveBase, id: 3, sort_order: 3, category: "special", name: { ko: "[예시] 돌진기" }, input_classic: "236HP", input_modern: "SP", damage: "1000", startup: "14", active: "8", recovery: "22", on_hit: "다운", on_block: "-12" },
+  { ...moveBase, id: 4, sort_order: 4, category: "super", name: { ko: "[예시] SA1" }, input_classic: "236236P", damage: "2000", startup: "9", active: "4", recovery: "40", on_hit: "다운", on_block: "-25" },
 ];

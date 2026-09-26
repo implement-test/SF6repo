@@ -1,6 +1,16 @@
 import "server-only";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import type { Character, Combo, Patch, Setup, SetupComboLink, SetupSituation, VsGuide } from "@/lib/types";
+import type {
+  Character,
+  CharacterOverview,
+  Combo,
+  Move,
+  Patch,
+  Setup,
+  SetupComboLink,
+  SetupSituation,
+  VsGuide,
+} from "@/lib/types";
 import { normalizeOptions, normalizePractice } from "@/lib/setup";
 import { normalizeStarterGroups } from "@/lib/starters";
 import {
@@ -10,6 +20,8 @@ import {
   sampleSetupLinks,
   sampleSetups,
   sampleSituations,
+  sampleMoves,
+  sampleOverviews,
   sampleVsGuides,
 } from "./sample";
 
@@ -159,4 +171,28 @@ export async function getVsGuides(characterId: number): Promise<VsGuide[]> {
     .order("sort_order")
     .order("id");
   return (data ?? []) as VsGuide[];
+}
+
+const localizedList = (v: unknown) => (Array.isArray(v) ? v.filter((x) => x && typeof x === "object" && x.ko) : []);
+
+/** 캐릭터 개요 (없으면 null). 표가 아직 없으면(0016 실행 전) null */
+export async function getOverview(characterId: number): Promise<CharacterOverview | null> {
+  const c = db();
+  if (!c) return sampleOverviews.find((o) => o.character_id === characterId) ?? null;
+  const { data } = await c.from("character_overviews").select("*").eq("character_id", characterId).maybeSingle();
+  if (!data) return null;
+  return {
+    ...data,
+    pros: localizedList(data.pros),
+    cons: localizedList(data.cons),
+    modern_notes: localizedList(data.modern_notes),
+  } as CharacterOverview;
+}
+
+/** 커맨드 리스트 */
+export async function getMoves(characterId: number): Promise<Move[]> {
+  const c = db();
+  if (!c) return sampleMoves.filter((m) => m.character_id === characterId);
+  const { data } = await c.from("moves").select("*").eq("character_id", characterId).order("sort_order").order("id");
+  return (data ?? []) as Move[];
 }

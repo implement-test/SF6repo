@@ -11,6 +11,7 @@ import { normalizeOptions, normalizePractice } from "@/lib/setup";
 import { normalizeStarterGroups } from "@/lib/starters";
 import { comboRoutes, routesToColumns } from "@/lib/combo-routes";
 import { RoutesInput } from "./routes-input";
+import { LocalizedListInput, cleanLocalizedList } from "./localized-list-input";
 import { NotationImage } from "../notation";
 import { useAdmin, type EditorRequest } from "./admin-context";
 import { formatPatchVersion } from "@/lib/patch";
@@ -152,7 +153,7 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
     if (isNew) {
       // 콤보·셋업은 새 항목을 목록 맨 아래에 둔다 (순서는 '순서 변경'에서 바꾼다)
       const order: Values = {};
-      if (typeof request.defaults?.character_id === "number" && ["combos", "setups", "vs_guides"].includes(entity.table)) {
+      if (typeof request.defaults?.character_id === "number" && ["combos", "setups", "vs_guides", "moves"].includes(entity.table)) {
         const { data: last } = await sb
           .from(entity.table)
           .select("sort_order")
@@ -447,6 +448,16 @@ function FieldInput({
         />
       );
 
+    case "localizedList":
+      return (
+        <LocalizedListInput
+          label={field.label}
+          help={field.help}
+          value={(value as Partial<Localized>[] | null) ?? []}
+          onChange={onChange}
+        />
+      );
+
     case "routes":
       return (
         <RoutesInput
@@ -645,6 +656,12 @@ function buildPayload(fields: Field[], values: Values): { payload: Values; probl
       case "starters":
         payload[field.key] = cleanStarterGroups(raw as StarterGroup[] | null);
         break;
+      case "localizedList": {
+        const list = cleanLocalizedList(raw as Partial<Localized>[] | null);
+        if (list === "missing-ko") return { payload, problem: `${field.label}: 한국어는 필수입니다.` };
+        payload[field.key] = list;
+        break;
+      }
       case "routes": {
         // 첫 번째 루트는 기존 칼럼, 나머지는 extra_routes 로 나눠 저장한다
         const columns = routesToColumns((raw as ComboRoute[] | null) ?? []);

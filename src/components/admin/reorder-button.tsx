@@ -11,7 +11,7 @@ export function ReorderButton({
   characterId,
   label,
 }: {
-  table: "combos" | "setups" | "vs_guides";
+  table: "combos" | "setups" | "vs_guides" | "moves";
   characterId: number;
   label: string;
 }) {

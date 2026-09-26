@@ -24,7 +24,7 @@ export default function ReorderPanel({
   label,
   onClose,
 }: {
-  table: "combos" | "setups" | "vs_guides";
+  table: "combos" | "setups" | "vs_guides" | "moves";
   characterId: number;
   label: string;
   onClose: () => void;
@@ -40,7 +40,8 @@ export default function ReorderPanel({
 
   useEffect(() => {
     sb.from(table)
-      .select("id,title,notation_classic,is_published,sort_order")
+      // 커맨드 표는 칸 이름이 달라서 이름을 바꿔 읽는다 (name → title, input_classic → notation_classic)
+      .select(table === "moves" ? "id,title:name,notation_classic:input_classic,is_published,sort_order" : "id,title,notation_classic,is_published,sort_order")
       .eq("character_id", characterId)
       .order("sort_order")
       .order("id")

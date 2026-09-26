@@ -8,7 +8,10 @@ export type Difficulty = "easy" | "normal" | "hard";
 export type ScreenPosition = "any" | "midscreen" | "near_corner" | "corner" | "other";
 /** 노멀 / 퍼니시 카운터 / 구석 임팩트 가드 / 구석 임팩트 스턴 */
 export type HitState = "normal" | "punish_counter" | "corner_impact_guard" | "corner_impact_stun";
-export type MoveCategory = "normal" | "unique" | "special" | "super" | "throw" | "drive";
+/** 기본기 / 특수기 / 타겟 콤보 / 잡기 / 드라이브 시스템 / 필살기 / 슈퍼 아츠 */
+export type MoveCategory = "normal" | "unique" | "target_combo" | "throw" | "drive" | "special" | "super";
+/** 커맨드 리스트에 보이는 순서 */
+export const MOVE_CATEGORIES: MoveCategory[] = ["normal", "unique", "target_combo", "throw", "drive", "special", "super"];
 
 export const TARGET_LEVELS: TargetLevel[] = ["beginner", "intermediate", "advanced"];
 export const HIT_STATES: HitState[] = ["normal", "punish_counter", "corner_impact_guard", "corner_impact_stun"];
@@ -220,3 +223,21 @@ export type VsGuide = ContentBase &
     notation_classic: string | null;
     notation_modern: string | null;
   };
+
+// ───────────────────────── 개요 ─────────────────────────
+
+/** 캐릭터 개요 (캐릭터마다 한 건): 소개 글 + 장점 / 단점 + 클래식·모던 차이 (한 줄씩) */
+export type CharacterOverview = {
+  id: number;
+  character_id: number;
+  summary: Localized | null;
+  pros: Localized[];
+  cons: Localized[];
+  modern_notes: Localized[];
+  patch_id: number | null;
+  is_published: boolean;
+  created_date: string;
+  created_by?: string | null;
+  updated_by?: string | null;
+  updated_at?: string;
+};

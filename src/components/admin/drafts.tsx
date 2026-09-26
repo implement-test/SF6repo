@@ -31,7 +31,8 @@ export function DraftItems({
     import("@/lib/supabase/browser").then(({ supabaseBrowser }) =>
       supabaseBrowser()
         .from(table)
-        .select("id,title,notation_classic")
+        // 커맨드 표는 칸 이름이 달라서 이름을 바꿔 읽는다
+        .select(table === "moves" ? "id,title:name,notation_classic:input_classic" : "id,title,notation_classic")
         .eq("character_id", characterId)
         .eq("is_published", false)
         .order("sort_order")
