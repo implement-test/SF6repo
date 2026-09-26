@@ -44,7 +44,7 @@ export function MoveCard({
   return (
     <article
       id={`move-${move.id}`}
-      className="grid border border-border bg-surface transition-colors hover:border-border-strong lg:grid-cols-[1fr_auto]"
+      className="grid border border-border bg-surface transition-colors hover:border-border-strong lg:grid-cols-[minmax(0,1fr)_33rem]"
     >
       <div className="flex min-w-0 flex-col gap-2.5 px-4 py-3">
         <header className="flex flex-wrap items-center gap-2">
@@ -65,11 +65,15 @@ export function MoveCard({
         )}
       </div>
 
+      {/* 프레임 칸은 폭을 고정하고(6칸 똑같이), 긴 값("20 on early hit …")은 칸 안에서 작게 줄바꿈 */}
       <dl className="grid grid-cols-3 border-t border-border bg-surface-2/60 sm:grid-cols-6 lg:border-t-0 lg:border-l">
         {stats.map((s) => (
-          <div key={s.label} className="flex flex-col items-center justify-center gap-0.5 border-border px-3 py-2.5 not-last:border-r lg:min-w-[4.5rem]">
+          <div key={s.label} className="flex min-w-0 flex-col items-center justify-center gap-0.5 border-border px-2 py-2.5 text-center not-last:border-r">
             <dt className="eyebrow whitespace-nowrap">{s.label}</dt>
-            <dd className="display text-lg tabular-nums" style={s.tone ? { color: s.tone } : undefined}>
+            <dd
+              className={`display tabular-nums break-words ${(s.value?.length ?? 0) > 8 ? "text-xs leading-tight" : "text-lg"}`}
+              style={s.tone ? { color: s.tone } : undefined}
+            >
               {s.value || "—"}
             </dd>
           </div>
