@@ -16,6 +16,15 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-09-26",
     items: [
       {
+        kind: "changed",
+        adminOnly: true,
+        text: {
+          ko: "관리 페이지 '확인 필요': 이전 패치 · 번역 누락(EN/JA) · 비공개 항목을 모아 바로 처리",
+          en: "Admin 'Review' section: items on older patches, missing EN/JA translations, and unpublished items",
+          ja: "管理ページ「要確認」：旧パッチ・翻訳漏れ（EN/JA）・非公開の項目をまとめて処理",
+        },
+      },
+      {
         kind: "added",
         adminOnly: true,
         text: {
