@@ -75,14 +75,21 @@ npm run lint
 3. D1(태그 캐시): `npx wrangler d1 create sf6-repository-tag-cache` → 나온 database_id 를 `wrangler.jsonc` 의 `d1_databases` 에 넣는다
    - 없으면 관리자가 저장해도(revalidatePath) 배포된 사이트에 반영되지 않는다. 표(`revalidations`)는 배포할 때 자동으로 만들어진다
 
-### 배포할 때마다
+### 배포
+`main` 에 push 하면 자동 배포된다 (Workers Builds, 저장소 implement-test/SF6repo).
+- 대시보드: Workers → sf6-repository → Settings → Build
+  - Build command `npx opennextjs-cloudflare build`, Deploy command `npx opennextjs-cloudflare deploy`
+  - Build variables: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (빌드에 들어가야 하므로 Runtime 변수가 아니라 Build 변수)
+  - Node 버전은 `.node-version` (24)
+- 빌드 로그: Workers → sf6-repository → Deployments
+
+수동 배포가 필요하면 로컬에서:
 ```bash
 npm run deploy
 ```
-(= `opennextjs-cloudflare build` + `deploy`. dev 서버가 켜져 있으면 `.open-next` 잠금으로 빌드가 실패하니 먼저 끈다.
-환경변수는 `.env.local` 의 `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` 가 빌드에 들어간다)
+(dev 서버가 켜져 있으면 `.open-next` 잠금으로 빌드가 실패하니 먼저 끈다. 환경변수는 `.env.local` 값이 들어간다)
 
 ### 설정 메모
 - 언어 rewrite(`next.config.ts`)는 첫 단계/나머지 단계를 나눠 받는다. 여러 단계를 한 칸에 담으면 OpenNext 라우터에서 500 오류
 - `open-next.config.ts`: R2 증분 캐시 + D1 태그 캐시 + 메모리 큐(자기 참조 서비스 바인딩)
-- 나중에: GitHub push 로 자동 배포(Workers Builds), 도메인 구입 후 Workers → Settings → Domains 에서 `sf6repository.com` 연결
+- 나중에: 도메인 구입 후 Workers → Settings → Domains 에서 `sf6repository.com` 연결
