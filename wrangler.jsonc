@@ -21,5 +21,13 @@
       "binding": "NEXT_INC_CACHE_R2_BUCKET",
       "bucket_name": "sf6-repository-opennext-cache"
     }
+  ],
+  "d1_databases": [
+    {
+      // 태그 캐시: 관리자가 저장할 때 revalidatePath 로 무효화한 경로를 기록한다
+      "binding": "NEXT_TAG_CACHE_D1",
+      "database_name": "sf6-repository-tag-cache",
+      "database_id": "c53d0e10-0eea-4bc7-b3e4-7e484a7acff7"
+    }
   ]
 }

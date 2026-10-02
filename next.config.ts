@@ -2,7 +2,11 @@ import type { NextConfig } from "next";
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
 // 언어 코드가 붙지 않는 경로만 대상으로 한다 (정적 파일, 아이콘, 이미 /ko 등이 붙은 내부 경로 제외).
-const PAGE_PATH = "/:path((?!_next|api|icons|media|ko(?:/|$)|en(?:/|$)|ja(?:/|$))[^.]*)";
+// 첫 단계(first)와 나머지 단계(rest, 여러 개)를 나눠 받는다. Cloudflare(OpenNext) 라우터는 재작성 결과의
+// 각 칸에 '/' 가 든 값을 허용하지 않아서, 여러 단계를 한 칸에 담으면 500 오류가 난다.
+// 점(.)이 든 단계는 정적 파일이라 제외한다.
+const PAGE_PATH = "/:first((?!(?:_next|api|icons|media|characters|ko|en|ja)(?![^/]))[^/.]+)/:rest([^/.]+)*";
+const PAGE_DEST = ":first/:rest*";
 
 const nextConfig: NextConfig = {
   images: {
@@ -20,11 +24,11 @@ const nextConfig: NextConfig = {
     return {
       beforeFiles: [
         { source: "/", has: [{ type: "cookie", key: "lang", value: "(?<lang>ko|en|ja)" }], destination: "/:lang" },
-        { source: PAGE_PATH, has: [{ type: "cookie", key: "lang", value: "(?<lang>ko|en|ja)" }], destination: "/:lang/:path" },
+        { source: PAGE_PATH, has: [{ type: "cookie", key: "lang", value: "(?<lang>ko|en|ja)" }], destination: `/:lang/${PAGE_DEST}` },
         { source: "/", has: [{ type: "header", key: "accept-language", value: "(?<lang>ja|en).*" }], destination: "/:lang" },
-        { source: PAGE_PATH, has: [{ type: "header", key: "accept-language", value: "(?<lang>ja|en).*" }], destination: "/:lang/:path" },
+        { source: PAGE_PATH, has: [{ type: "header", key: "accept-language", value: "(?<lang>ja|en).*" }], destination: `/:lang/${PAGE_DEST}` },
         { source: "/", destination: "/ko" },
-        { source: PAGE_PATH, destination: "/ko/:path" },
+        { source: PAGE_PATH, destination: `/ko/${PAGE_DEST}` },
       ],
       afterFiles: [],
       fallback: [],

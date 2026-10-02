@@ -66,14 +66,23 @@ npm run lint
 
 ## 3. Cloudflare
 
-OpenNext 는 Windows 에서 빌드가 불안정하므로, 빌드는 Cloudflare 서버(Workers Builds)에서 한다.
+배포 주소: https://sf6-repository.end0fw0rld.workers.dev (도메인 구입 전)
 
-1. R2 → 버킷 2개 생성
-   - `sf6-repository-opennext-cache` (ISR 캐시)
-   - `sf6-repository-media` (영상, 공개 접근 허용)
-2. Workers & Pages → Create → Import a repository → GitHub 저장소 선택
-   - Build command: `npx opennextjs-cloudflare build`
-   - Deploy command: `npx opennextjs-cloudflare deploy`
-3. 환경변수(Build variables 와 Variables 둘 다): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-4. 배포 후 `sf6-repository.<계정>.workers.dev` 로 접속 확인
-5. 도메인 구입 후 Workers → Settings → Domains 에서 `sf6repository.com` 연결
+### 처음 한 번
+1. `npx wrangler login` (PowerShell 에서는 `npx.cmd`)
+2. R2 버킷: `npx wrangler r2 bucket create sf6-repository-opennext-cache` (ISR 캐시)
+   - 영상(움짤)은 별도 버킷 `sf6-media` (공개 접근 허용)
+3. D1(태그 캐시): `npx wrangler d1 create sf6-repository-tag-cache` → 나온 database_id 를 `wrangler.jsonc` 의 `d1_databases` 에 넣는다
+   - 없으면 관리자가 저장해도(revalidatePath) 배포된 사이트에 반영되지 않는다. 표(`revalidations`)는 배포할 때 자동으로 만들어진다
+
+### 배포할 때마다
+```bash
+npm run deploy
+```
+(= `opennextjs-cloudflare build` + `deploy`. dev 서버가 켜져 있으면 `.open-next` 잠금으로 빌드가 실패하니 먼저 끈다.
+환경변수는 `.env.local` 의 `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` 가 빌드에 들어간다)
+
+### 설정 메모
+- 언어 rewrite(`next.config.ts`)는 첫 단계/나머지 단계를 나눠 받는다. 여러 단계를 한 칸에 담으면 OpenNext 라우터에서 500 오류
+- `open-next.config.ts`: R2 증분 캐시 + D1 태그 캐시 + 메모리 큐(자기 참조 서비스 바인딩)
+- 나중에: GitHub push 로 자동 배포(Workers Builds), 도메인 구입 후 Workers → Settings → Domains 에서 `sf6repository.com` 연결

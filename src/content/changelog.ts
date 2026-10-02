@@ -13,6 +13,19 @@ export type ChangelogEntry = { date: string; items: ChangelogItem[] };
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    date: "2026-10-02",
+    items: [
+      {
+        kind: "added",
+        text: {
+          ko: "사이트 공개 (Cloudflare 배포)",
+          en: "Site launched on Cloudflare",
+          ja: "サイト公開（Cloudflare）",
+        },
+      },
+    ],
+  },
+  {
     date: "2026-09-26",
     items: [
       {
