@@ -19,14 +19,16 @@ const nextConfig: NextConfig = {
    * 쿠키(lang) → 브라우저 언어 → 한국어 순으로 언어를 정해 내부 경로 /{lang}/... 로 rewrite 한다.
    * 페이지는 언어별로 정적 생성되므로 방문자 요청이 DB 를 직접 부르지 않는다.
    * (proxy.ts 는 Cloudflare 에서 실험 기능이라 설정 파일의 rewrite 로 처리)
+   * has 의 정규식은 ^ 로 시작을 고정한다. OpenNext 는 조건을 부분 일치로 검사하고 lang 값은 전체 일치로 꺼내서,
+   * 고정하지 않으면 "ko-KR,ko;q=0.9,en-US" 같은 한국어 브라우저 헤더가 조건만 통과하고 lang 이 비어 404/500 이 난다.
    */
   async rewrites() {
     return {
       beforeFiles: [
-        { source: "/", has: [{ type: "cookie", key: "lang", value: "(?<lang>ko|en|ja)" }], destination: "/:lang" },
-        { source: PAGE_PATH, has: [{ type: "cookie", key: "lang", value: "(?<lang>ko|en|ja)" }], destination: `/:lang/${PAGE_DEST}` },
-        { source: "/", has: [{ type: "header", key: "accept-language", value: "(?<lang>ja|en).*" }], destination: "/:lang" },
-        { source: PAGE_PATH, has: [{ type: "header", key: "accept-language", value: "(?<lang>ja|en).*" }], destination: `/:lang/${PAGE_DEST}` },
+        { source: "/", has: [{ type: "cookie", key: "lang", value: "^(?<lang>ko|en|ja)$" }], destination: "/:lang" },
+        { source: PAGE_PATH, has: [{ type: "cookie", key: "lang", value: "^(?<lang>ko|en|ja)$" }], destination: `/:lang/${PAGE_DEST}` },
+        { source: "/", has: [{ type: "header", key: "accept-language", value: "^(?<lang>ja|en).*" }], destination: "/:lang" },
+        { source: PAGE_PATH, has: [{ type: "header", key: "accept-language", value: "^(?<lang>ja|en).*" }], destination: `/:lang/${PAGE_DEST}` },
         { source: "/", destination: "/ko" },
         { source: PAGE_PATH, destination: `/ko/${PAGE_DEST}` },
       ],
