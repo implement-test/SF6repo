@@ -18,6 +18,14 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         kind: "changed",
         text: {
+          ko: "짧은 영상 칸에 YouTube 링크가 들어간 항목도 영상이 나오도록 수정",
+          en: "Fixed videos not showing when a YouTube link was saved in the short-clip field",
+          ja: "短い動画欄に YouTube リンクが入っている項目でも動画が表示されるよう修正",
+        },
+      },
+      {
+        kind: "changed",
+        text: {
           ko: "셋업을 엔더(콤보를 끝낸 기술)별로 연결: 같은 기술로 끝나는 콤보에는 셋업이 자동으로 붙고, 셋업에서 그 기술로 끝나는 콤보를 바로 볼 수 있음",
           en: "Setups now link to enders (the move that ends a combo): every combo ending with that move shows the setup, and setups link to those combos",
           ja: "セットプレイを締め技ごとに紐付け：同じ技で終わるコンボに自動で表示され、セットプレイからそのコンボ一覧へ移動可能",

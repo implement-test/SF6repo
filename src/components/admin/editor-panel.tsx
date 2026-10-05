@@ -823,6 +823,14 @@ function buildPayload(fields: Field[], values: Values): { payload: Values; probl
         payload[field.key] = raw ?? null;
     }
   }
+  // 짧은 영상(R2) 칸에 YouTube 링크를 넣었으면 YouTube 칸으로 옮긴다
+  if (typeof payload.media_url === "string" && parseYouTube(payload.media_url)) {
+    if (payload.youtube_url && payload.youtube_url !== payload.media_url) {
+      return { payload, problem: "짧은 영상 URL 칸에는 R2 영상 주소를 넣으세요. YouTube 링크는 YouTube URL 칸에 넣습니다." };
+    }
+    payload.youtube_url = payload.media_url;
+    payload.media_url = null;
+  }
   // 영상 구간 확인
   const start = typeof payload.youtube_start === "number" ? payload.youtube_start : 0;
   const end = payload.youtube_end;

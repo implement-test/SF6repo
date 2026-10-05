@@ -10,6 +10,7 @@ import { YouTubeLoop } from "./youtube-loop";
  *     - 끝(youtube_end)만 있으면 그 구간을 재생하고 멈춘다
  *     - 반복(youtube_loop)이면 시작~끝 구간을 계속 반복한다 (youtube-loop.tsx)
  *   media_url   → R2 의 짧은 영상 (움짤처럼 자동 반복 재생)
+ *                 YouTube 링크를 이 칸에 잘못 넣었으면 YouTube 로 보여 준다
  */
 export function ItemMedia({
   youtubeUrl,
@@ -28,6 +29,12 @@ export function ItemMedia({
   title: string;
   labels: Dictionary["video"];
 }) {
+  // 짧은 영상 칸에 YouTube 링크가 들어 있으면 YouTube 칸으로 옮겨서 다룬다
+  const mediaIsYouTube = !!parseYouTube(mediaUrl);
+  if (mediaIsYouTube) {
+    youtubeUrl = youtubeUrl || mediaUrl;
+    mediaUrl = null;
+  }
   const yt = parseYouTube(youtubeUrl);
   if (!yt && !mediaUrl) return null;
 
