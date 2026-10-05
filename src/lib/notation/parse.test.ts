@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { displayNotation, findUnknownTokens, normalizeNotation, parseNotation } from "./parse";
+import { displayNotation, findUnknownTokens, normalizeNotation, parseNotation, parseNotationSegments } from "./parse";
 import { directionIcons } from "./icons";
 
 describe("normalizeNotation", () => {
@@ -11,6 +11,21 @@ describe("normalizeNotation", () => {
 
   it("말줄임(...)과 f.throw 의 점은 타겟 콤보가 아니다", () => {
     expect(normalizeNotation("(잠깐...) f.throw")).toBe("(잠깐...) f.throw");
+  });
+});
+
+describe("생략 가능 구간 {}", () => {
+  it("중괄호 안을 생략 가능 조각으로 나눈다 (경계의 → 는 뗀다)", () => {
+    const segs = parseNotationSegments("2MP → {DRC 5HP →} 236HP");
+    expect(segs.map((s) => s.optional)).toEqual([false, true, false]);
+    expect(segs[1].combo).toEqual([[{ kind: "input", modifiers: ["DRC"], direction: null, buttons: ["HP"] }]]);
+    expect(segs[2].combo).toHaveLength(1);
+  });
+
+  it("전체 해석에서는 중괄호를 무시해 해석 못 한 조각이 생기지 않는다", () => {
+    const combo = parseNotation("2MP → {DRC → 5HP} → 236HP");
+    expect(combo).toHaveLength(4);
+    expect(findUnknownTokens(combo)).toEqual([]);
   });
 });
 

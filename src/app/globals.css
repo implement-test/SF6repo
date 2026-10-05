@@ -370,6 +370,33 @@ article[id] {
   border: 1px solid currentColor;
 }
 
+/* 생략 가능 구간({ }): 점선 상자로 묶고 앞에 OPTIONAL 꼬리표 */
+.notation-optional {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 0.375rem;
+  row-gap: 0.5rem;
+  padding: 0.25rem 0.45rem;
+  border: 1.5px dashed color-mix(in srgb, var(--fg) 45%, transparent);
+  border-radius: 0.4rem;
+  background: color-mix(in srgb, var(--fg) 4%, transparent);
+}
+.notation-optional-tag {
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  padding-right: 0.4rem;
+  border-right: 1px dashed color-mix(in srgb, var(--fg) 35%, transparent);
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 800;
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  line-height: 1;
+}
+
 /* 접히는 카드(콤보·셋업·추천 연습): 기본은 제목 줄만 */
 .card-details > summary {
   list-style: none;

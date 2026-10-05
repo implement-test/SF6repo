@@ -18,6 +18,22 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         kind: "added",
         text: {
+          ko: "콤보 표기: { } 로 감싼 부분은 생략 가능 구간으로 점선 상자에 표시",
+          en: "Notation: parts wrapped in { } are shown in a dashed box as optional",
+          ja: "表記：{ } で囲んだ部分は省略可能として点線の枠で表示",
+        },
+      },
+      {
+        kind: "changed",
+        text: {
+          ko: "접힌 카드의 제목 줄을 더 크게",
+          en: "Collapsed cards have a taller title row",
+          ja: "閉じたカードのタイトル行を大きく",
+        },
+      },
+      {
+        kind: "added",
+        text: {
           ko: "상단 메뉴에 관리자 페이지 버튼",
           en: "Admin page button in the header",
           ja: "ヘッダーに管理者ページボタン",

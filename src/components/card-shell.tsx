@@ -34,7 +34,7 @@ export function CardShell({
       {/* 대상 수준 색 띠 */}
       <span aria-hidden className="absolute inset-y-0 left-0 w-1" style={{ background: `var(--lv-${level})` }} />
       <details className="card-details" open={open || undefined} data-card="">
-        <summary className={`flex cursor-pointer flex-wrap items-center gap-2 py-3 pl-5 select-none ${actions ? "pr-32" : "pr-4"}`}>
+        <summary className={`flex min-h-[4.5rem] cursor-pointer flex-wrap items-center gap-2 py-[1.375rem] pl-5 select-none ${actions ? "pr-32" : "pr-4"}`}>
           <span aria-hidden className="card-chevron text-xs text-muted">
             ▼
           </span>
@@ -42,7 +42,7 @@ export function CardShell({
         </summary>
         <div className="border-t border-border">{children}</div>
       </details>
-      {actions && <span className="absolute right-3 top-2.5 flex items-center gap-1.5">{actions}</span>}
+      {actions && <span className="absolute right-3 top-[1.375rem] flex items-center gap-1.5">{actions}</span>}
     </article>
   );
 }

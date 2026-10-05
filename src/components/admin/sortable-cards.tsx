@@ -126,7 +126,7 @@ export function SortableCards({
   }
 
   const railButton =
-    "grid size-7 place-items-center border border-border-strong bg-surface text-xs text-muted transition-colors hover:border-accent hover:text-accent disabled:pointer-events-none disabled:opacity-30";
+    "grid size-5 place-items-center border border-border-strong bg-surface text-[0.55rem] text-muted transition-colors hover:border-accent hover:text-accent disabled:pointer-events-none disabled:opacity-30";
 
   return (
     <div className="flex flex-col gap-2">
@@ -176,7 +176,7 @@ export function SortableCards({
                   className={`absolute inset-x-0 z-10 h-[3px] bg-accent ${over.after ? "-bottom-[5px]" : "-top-[5px]"}`}
                 />
               )}
-              <div className="sticky top-20 flex shrink-0 flex-col items-center gap-1 self-start pt-3">
+              <div className="sticky top-20 flex h-[4.5rem] shrink-0 flex-col items-center justify-center gap-0.5 self-start">
                 <button
                   type="button"
                   className={railButton}
@@ -190,7 +190,7 @@ export function SortableCards({
                 <span
                   onPointerDown={() => setArmed(id)}
                   onPointerUp={() => setArmed(null)}
-                  className="grid h-9 w-7 cursor-grab select-none place-items-center text-lg leading-none text-muted hover:text-accent active:cursor-grabbing"
+                  className="grid h-4 w-5 cursor-grab select-none place-items-center text-sm leading-none text-muted hover:text-accent active:cursor-grabbing"
                   title="끌어서 옮기기"
                   aria-hidden
                 >

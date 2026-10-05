@@ -14,6 +14,7 @@
  *   f.throw / b.throw     앞잡기 / 뒤잡기
  *   L M H SP A            모던 버튼 (A = AUTO)
  *   (텍스트)              괄호 안은 그대로 메모로 표시
+ *   2MP → {DRC 5HP} → 236HP   중괄호 안은 통째로 생략 가능 (이미지에서 점선 상자로 묶는다)
  */
 
 /** 커맨드가 아니라 히트 상황. 커맨드와 구분되는 배지로 그린다. */
@@ -173,7 +174,27 @@ function parsePart(part: string): Move[] {
   return [parseMove(part)];
 }
 
+/** 중괄호({})를 뺀 콤보 전체. 생략 가능 구간도 그대로 이어서 읽는다 */
 export function parseNotation(src: string): Combo {
+  return parsePlain(src.replace(/[{}]/g, " "));
+}
+
+/** 생략 가능 구간({...})과 나머지로 나눈 조각들. 조각 사이는 → 로 이어진다 */
+export type NotationSegment = { optional: boolean; combo: Combo };
+
+export function parseNotationSegments(src: string): NotationSegment[] {
+  return normalizeNotation(src)
+    .split(/(\{[^{}]*\})/)
+    .map((piece) => {
+      const optional = piece.startsWith("{") && piece.endsWith("}");
+      // 구간 경계의 → 는 조각 사이에 다시 그리므로 앞뒤에서 뗀다
+      const body = (optional ? piece.slice(1, -1) : piece).replace(/^[\s→]+|[\s→]+$/g, "");
+      return { optional, combo: parsePlain(body) };
+    })
+    .filter((seg) => seg.combo.length > 0);
+}
+
+function parsePlain(src: string): Combo {
   const normalized = normalizeNotation(src);
   if (!normalized) return [];
   return normalized.split("→").map((step) =>

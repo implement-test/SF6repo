@@ -2,7 +2,8 @@ import { Fragment } from "react";
 import {
   isSituation,
   displayNotation,
-  parseNotation,
+  parseNotationSegments,
+  type Combo,
   type Modifier,
   type Move,
   type Situation,
@@ -129,9 +130,33 @@ function MoveIcons({ move }: { move: Move }) {
 
 /** 한 줄의 콤보 표기를 이미지로 */
 export function NotationImage({ notation }: { notation: string }) {
-  const combo = parseNotation(notation);
+  const segments = parseNotationSegments(notation);
   return (
     <span className="inline-flex flex-wrap items-center gap-x-1.5 gap-y-2">
+      {segments.map((segment, i) => (
+        <Fragment key={i}>
+          {i > 0 && <span className="text-muted" aria-label="then">→</span>}
+          {segment.optional ? (
+            // { } 안은 통째로 생략 가능: 점선 상자 + OPTIONAL 꼬리표
+            <span className="notation-optional" title="optional">
+              <span aria-hidden className="notation-optional-tag">
+                OPTIONAL
+              </span>
+              <Steps combo={segment.combo} />
+            </span>
+          ) : (
+            <Steps combo={segment.combo} />
+          )}
+        </Fragment>
+      ))}
+    </span>
+  );
+}
+
+/** → 로 이어진 단계들 */
+function Steps({ combo }: { combo: Combo }) {
+  return (
+    <>
       {combo.map((step, i) => (
         <Fragment key={i}>
           {i > 0 && <span className="text-muted" aria-label="then">→</span>}
@@ -148,7 +173,7 @@ export function NotationImage({ notation }: { notation: string }) {
           </span>
         </Fragment>
       ))}
-    </span>
+    </>
   );
 }
 
