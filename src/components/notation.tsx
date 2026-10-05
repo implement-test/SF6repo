@@ -65,12 +65,20 @@ function DelayBadge() {
   );
 }
 
-/** 수식어: 히트 상황은 리본 배지, delay 는 딜레이 배지 */
+/** 수식어: 히트 상황은 리본 배지, delay 는 딜레이 배지, 앞에 붙인 DR · DRC 는 그 아이콘 */
 function Modifiers({ modifiers }: { modifiers: Modifier[] }) {
   if (modifiers.length === 0) return null;
   return (
     <>
-      {modifiers.map((m) => (isSituation(m) ? <SituationBadge key={m} situation={m} /> : <DelayBadge key={m} />))}
+      {modifiers.map((m) =>
+        m === "DR" || m === "DRC" ? (
+          <Icon key={m} icon={SYSTEM_ICONS[m]} />
+        ) : isSituation(m) ? (
+          <SituationBadge key={m} situation={m} />
+        ) : (
+          <DelayBadge key={m} />
+        ),
+      )}
       <span className="w-0.5" />
     </>
   );
@@ -132,7 +140,7 @@ export function NotationImage({ notation }: { notation: string }) {
               <Fragment key={j}>
                 {/* 타겟 콤보 구분점. 괄호 메모 앞뒤에는 찍지 않는다 */}
                 {j > 0 && move.kind !== "note" && step[j - 1].kind !== "note" && (
-                  <span className="font-bold text-muted">·</span>
+                  <span className="font-bold text-muted">..</span>
                 )}
                 <MoveIcons move={move} />
               </Fragment>

@@ -6,6 +6,36 @@ describe("normalizeNotation", () => {
   it("입력 편의 기호를 표준 기호로 바꾼다", () => {
     expect(normalizeNotation("2MK>5HP -> 236HP")).toBe("2MK → 5HP → 236HP");
     expect(normalizeNotation("MP ・ HP")).toBe("MP·HP");
+    expect(normalizeNotation("MP .. HP")).toBe("MP·HP");
+  });
+
+  it("말줄임(...)과 f.throw 의 점은 타겟 콤보가 아니다", () => {
+    expect(normalizeNotation("(잠깐...) f.throw")).toBe("(잠깐...) f.throw");
+  });
+});
+
+describe("DR · DRC · SA", () => {
+  it("DR · DRC 를 기술 앞에 붙이면 한 묶음이 된다", () => {
+    expect(parseNotation("DRC 5HP → dr 2MP")).toEqual([
+      [{ kind: "input", modifiers: ["DRC"], direction: null, buttons: ["HP"] }],
+      [{ kind: "input", modifiers: ["DR"], direction: "2", buttons: ["MP"] }],
+    ]);
+    expect(parseNotation("counter DRC 5HP")[0][0]).toMatchObject({ modifiers: ["counter", "DRC"] });
+  });
+
+  it("단독 DR · DRC 는 그대로 시스템 기호", () => {
+    expect(parseNotation("drc → 5HP")[0][0]).toEqual({ kind: "system", modifiers: [], value: "DRC" });
+  });
+
+  it("sa1 · sa2 · sa3 는 슈퍼 아츠", () => {
+    const combo = parseNotation("2MP → sa1 → SA2 → sa3");
+    expect(combo.slice(1).map((s) => s[0])).toEqual([
+      { kind: "system", modifiers: [], value: "SA1" },
+      { kind: "system", modifiers: [], value: "SA2" },
+      { kind: "system", modifiers: [], value: "SA3" },
+    ]);
+    expect(findUnknownTokens(combo)).toEqual([]);
+    expect(displayNotation("2mp > drc 5hp > sa3")).toBe("2MP → DRC 5HP → SA3");
   });
 });
 
@@ -22,7 +52,7 @@ describe("parseNotation", () => {
   });
 
   it("타겟 콤보를 한 단계로 묶는다", () => {
-    const combo = parseNotation("MP·HP → DRC → 5HP");
+    const combo = parseNotation("MP..HP → DRC → 5HP");
     expect(combo).toHaveLength(3);
     expect(combo[0]).toHaveLength(2);
     expect(combo[1][0]).toEqual({ kind: "system", modifiers: [], value: "DRC" });
@@ -132,7 +162,8 @@ describe("directionIcons", () => {
 describe("displayNotation", () => {
   it("버튼과 시스템 기호는 대문자로", () => {
     expect(displayNotation("counter 2lk > lk > 236lk")).toBe("counter 2LK → LK → 236LK");
-    expect(displayNotation("2mp -> drc > 5hp・hp")).toBe("2MP → DRC → 5HP·HP");
+    expect(displayNotation("2mp -> drc > 5hp・hp")).toBe("2MP → DRC → 5HP..HP");
+    expect(displayNotation("mp..hp (약·중)")).toBe("MP..HP (약·중)");
     expect(displayNotation("j.hp > 5pp > 236kk")).toBe("j.HP → 5PP → 236KK");
     expect(displayNotation("2m > sp")).toBe("2M → SP");
   });

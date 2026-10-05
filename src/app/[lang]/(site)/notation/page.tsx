@@ -11,7 +11,7 @@ const LEGEND: { notation: string; ko: string; en: string; ja: string }[] = [
   { notation: "236HP → 214LK → 623MP", ko: "커맨드 입력", en: "Motion inputs", ja: "コマンド入力" },
   { notation: "236PP → 214KK", ko: "펀치/킥 버튼 2개 (약중강 무관)", en: "Any two punches / kicks", ja: "パンチ/キック2つ同時押し" },
   { notation: "2MK → 5HP", ko: "→ 연결·캔슬", en: "→ link / cancel", ja: "→ つなぎ・キャンセル" },
-  { notation: "MP·HP", ko: "· 타겟 콤보", en: "· target combo", ja: "· ターゲットコンボ" },
+  { notation: "MP..HP", ko: ".. 타겟 콤보 (마침표 2개)", en: ".. target combo (two periods)", ja: ".. ターゲットコンボ（ピリオド2つ）" },
   {
     notation: "counter 5HP → punish 2MP → air HP → guard 2LK",
     ko: "상황: counter 카운터 / punish 퍼니시 카운터 / air 공중 / guard 가드시킴 (커맨드 앞에)",
@@ -22,6 +22,8 @@ const LEGEND: { notation: string; ko: string; en: string; ja: string }[] = [
   { notation: "66 → 44", ko: "앞대쉬 / 뒷대쉬", en: "Forward dash / back dash", ja: "前ステップ / バックステップ" },
   { notation: "f.throw → b.throw", ko: "앞잡기 / 뒤잡기", en: "Forward throw / back throw", ja: "前投げ / 後ろ投げ" },
   { notation: "DR → DRC → DI", ko: "생 드라이브 러시 / 캔슬 드라이브 러시 / 드라이브 임팩트", en: "Raw Drive Rush / Drive Rush cancel / Drive Impact", ja: "生ドライブラッシュ / キャンセルラッシュ / ドライブインパクト" },
+  { notation: "DRC 5HP → DR 5MP", ko: "DR · DRC 는 기술 앞에 붙여서도 쓴다", en: "DR / DRC can also prefix a move", ja: "DR・DRC は技の前に付けても書ける" },
+  { notation: "SA1 → SA2 → SA3", ko: "sa1 · sa2 · sa3 슈퍼 아츠", en: "sa1 / sa2 / sa3: Super Arts", ja: "sa1・sa2・sa3 スーパーアーツ" },
   { notation: "parry → 5HP", ko: "parry 저스트 패리", en: "parry: Perfect Parry", ja: "parry ジャストパリィ" },
   { notation: "L → M → H → SP → A+M → ANY", ko: "모던 버튼 (A = 어시스트)", en: "Modern buttons (A = assist)", ja: "モダンボタン (A = アシスト)" },
 ];
@@ -39,7 +41,7 @@ export default async function NotationPage({ params }: PageProps<"/[lang]/notati
 
       <section className="flex flex-col gap-4">
         <SectionTitle eyebrow="Try it" title={dict.notationPage.tryIt} />
-        <NotationPlayground initial="2MP → DRC → 5HP → MP·HP → 236236P" unknownLabel={dict.notationPage.unknown} />
+        <NotationPlayground initial="2MP → DRC 5HP → MP..HP → sa3" unknownLabel={dict.notationPage.unknown} />
       </section>
 
       <section className="flex flex-col gap-4">

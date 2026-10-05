@@ -3,11 +3,13 @@
  *
  * 규칙 (docs/SPEC.md "콤보 표기법" 참고)
  *   2MK → 5HP → 236HP    `→` 연결/캔슬 (입력 편의상 `->`, `>` 도 허용)
- *   MP·HP                 `·` 타겟 콤보 (`・` 도 허용)
+ *   MP..HP                `..` 타겟 콤보 (마침표 2개. 예전 표기 `·` `・` 도 허용, 화면에는 `..`)
  *   236PP / 236KK         약중강 구분 없는 버튼 2개
  *   air HP                히트 상황: 공중 (counter = 카운터, punish = 퍼니시 카운터, guard = 가드시킴)
  *   delay 5HP             딜레이 입력
  *   DR / DRC / DI         생 드라이브 러시 / 캔슬 드라이브 러시 / 드라이브 임팩트
+ *   DRC 5HP               DR · DRC 는 delay 처럼 기술 앞에 붙여 한 묶음으로도 쓴다 (단독도 가능)
+ *   sa1 / sa2 / sa3       슈퍼 아츠 1 · 2 · 3
  *   parry                 저스트 패리
  *   f.throw / b.throw     앞잡기 / 뒤잡기
  *   L M H SP A            모던 버튼 (A = AUTO)
@@ -16,10 +18,13 @@
 
 /** 커맨드가 아니라 히트 상황. 커맨드와 구분되는 배지로 그린다. */
 export type Situation = "air" | "counter" | "punish" | "guard";
-export type Modifier = Situation | "delay";
+/** delay 와 DR · DRC 는 기술 앞에 붙는 수식어로도 쓴다 ("DRC 5HP") */
+export type Modifier = Situation | "delay" | "DR" | "DRC";
 
 export const SITUATIONS: Situation[] = ["air", "counter", "punish", "guard"];
 export const isSituation = (m: Modifier): m is Situation => (SITUATIONS as string[]).includes(m);
+
+export type SystemValue = "DR" | "DRC" | "DI" | "PARRY" | "SA1" | "SA2" | "SA3";
 
 export type ClassicButton = "LP" | "MP" | "HP" | "LK" | "MK" | "HK" | "P" | "K";
 export type ModernButton = "L" | "M" | "H" | "SP" | "A" | "ANY";
@@ -28,13 +33,13 @@ export type Button = ClassicButton | ModernButton;
 export type Move =
   /** hits: "5HP(2)" 처럼 몇 번째 타격인지 */
   | { kind: "input"; modifiers: Modifier[]; direction: string | null; buttons: Button[]; hits?: number }
-  | { kind: "system"; modifiers: Modifier[]; value: "DR" | "DRC" | "DI" | "PARRY" }
+  | { kind: "system"; modifiers: Modifier[]; value: SystemValue }
   /** 잡기: f.throw = 앞잡기, b.throw = 뒤잡기, throw = 방향 없음 */
   | { kind: "throw"; modifiers: Modifier[]; direction: "f" | "b" | null }
   | { kind: "note"; text: string }
   | { kind: "unknown"; text: string };
 
-/** 타겟 콤보(·)로 묶인 기술 묶음 */
+/** 타겟 콤보(..)로 묶인 기술 묶음 */
 export type Step = Move[];
 /** `→` 로 연결된 전체 콤보 */
 export type Combo = Step[];
@@ -45,8 +50,10 @@ const MODIFIERS: Record<string, Modifier> = {
   punish: "punish",
   guard: "guard",
   delay: "delay",
+  dr: "DR",
+  drc: "DRC",
 };
-const SYSTEM = new Set(["DR", "DRC", "DI", "PARRY"]);
+const SYSTEM = new Set<string>(["DR", "DRC", "DI", "PARRY", "SA1", "SA2", "SA3"]);
 
 // 길이가 긴 것부터 매칭해야 HP 가 H + P 로 쪼개지지 않는다.
 const BUTTON_TOKENS: [string, Button[]][] = [
@@ -72,6 +79,8 @@ const BUTTON_TOKENS: [string, Button[]][] = [
 export function normalizeNotation(src: string): string {
   return src
     .replace(/->|>/g, "→")
+    // 마침표 2개(..)가 타겟 콤보. 안에서는 · 로 통일한다 (말줄임 ... 은 건드리지 않음)
+    .replace(/(?<!\.)\.\.(?!\.)/g, "·")
     .replace(/[・•]/g, "·")
     .replace(/\s*→\s*/g, " → ")
     .replace(/\s*·\s*/g, "·")
@@ -81,7 +90,7 @@ export function normalizeNotation(src: string): string {
 
 /**
  * 텍스트로 보여 줄 표기: 표준 기호로 바꾸고 버튼·시스템 기호를 대문자로 (2lk → 2LK, drc → DRC).
- * 괄호 안 메모와 counter · delay · f.throw 같은 단어는 그대로 둔다.
+ * 타겟 콤보는 `..` 로 보여 준다. 괄호 안 메모와 counter · delay · f.throw 같은 단어는 그대로 둔다.
  */
 export function displayNotation(src: string): string {
   return normalizeNotation(src)
@@ -89,10 +98,12 @@ export function displayNotation(src: string): string {
     .map((part, i) =>
       i % 2 === 1
         ? part
-        : part.replace(
-            /\b(\d*)((?:lp|mp|hp|lk|mk|hk|pp|kk|sp|p|k|l|m|h)+|parry|drc|dr|di)\b/gi,
-            (_, digits: string, buttons: string) => digits + buttons.toUpperCase(),
-          ),
+        : part
+            .replace(
+              /\b(\d*)((?:lp|mp|hp|lk|mk|hk|pp|kk|sp|p|k|l|m|h)+|parry|drc|dr|di|sa[123])\b/gi,
+              (_, digits: string, buttons: string) => digits + buttons.toUpperCase(),
+            )
+            .replace(/·/g, ".."),
     )
     .join("");
 }
@@ -122,7 +133,7 @@ function parseMove(src: string): Move {
 
   const word = words[0];
   const upper = word.toUpperCase();
-  if (SYSTEM.has(upper)) return { kind: "system", modifiers, value: upper as "DR" | "DRC" | "DI" | "PARRY" };
+  if (SYSTEM.has(upper)) return { kind: "system", modifiers, value: upper as SystemValue };
 
   const thr = /^(?:([fb])\.)?throw$/i.exec(word);
   if (thr) return { kind: "throw", modifiers, direction: (thr[1]?.toLowerCase() as "f" | "b" | undefined) ?? null };

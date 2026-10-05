@@ -1,4 +1,4 @@
-import type { Button } from "./parse";
+import type { Button, SystemValue } from "./parse";
 
 /**
  * 아이콘 파일은 모두 public/icons 에 있다.
@@ -72,9 +72,13 @@ export const BUTTON_ICONS: Record<Button, IconRef> = {
   ANY: { src: "/icons/modern-any.png", alt: "ANY" },
 };
 
-export const SYSTEM_ICONS: Record<"DR" | "DRC" | "DI" | "PARRY", IconRef> = {
+export const SYSTEM_ICONS: Record<SystemValue, IconRef> = {
   DR: { src: "/icons/dr.svg", wide: true, alt: "DR" },
   DRC: { src: "/icons/drc.svg", wide: true, alt: "DRC" },
   DI: { src: "/icons/di.png", wide: true, alt: "DI" },
   PARRY: { src: "/icons/parry.svg", wide: true, alt: "PARRY" },
+  // 슈퍼 아츠: 드라이브(파랑)와 구분되게 주황
+  SA1: { src: "/icons/sa1.svg", wide: true, alt: "SA1" },
+  SA2: { src: "/icons/sa2.svg", wide: true, alt: "SA2" },
+  SA3: { src: "/icons/sa3.svg", wide: true, alt: "SA3" },
 };

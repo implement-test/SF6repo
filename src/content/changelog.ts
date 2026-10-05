@@ -17,6 +17,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     items: [
       {
         kind: "changed",
+        text: {
+          ko: "콤보 표기: 타겟 콤보는 MP..HP (마침표 2개), DRC 5HP 처럼 DR·DRC 를 기술 앞에 붙여 쓰기, SA1~3 아이콘 추가",
+          en: "Notation: target combos as MP..HP, DR/DRC can prefix a move (DRC 5HP), new SA1–3 icons",
+          ja: "表記：ターゲットコンボは MP..HP、DR・DRC を技の前に付けて書ける（DRC 5HP）、SA1〜3 アイコン追加",
+        },
+      },
+      {
+        kind: "changed",
         adminOnly: true,
         text: {
           ko: "콤보·셋업 등을 저장한 뒤 바로 화면에 반영되지 않던 문제 수정",
