@@ -1,5 +1,4 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { revalidateSiteAction } from "@/lib/admin/revalidate-action";
 
 /**
  * 관리자 화면 전용 브라우저 클라이언트.
@@ -55,13 +54,23 @@ export async function getAdminInfo(sb: SupabaseClient): Promise<AdminInfo | null
   };
 }
 
-/** 저장 후 정적 페이지를 다시 만들도록 서버에 알린다. */
+/**
+ * 저장 후 정적 페이지를 다시 만들도록 서버에 알린다.
+ * 서버(Route Handler)는 무효화 기록을 응답을 보낸 직후에 남기므로, 바로 이어지는 router.refresh() 가
+ * 예전 페이지를 받지 않도록 잠깐 기다린다. 실패해도 저장은 끝난 것이라 예외를 던지지 않는다
+ * (Server Action 으로 바꿔 봤지만 Cloudflare 에서 저장이 멈춰서 되돌렸다).
+ */
 export async function revalidateSite(sb: SupabaseClient) {
-  const { data } = await sb.auth.getSession();
-  const token = data.session?.access_token;
-  if (!token) return;
-  const res = await revalidateSiteAction(token);
-  if (!res.ok) console.error("revalidate failed:", res.error);
+  try {
+    const { data } = await sb.auth.getSession();
+    const token = data.session?.access_token;
+    if (!token) return;
+    const res = await fetch("/api/revalidate", { method: "POST", headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) console.error("revalidate failed:", res.status);
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+  } catch (e) {
+    console.error("revalidate failed:", e);
+  }
 }
 
 /** Supabase 오류를 관리자에게 보여 줄 문장으로 */
