@@ -19,7 +19,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         kind: "added",
         adminOnly: true,
         text: {
-          ko: "관리 페이지에 캐릭터 공개 On/Off (최고 관리자만)",
+          ko: "관리 페이지에 캐릭터 공개 On/Off (최고 관리자만, 여러 명을 고른 뒤 한 번에 적용)",
           en: "Character visibility switches on the admin page (super admin only)",
           ja: "管理ページにキャラクター公開 On/Off（最高管理者のみ）",
         },
