@@ -6,8 +6,9 @@
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   // 사이트 주소. 배포할 때 DNS 레코드와 인증서가 자동으로 만들어진다 (nogamenogain.com 영역이 같은 계정에 있어야 함)
   "routes": [{ "pattern": "sf6.nogamenogain.com", "custom_domain": true }],
-  // routes 가 있으면 workers.dev 주소가 기본으로 꺼진다. 새 주소가 열릴 때까지 켜 둔다
-  "workers_dev": true,
+  // workers.dev 주소는 끈다. 도메인의 보안 설정(AI 봇 차단, Rate limiting)을 우회하지 못하게 한다
+  "workers_dev": false,
+  "preview_urls": false,
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"

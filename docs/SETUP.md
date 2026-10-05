@@ -66,7 +66,7 @@ npm run lint
 
 ## 3. Cloudflare
 
-사이트 주소: https://sf6.nogamenogain.com (`wrangler.jsonc` 의 routes, custom_domain). 배포 확인용: https://sf6-repository.end0fw0rld.workers.dev
+사이트 주소: https://sf6.nogamenogain.com (`wrangler.jsonc` 의 routes, custom_domain). workers.dev 주소는 보안 설정 우회를 막으려고 꺼 두었다 (`workers_dev: false`)
 
 ### 처음 한 번
 1. `npx wrangler login` (PowerShell 에서는 `npx.cmd`)
