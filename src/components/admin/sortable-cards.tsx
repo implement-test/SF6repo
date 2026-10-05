@@ -24,7 +24,7 @@ export function SortableCards({
   className,
   levelFilter = true,
 }: {
-  table: "combos" | "setups" | "vs_guides" | "moves" | "videos";
+  table: "combos" | "setups" | "practices" | "vs_guides" | "moves" | "videos";
   characterId: number;
   /** 공개 항목 전체 (지금 순서대로) */
   items: Item[];

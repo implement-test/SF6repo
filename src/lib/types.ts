@@ -2,19 +2,20 @@
 
 export type Localized = { ko: string; en?: string; ja?: string };
 
-export type TargetLevel = "beginner" | "intermediate" | "advanced";
+/** 초급 / 숙련 (0021 에서 중급·상급을 숙련으로 합쳤다) */
+export type TargetLevel = "beginner" | "advanced";
 export type Difficulty = "easy" | "normal" | "hard";
 /** 거리 무관 / 필드 / 코너 근처 / 코너 / 기타 */
 export type ScreenPosition = "any" | "midscreen" | "near_corner" | "corner" | "other";
-/** 노멀 / 퍼니시 카운터 / 구석 임팩트 가드 / 구석 임팩트 스턴 */
-export type HitState = "normal" | "punish_counter" | "corner_impact_guard" | "corner_impact_stun";
+/** 노멀 / 퍼니시 카운터 / 구석 임팩트 가드 / 구석 임팩트 스턴 / 기타 */
+export type HitState = "normal" | "punish_counter" | "corner_impact_guard" | "corner_impact_stun" | "other";
 /** 기본기 / 특수기 / 타겟 콤보 / 잡기 / 드라이브 시스템 / 필살기 / 슈퍼 아츠 */
 export type MoveCategory = "normal" | "unique" | "target_combo" | "throw" | "drive" | "special" | "super";
 /** 커맨드 리스트에 보이는 순서 */
 export const MOVE_CATEGORIES: MoveCategory[] = ["normal", "unique", "target_combo", "throw", "drive", "special", "super"];
 
-export const TARGET_LEVELS: TargetLevel[] = ["beginner", "intermediate", "advanced"];
-export const HIT_STATES: HitState[] = ["normal", "punish_counter", "corner_impact_guard", "corner_impact_stun"];
+export const TARGET_LEVELS: TargetLevel[] = ["beginner", "advanced"];
+export const HIT_STATES: HitState[] = ["normal", "punish_counter", "corner_impact_guard", "corner_impact_stun", "other"];
 export const POSITIONS: ScreenPosition[] = ["any", "midscreen", "near_corner", "corner", "other"];
 
 type ContentBase = {
@@ -87,17 +88,30 @@ export type ComboStarter = {
 /** 시동기 그룹. 프리셋을 불러오면 프리셋 이름으로 그룹 하나가 된다. name 이 없으면 이름 없는 그룹 */
 export type StarterGroup = { name: string | null; starters: ComboStarter[] };
 
-/** 한 콤보 안의 루트 하나와 그 루트의 수치 */
+/** 루트의 마무리 하나: 표기 + 이 마무리로 끝냈을 때의 데미지·후상황 */
+export type ComboFinish = {
+  classic: string;
+  modern: string | null;
+  damage: number | null;
+  frame_after: string | null;
+};
+
+/**
+ * 한 콤보 안의 루트 하나와 그 루트의 수치.
+ * 마무리가 있으면 데미지·후상황은 마무리마다 적고(루트의 damage·frame_after 는 비움), 없으면 루트에 적는다.
+ */
 export type ComboRoute = {
   classic: string;
   modern: string | null;
   damage: number | null;
-  drive_cost: number;
-  sa_cost: number;
   frame_after: string | null;
+  finishes: ComboFinish[];
   /** 이 루트만의 메모 (콤보 메모는 모든 루트 공용) */
   note: Localized | null;
 };
+
+/** 콤보 그룹. 그룹 없는 콤보는 목록 맨 위 */
+export type ComboGroup = { id: number; character_id: number; name: Localized; sort_order: number };
 
 export type Combo = ContentBase &
   Media & {
@@ -109,13 +123,14 @@ export type Combo = ContentBase &
     extra_routes?: ComboRoute[];
     /** 루트 1의 메모 (2번째부터는 extra_routes 안에) */
     route_note?: Localized | null;
+    /** 루트 1의 마무리 (2번째부터는 extra_routes 안에) */
+    finishes?: unknown;
+    group_id?: number | null;
     /** 첫 번째 루트 */
     notation_classic: string;
     notation_modern: string | null;
     hit_states: HitState[];
     position_start: ScreenPosition;
-    drive_cost: number;
-    sa_cost: number;
     damage: number | null;
     /** 콤보 후 프레임 (예: "+32", "다운 +30") */
     frame_after: string | null;
@@ -199,6 +214,19 @@ export type Setup = ContentBase &
     notation_modern: string | null;
     description: Localized | null;
     difficulty: Difficulty;
+    options: SetupOption[];
+    practice: PracticeConfig | null;
+  };
+
+/** 추천 연습: 셋업과 같은 구조, 이어지는 콤보 대신 상황을 글로 */
+export type Practice = ContentBase &
+  Media & {
+    character_id: number;
+    title: Localized;
+    situation: Localized | null;
+    notation_classic: string | null;
+    notation_modern: string | null;
+    description: Localized | null;
     options: SetupOption[];
     practice: PracticeConfig | null;
   };

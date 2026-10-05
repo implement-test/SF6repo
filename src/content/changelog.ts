@@ -16,6 +16,71 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-10-05",
     items: [
       {
+        kind: "added",
+        text: {
+          ko: "추천 연습 탭 추가 (셋업과 같은 구성, 상황을 글로 설명)",
+          en: "New Practice tab (same layout as setups, with a written situation)",
+          ja: "おすすめ練習タブを追加（セットプレイと同じ構成、状況を文章で説明）",
+        },
+      },
+      {
+        kind: "added",
+        text: {
+          ko: "개인 홈: 헤더의 ☆ 즐겨찾기에서 모든 캐릭터의 즐겨찾기를 모아 보기",
+          en: "Personal home: see all your favorites across characters from ☆ Favorites in the header",
+          ja: "マイページ：ヘッダーの ☆ お気に入りから全キャラのお気に入りをまとめて表示",
+        },
+      },
+      {
+        kind: "added",
+        text: {
+          ko: "콤보 마무리: 루트 끝의 FINISH 배지에 마우스를 올리면 마무리별 데미지 · 후상황 표시",
+          en: "Combo finishers: hover the FINISH badge at the end of a route to see each finisher's damage and frame advantage",
+          ja: "コンボの締め：ルート末尾の FINISH に触れると締めごとのダメージ・状況を表示",
+        },
+      },
+      {
+        kind: "added",
+        text: {
+          ko: "콤보를 그룹으로 묶어 보기 (그룹도 접고 펼 수 있음)",
+          en: "Combos can be grouped (groups collapse too)",
+          ja: "コンボをグループでまとめて表示（グループも開閉可能）",
+        },
+      },
+      {
+        kind: "changed",
+        text: {
+          ko: "콤보 · 셋업 카드는 기본으로 접혀서 제목만 표시 (모두 펼치기 버튼)",
+          en: "Combo and setup cards start collapsed to their titles (with an Expand all button)",
+          ja: "コンボ・セットプレイのカードは最初はタイトルのみ表示（すべて開くボタンあり）",
+        },
+      },
+      {
+        kind: "changed",
+        text: {
+          ko: "대상 수준을 초급 / 숙련 2단계로 (중급 · 상급은 숙련으로), 콤보 태그에 기타 추가",
+          en: "Levels are now Beginner / Skilled (Intermediate and Advanced merged); added Other combo tag",
+          ja: "対象レベルを初級 / 熟練の2段階に（中級・上級は熟練へ）、コンボタグに「その他」を追加",
+        },
+      },
+      {
+        kind: "removed",
+        text: {
+          ko: "콤보의 드라이브 · SA 게이지 표시",
+          en: "Drive / SA gauge display on combos",
+          ja: "コンボのドライブ・SAゲージ表示",
+        },
+      },
+      {
+        kind: "changed",
+        adminOnly: true,
+        text: {
+          ko: "편집 · 순서 변경 창을 화면 가운데에 크게, 콤보 '순서 · 그룹' 창에서 그룹 관리, 콤보 제목 필수",
+          en: "Editor and reorder dialogs are centered and larger; manage combo groups in the Order & Groups dialog; combo titles required",
+          ja: "編集・並べ替えウィンドウを中央に大きく表示、コンボの「順序・グループ」でグループ管理、コンボのタイトル必須",
+        },
+      },
+      {
         kind: "changed",
         text: {
           ko: "콤보 표기: 타겟 콤보는 MP..HP (마침표 2개), DRC 5HP 처럼 DR·DRC 를 기술 앞에 붙여 쓰기, SA1~3 아이콘 추가",

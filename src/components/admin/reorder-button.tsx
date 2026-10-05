@@ -4,6 +4,8 @@ import { lazy, Suspense, useState } from "react";
 import { useAdmin } from "./admin-context";
 
 const ReorderPanel = lazy(() => import("./reorder-panel"));
+// 콤보는 그룹까지 함께 편집한다
+const ComboReorderPanel = lazy(() => import("./combo-reorder-panel"));
 
 /** 콤보·셋업 목록의 '순서 변경' 버튼. 이 캐릭터를 편집할 수 있는 관리자에게만 보인다. */
 export function ReorderButton({
@@ -11,7 +13,7 @@ export function ReorderButton({
   characterId,
   label,
 }: {
-  table: "combos" | "setups" | "vs_guides" | "moves" | "videos";
+  table: "combos" | "setups" | "practices" | "vs_guides" | "moves" | "videos";
   characterId: number;
   label: string;
 }) {
@@ -26,11 +28,15 @@ export function ReorderButton({
         onClick={() => setOpen(true)}
         className="skew border border-accent px-4 py-1.5 text-sm font-bold text-accent transition-colors hover:bg-accent hover:text-accent-fg"
       >
-        <span>⇅ 순서 변경</span>
+        <span>{table === "combos" ? "⇅ 순서 · 그룹" : "⇅ 순서 변경"}</span>
       </button>
       {open && (
         <Suspense>
-          <ReorderPanel table={table} characterId={characterId} label={label} onClose={() => setOpen(false)} />
+          {table === "combos" ? (
+            <ComboReorderPanel characterId={characterId} onClose={() => setOpen(false)} />
+          ) : (
+            <ReorderPanel table={table} characterId={characterId} label={label} onClose={() => setOpen(false)} />
+          )}
         </Suspense>
       )}
     </>

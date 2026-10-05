@@ -16,6 +16,7 @@ import { NotationText } from "../notation";
 const KINDS = [
   { table: "combos", entity: "combo", label: "콤보" },
   { table: "setups", entity: "setup", label: "셋업" },
+  { table: "practices", entity: "practice", label: "추천 연습" },
   { table: "moves", entity: "move", label: "커맨드" },
   { table: "vs_guides", entity: "vs", label: "Vs 가이드" },
   { table: "character_overviews", entity: "overview", label: "개요" },
@@ -42,6 +43,8 @@ function hrefFor(item: Item, slug: string): string {
       return `/${slug}/combos#combo-${id}`;
     case "setups":
       return `/${slug}/setups#setup-${id}`;
+    case "practices":
+      return `/${slug}/practice#practice-${id}`;
     case "moves":
       return `/${slug}/moves#move-${id}`;
     case "vs_guides":

@@ -13,6 +13,8 @@ import { normalizeOptions, normalizePractice } from "@/lib/setup";
 import { normalizeStarterGroups } from "@/lib/starters";
 import { comboRoutes, routesToColumns } from "@/lib/combo-routes";
 import { RoutesInput } from "./routes-input";
+import { ComboGroupSelect } from "./combo-group-select";
+import { upgradeRow } from "@/lib/admin/upgrade";
 import { LocalizedListInput, cleanLocalizedList } from "./localized-list-input";
 import { VsActionsInput, cleanVsActions } from "./vs-actions-input";
 import { normalizeVsActions } from "@/lib/vs-actions";
@@ -41,7 +43,7 @@ function normalizeValues(v: Values): Values {
   if ("starters" in out) out.starters = normalizeStarterGroups(out.starters);
   if ("actions" in out) out.actions = normalizeVsActions(out.actions);
   // 콤보: 칼럼(첫 번째 루트) + extra_routes 를 루트 목록 하나로
-  if (!("routes" in out) && "drive_cost" in out) out.routes = comboRoutes(out as Parameters<typeof comboRoutes>[0]);
+  if (!("routes" in out) && "extra_routes" in out) out.routes = comboRoutes(out as Parameters<typeof comboRoutes>[0]);
   return out;
 }
 const LANGS = [
@@ -205,7 +207,7 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
     if (isNew) {
       // 콤보·셋업은 새 항목을 목록 맨 아래에 둔다 (순서는 '순서 변경'에서 바꾼다)
       const order: Values = {};
-      if (typeof request.defaults?.character_id === "number" && ["combos", "setups", "vs_guides", "moves", "videos"].includes(entity.table)) {
+      if (typeof request.defaults?.character_id === "number" && ["combos", "setups", "practices", "vs_guides", "moves", "videos"].includes(entity.table)) {
         const { data: last } = await sb
           .from(entity.table)
           .select("sort_order")
@@ -284,20 +286,20 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
   function loadVersion(snapshot: Values) {
     // 연결 콤보는 이력에 없는 따로 저장되는 값이라 지금 값을 유지한다.
     setValues((current) =>
-      normalizeValues({ ...snapshot, combo_links: current?.combo_links, updated_at: baseUpdatedAt }),
+      normalizeValues({ ...upgradeRow(entity.table, snapshot), combo_links: current?.combo_links, updated_at: baseUpdatedAt }),
     );
     setShowHistory(false);
     setError("과거 버전을 불러왔습니다. 확인 후 저장하면 되돌려집니다.");
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end">
+    <div className="fixed inset-0 z-50 grid place-items-center p-4">
       <button type="button" aria-label="닫기" onClick={onClose} className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
       <section
         role="dialog"
         aria-modal="true"
         aria-label={`${entity.label} ${isNew ? "추가" : "수정"}`}
-        className="relative flex h-full w-full max-w-2xl flex-col border-l-2 border-accent bg-surface shadow-2xl"
+        className="relative flex h-[92vh] w-full max-w-5xl flex-col border border-accent bg-surface shadow-2xl"
       >
         <header className="flex items-center gap-3 border-b border-border px-5 py-4">
           <span className="eyebrow text-accent!">{isNew ? (request.initial ? "Copy" : "New") : `Edit #${request.id}`}</span>
@@ -548,6 +550,17 @@ function FieldInput({
           help={field.help}
           value={(value as ComboRoute[] | null) ?? []}
           onChange={onChange}
+        />
+      );
+
+    case "comboGroup":
+      return (
+        <ComboGroupSelect
+          label={field.label}
+          help={field.help}
+          value={typeof value === "number" ? value : null}
+          onChange={onChange}
+          characterId={characterId}
         />
       );
 

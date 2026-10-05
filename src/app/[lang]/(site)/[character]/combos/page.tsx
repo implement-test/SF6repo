@@ -2,12 +2,14 @@ import { notFound } from "next/navigation";
 import {
   getAuthorNames,
   getCharacter,
+  getComboGroups,
   getCombos,
   getLatestPatchId,
   getSetupComboLinks,
   getSetups,
 } from "@/lib/data";
 import { hasLocale } from "@/lib/i18n/config";
+import { pickLocalized } from "@/lib/i18n/localized";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { linkedSetupsFor } from "@/lib/setup-links";
 import { ComboCard } from "@/components/combo-card";
@@ -25,8 +27,9 @@ export default async function CombosPage({ params }: PageProps<"/[lang]/[charact
   if (!character) notFound();
 
   const dict = getDictionary(lang);
-  const [combos, latestPatchId, authors, setups] = await Promise.all([
+  const [combos, groups, latestPatchId, authors, setups] = await Promise.all([
     getCombos(character.id),
+    getComboGroups(character.id),
     getLatestPatchId(),
     getAuthorNames(),
     getSetups(character.id),
@@ -48,6 +51,7 @@ export default async function CombosPage({ params }: PageProps<"/[lang]/[charact
       <ComboFilters
         dict={dict}
         characterId={character.id}
+        groups={groups.map((g) => ({ id: g.id, name: pickLocalized(g.name, lang).text }))}
         items={combos
           .filter((c) => c.is_published)
           .map((combo) => ({
@@ -55,6 +59,7 @@ export default async function CombosPage({ params }: PageProps<"/[lang]/[charact
             level: combo.target_level,
             hitStates: combo.hit_states,
             positionStart: combo.position_start,
+            groupId: combo.group_id ?? null,
             card: (
               <ComboCard
                 combo={combo}

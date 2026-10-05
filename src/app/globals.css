@@ -30,7 +30,6 @@
   --drive: #2fb344;
   --sa: #e0a100;
   --lv-beginner: #0f9b8e;
-  --lv-intermediate: #7c4ddb;
   --lv-advanced: #c28a00;
   --warn: #b36b00;
 }
@@ -54,7 +53,6 @@
   --drive: #5fe067;
   --sa: #ffc233;
   --lv-beginner: #3fd6c6;
-  --lv-intermediate: #b18cff;
   --lv-advanced: #ffcb47;
   --warn: #ffb547;
 }
@@ -78,7 +76,6 @@
   --color-drive: var(--drive);
   --color-sa: var(--sa);
   --color-lv-beginner: var(--lv-beginner);
-  --color-lv-intermediate: var(--lv-intermediate);
   --color-lv-advanced: var(--lv-advanced);
   --color-warn: var(--warn);
   --font-sans: var(--font-geist-sans), "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "Hiragino Sans",
@@ -174,7 +171,6 @@ html:not([data-control="modern"]) .show-if-modern {
 }
 
 html[data-hide-beginner] [data-level="beginner"],
-html[data-hide-intermediate] [data-level="intermediate"],
 html[data-hide-advanced] [data-level="advanced"] {
   display: none !important;
 }
@@ -198,14 +194,10 @@ html[data-control="modern"] [data-pref="control"][data-value="modern"] {
 .level-chip[data-value="beginner"] {
   --lv: var(--lv-beginner);
 }
-.level-chip[data-value="intermediate"] {
-  --lv: var(--lv-intermediate);
-}
 .level-chip[data-value="advanced"] {
   --lv: var(--lv-advanced);
 }
 html[data-hide-beginner] .level-chip[data-value="beginner"],
-html[data-hide-intermediate] .level-chip[data-value="intermediate"],
 html[data-hide-advanced] .level-chip[data-value="advanced"] {
   background: transparent;
   color: var(--lv);
@@ -349,6 +341,47 @@ article[id] {
   letter-spacing: 0.06em;
   line-height: 1;
   flex: none;
+}
+
+/* 마무리(FINISH) 배지: 커맨드·히트 상황·딜레이와 겹치지 않게 노란 이중 테두리 + 체크무늬 깃발 */
+.notation-finish {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  height: 1.55rem;
+  padding: 0 0.5rem 0 0.35rem;
+  border: 2px double var(--highlight);
+  background: color-mix(in srgb, var(--highlight) 14%, transparent);
+  color: var(--highlight-text);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 900;
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  flex: none;
+  white-space: nowrap;
+}
+.notation-finish::before {
+  content: "";
+  width: 0.8rem;
+  height: 0.8rem;
+  background: repeating-conic-gradient(currentColor 0 25%, transparent 0 50%) 0 0 / 0.4rem 0.4rem;
+  border: 1px solid currentColor;
+}
+
+/* 접히는 카드(콤보·셋업·추천 연습): 기본은 제목 줄만 */
+.card-details > summary {
+  list-style: none;
+}
+.card-details > summary::-webkit-details-marker {
+  display: none;
+}
+.card-chevron {
+  transition: transform 0.15s;
+}
+.card-details[open] > summary .card-chevron {
+  transform: rotate(180deg);
 }
 
 /* 히트 상황 배지: 왼쪽이 파이고 오른쪽이 뾰족한 리본. 커맨드 아이콘(원·방향키)과 모양부터 다르게 */

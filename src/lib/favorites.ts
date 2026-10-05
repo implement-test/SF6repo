@@ -5,9 +5,11 @@ import { useSyncExternalStore } from "react";
 /**
  * 방문자 즐겨찾기. 로그인 없이 이 브라우저의 localStorage 에만 저장한다
  * (서버는 읽지 않는다 — 페이지를 정적으로 유지하기 위해 쿠키를 쓰지 않는다).
- * 종류별 id 목록: { combo: [3, 9], setup: [1], vs: [4] }. 삭제·비공개된 항목의 id 는 목록에 남아도 화면에서 무시된다.
+ * 종류별 id 목록: { combo: [3, 9], setup: [1], practice: [2], vs: [4] }. 삭제·비공개된 항목의 id 는 목록에 남아도 화면에서 무시된다.
+ * 나중에 로그인을 붙이면 user_favorites 표(0023)로 옮긴다.
  */
-export type FavoriteKind = "combo" | "setup" | "vs";
+export type FavoriteKind = "combo" | "setup" | "practice" | "vs";
+export const FAVORITE_KINDS: FavoriteKind[] = ["combo", "setup", "practice", "vs"];
 
 const KEY = "sf6r:favorites";
 const EVENT = "sf6r:favorites";
@@ -43,6 +45,16 @@ function subscribe(onChange: () => void) {
     window.removeEventListener(EVENT, onChange);
     window.removeEventListener("storage", onChange);
   };
+}
+
+/** 모든 종류의 즐겨찾기 (개인 홈). 서버와 첫 렌더에서는 null */
+export function useAllFavorites(): Record<FavoriteKind, number[]> | null {
+  const snapshot = useSyncExternalStore(subscribe, () => JSON.stringify(read()), () => "");
+  if (!snapshot) return null;
+  const store = JSON.parse(snapshot) as Store;
+  return Object.fromEntries(
+    FAVORITE_KINDS.map((k) => [k, (store[k] ?? []).filter((id) => typeof id === "number")]),
+  ) as Record<FavoriteKind, number[]>;
 }
 
 /** 이 종류의 즐겨찾기 id 목록. 서버와 첫 렌더에서는 빈 목록 */

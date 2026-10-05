@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 /**
  * 주소의 #setup-12, #combo-3 같은 항목으로 스크롤하고 잠깐 강조한다.
+ * 접힌 카드(와 그 카드를 감싼 접힌 그룹)는 펼친다.
  * (페이지 이동은 pushState 라서 CSS :target 이 동작하지 않는다)
  */
 export function HashHighlight() {
@@ -16,6 +17,9 @@ export function HashHighlight() {
       if (!id) return;
       const el = document.getElementById(id);
       if (!el) return;
+      for (let node: Element | null = el.querySelector("details[data-card]") ?? el; node; node = node.parentElement) {
+        if (node instanceof HTMLDetailsElement) node.open = true;
+      }
       document.querySelectorAll("[data-highlight]").forEach((e) => e.removeAttribute("data-highlight"));
       el.setAttribute("data-highlight", "");
       el.scrollIntoView({ block: "start", behavior: "smooth" });

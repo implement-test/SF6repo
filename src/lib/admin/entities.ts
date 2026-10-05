@@ -18,6 +18,8 @@ export type Field = { key: string; label: string; help?: string; required?: bool
   | { type: "vsActions" }
   /** 콤보 루트 여러 개 + 루트별 수치. 첫 번째는 칼럼, 나머지는 extra_routes 에 저장 */
   | { type: "routes" }
+  /** 콤보 그룹 (combo_groups 에서 불러온다) */
+  | { type: "comboGroup" }
   | { type: "text" | "url" }
   | { type: "number"; step?: number; min?: number; max?: number; nullable?: boolean }
   | { type: "select"; options: Option[]; nullable?: boolean }
@@ -39,7 +41,7 @@ export type Field = { key: string; label: string; help?: string; required?: bool
 
 export type FieldGroup = { title: string; fields: Field[] };
 
-export type EntityType = "combo" | "patch" | "setup" | "vs" | "overview" | "move" | "video";
+export type EntityType = "combo" | "patch" | "setup" | "practice" | "vs" | "overview" | "move" | "video";
 
 export type Entity = {
   table: string;
@@ -57,8 +59,7 @@ export function today(): string {
 
 const LEVELS: Option[] = [
   { value: "beginner", label: "초급 (플래티넘 이하)" },
-  { value: "intermediate", label: "중급 (다이아)" },
-  { value: "advanced", label: "상급 (마스터 이상)" },
+  { value: "advanced", label: "숙련 (다이아 이상)" },
 ];
 
 const POSITIONS: Option[] = [
@@ -106,6 +107,7 @@ const HIT_STATES: Option[] = [
   { value: "punish_counter", label: "퍼니시 카운터" },
   { value: "corner_impact_guard", label: "구석 임팩트 가드" },
   { value: "corner_impact_stun", label: "구석 임팩트 스턴" },
+  { value: "other", label: "기타" },
 ];
 
 /** 콘텐츠 공통 필드 */
@@ -154,7 +156,8 @@ export const ENTITIES: Record<EntityType, Entity> = {
       {
         title: "콤보",
         fields: [
-          { key: "title", label: "제목", type: "localized" },
+          { key: "title", label: "제목", type: "localized", required: true, help: "목록에서는 카드가 접혀 제목만 보입니다." },
+          { key: "group_id", label: "그룹", type: "comboGroup", help: "그룹 만들기 · 이름 바꾸기 · 순서는 목록 위 '순서 · 그룹' 창에서 합니다." },
           {
             key: "starters",
             label: "시동 기본기",
@@ -167,7 +170,7 @@ export const ENTITIES: Record<EntityType, Entity> = {
             label: "루트",
             type: "routes",
             wide: true,
-            help: "같은 시동기로 이어지는 루트를 여러 개 넣을 수 있습니다. 카드에는 루트 1의 수치가 보이고, 다른 루트에 마우스를 올리면 그 루트의 수치로 바뀝니다. 데미지는 시동기 칸에서 고른 데미지 기준 시동기로 잰 값. 모던을 비워 두면 '클래식 전용'.",
+            help: "같은 시동기로 이어지는 루트를 여러 개 넣을 수 있습니다. 카드에는 루트 1의 수치가 보이고, 다른 루트에 마우스를 올리면 그 루트의 수치로 바뀝니다. 루트의 '마무리'를 켜면 마무리를 여러 개 넣고 데미지 · 후상황을 마무리마다 적습니다. 데미지는 시동기 칸에서 고른 데미지 기준 시동기로 잰 값. 모던을 비워 두면 '클래식 전용'.",
           },
         ],
       },
@@ -198,7 +201,8 @@ export const ENTITIES: Record<EntityType, Entity> = {
       starters: [],
       hit_states: ["normal"],
       position_start: "midscreen",
-      routes: [{ classic: "", modern: null, damage: null, drive_cost: 0, sa_cost: 0, frame_after: null, note: null }],
+      group_id: null,
+      routes: [{ classic: "", modern: null, damage: null, frame_after: null, finishes: [], note: null }],
     }),
   },
 
@@ -244,6 +248,48 @@ export const ENTITIES: Record<EntityType, Entity> = {
       })),
       practice: null,
       combo_links: [],
+    }),
+  },
+
+  practice: {
+    table: "practices",
+    label: "추천 연습",
+    groups: [
+      {
+        title: "추천 연습",
+        fields: [
+          { key: "title", label: "제목", type: "localized", required: true },
+          {
+            key: "situation",
+            label: "상황",
+            type: "localized",
+            multiline: true,
+            help: "어떤 상황에서 쓰는 연습인지 글로 적습니다 (셋업의 '이어지는 콤보' 자리).",
+          },
+          { key: "notation_classic", label: "공통 루트 (클래식)", type: "notation", wide: true, help: "옵션으로 갈라지기 전 공통 부분 (없으면 비움)" },
+          { key: "notation_modern", label: "공통 루트 (모던)", type: "notation", wide: true },
+          { key: "description", label: "설명", type: "localized", multiline: true },
+        ],
+      },
+      { title: "프랙티스 설정", fields: [{ key: "practice", label: "트레이닝 모드 더미 설정", type: "practice", wide: true }] },
+      { title: "옵션", fields: [{ key: "options", label: "옵션 1 / 2 / …", type: "setupOptions", wide: true }] },
+      MEDIA_GROUP,
+      META_GROUP,
+    ],
+    defaults: () => ({
+      ...metaDefaults(),
+      options: [1, 2].map((n) => ({
+        label: `옵션 ${n}`,
+        classic: "",
+        modern: null,
+        description: null,
+        branches: [
+          { result: "hit", classic: "", modern: null, note: null },
+          { result: "guard", classic: "", modern: null, note: null },
+        ],
+        youtube_url: null,
+      })),
+      practice: null,
     }),
   },
 

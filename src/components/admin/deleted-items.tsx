@@ -6,6 +6,7 @@ import { describeError, revalidateSite, supabaseBrowser } from "@/lib/supabase/b
 import { useAdmin } from "./admin-context";
 import { AdminSection } from "./admin-section";
 import { useAuthorNames, type ChangeEntry } from "./history";
+import { upgradeRow } from "@/lib/admin/upgrade";
 
 /** 복구할 수 있는 콘텐츠 테이블 */
 const TABLE_LABELS: Record<string, string> = {
@@ -13,6 +14,8 @@ const TABLE_LABELS: Record<string, string> = {
   moves: "커맨드",
   combos: "콤보",
   setups: "셋업",
+  practices: "추천 연습",
+  combo_groups: "콤보 그룹",
   practice_settings: "프랙티스 세팅",
   vs_punishes: "확정 반격",
   vs_patterns: "패턴 대응",
@@ -63,7 +66,7 @@ export function DeletedItems() {
   async function restore(entry: ChangeEntry) {
     if (!entry.old_data) return;
     setMessage(null);
-    const { error } = await sb.from(entry.table_name).insert(entry.old_data);
+    const { error } = await sb.from(entry.table_name).insert(upgradeRow(entry.table_name, entry.old_data));
     if (error) {
       setMessage(error.code === "23505" ? "이미 복구된 항목입니다." : describeError(error));
       return;

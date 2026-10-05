@@ -4,8 +4,10 @@ import type {
   Character,
   CharacterOverview,
   Combo,
+  ComboGroup,
   Move,
   Patch,
+  Practice,
   Setup,
   SetupComboLink,
   SetupSituation,
@@ -88,6 +90,38 @@ export async function getCombos(characterId: number): Promise<Combo[]> {
   const list = await rows<Combo>(c.from("combos").select("*").eq("character_id", characterId).order("sort_order").order("id"));
   // 예전 형식(시동기 목록)도 그룹 목록으로 맞춘다.
   return list.map((cb) => ({ ...cb, starters: normalizeStarterGroups(cb.starters) }));
+}
+
+/** 콤보 그룹 (0021). 표가 아직 없으면 그룹 없이 보여 준다 */
+export async function getComboGroups(characterId: number): Promise<ComboGroup[]> {
+  const c = db();
+  if (!c) return [];
+  const { data, error } = await c
+    .from("combo_groups")
+    .select("id,character_id,name,sort_order")
+    .eq("character_id", characterId)
+    .order("sort_order")
+    .order("id");
+  if (error) return [];
+  return (data ?? []) as ComboGroup[];
+}
+
+/** 추천 연습 (0022). 표가 아직 없으면 빈 목록 */
+export async function getPractices(characterId: number): Promise<Practice[]> {
+  const c = db();
+  if (!c) return [];
+  const { data, error } = await c
+    .from("practices")
+    .select("*")
+    .eq("character_id", characterId)
+    .order("sort_order")
+    .order("id");
+  if (error) return [];
+  return ((data ?? []) as Practice[]).map((p) => ({
+    ...p,
+    options: normalizeOptions(p.options),
+    practice: normalizePractice(p.practice),
+  }));
 }
 
 export async function getSetupSituations(): Promise<SetupSituation[]> {

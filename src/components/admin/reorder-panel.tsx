@@ -25,7 +25,7 @@ export default function ReorderPanel({
   label,
   onClose,
 }: {
-  table: "combos" | "setups" | "vs_guides" | "moves" | "videos";
+  table: "combos" | "setups" | "practices" | "vs_guides" | "moves" | "videos";
   characterId: number;
   label: string;
   onClose: () => void;
@@ -102,7 +102,7 @@ export default function ReorderPanel({
         role="dialog"
         aria-modal="true"
         aria-label={`${label} 순서 변경`}
-        className="relative flex max-h-[88vh] w-full max-w-2xl flex-col border border-accent bg-surface shadow-2xl"
+        className="relative flex max-h-[92vh] w-full max-w-4xl flex-col border border-accent bg-surface shadow-2xl"
       >
         <div className="brand-bar h-[3px]" />
         <header className="flex items-center gap-3 border-b border-border px-5 py-3">
