@@ -14,6 +14,28 @@ import type { AdminInfo } from "@/lib/supabase/browser";
  */
 
 export const ADMIN_FLAG = "sf6r:admin";
+/**
+ * 지난번 확인한 관리자 정보. 페이지를 열자마자 관리자 도구(순서 변경 레일 등)를 그리는 데 쓰고,
+ * 실제 확인(세션 · admins 조회)은 뒤에서 다시 한다. 화면 표시용일 뿐, 저장 권한은 DB(RLS)가 검사한다.
+ * 로그아웃하면 ADMIN_FLAG 가 지워져 이 값도 쓰지 않는다.
+ */
+const ADMIN_CACHE = "sf6r:admin-info";
+
+function readCachedAdmin(): AdminInfo | null {
+  try {
+    const raw = JSON.parse(localStorage.getItem(ADMIN_CACHE) ?? "null");
+    return raw && typeof raw.userId === "string" && Array.isArray(raw.characterIds) ? (raw as AdminInfo) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedAdmin(info: AdminInfo | null) {
+  try {
+    if (info) localStorage.setItem(ADMIN_CACHE, JSON.stringify(info));
+    else localStorage.removeItem(ADMIN_CACHE);
+  } catch {}
+}
 
 export type EditorRequest = {
   entity: EntityType;
@@ -120,11 +142,16 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!hasFlag()) return;
     let cancelled = false;
+    // 지난번 정보로 먼저 그리고, 아래에서 확인한 결과로 바꾼다
+    const cached = readCachedAdmin();
+    // (하이드레이션이 끝난 다음 차례에 바꾼다)
+    if (cached) Promise.resolve().then(() => !cancelled && setAdmin((current) => current ?? cached));
     import("@/lib/supabase/browser").then(async ({ supabaseBrowser, getAdminInfo }) => {
       try {
         const info = await getAdminInfo(supabaseBrowser());
         if (cancelled) return;
         setAdmin(info);
+        writeCachedAdmin(info);
         // 세션이 만료됐거나 해임됐으면 표시를 지워 다음부터는 불러오지 않는다.
         if (!info) localStorage.removeItem(ADMIN_FLAG);
       } catch {

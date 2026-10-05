@@ -16,6 +16,15 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-10-05",
     items: [
       {
+        kind: "changed",
+        adminOnly: true,
+        text: {
+          ko: "관리자 도구(순서 변경 버튼 등)가 페이지를 열자마자 보이도록",
+          en: "Admin tools (reorder rails etc.) show up right away when a page opens",
+          ja: "管理者ツール（並べ替えボタンなど）をページを開いてすぐ表示",
+        },
+      },
+      {
         kind: "added",
         text: {
           ko: "콤보 표기: { } 로 감싼 부분은 생략 가능 구간으로 점선 상자에 표시",
