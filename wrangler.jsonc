@@ -4,6 +4,8 @@
   "name": "sf6-repository",
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  // 사이트 주소. 배포할 때 DNS 레코드와 인증서가 자동으로 만들어진다 (nogamenogain.com 영역이 같은 계정에 있어야 함)
+  "routes": [{ "pattern": "sf6.nogamenogain.com", "custom_domain": true }],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"

@@ -66,7 +66,7 @@ npm run lint
 
 ## 3. Cloudflare
 
-배포 주소: https://sf6-repository.end0fw0rld.workers.dev (도메인 구입 전)
+사이트 주소: https://sf6.nogamenogain.com (`wrangler.jsonc` 의 routes, custom_domain). 배포 확인용: https://sf6-repository.end0fw0rld.workers.dev
 
 ### 처음 한 번
 1. `npx wrangler login` (PowerShell 에서는 `npx.cmd`)
@@ -92,4 +92,4 @@ npm run deploy
 ### 설정 메모
 - 언어 rewrite(`next.config.ts`)는 첫 단계/나머지 단계를 나눠 받는다. 여러 단계를 한 칸에 담으면 OpenNext 라우터에서 500 오류
 - `open-next.config.ts`: R2 증분 캐시 + D1 태그 캐시 + 메모리 큐(자기 참조 서비스 바인딩)
-- 나중에: 도메인 구입 후 Workers → Settings → Domains 에서 `sf6repository.com` 연결
+- AI 크롤러: `public/robots.txt` 로 거부를 알리고, 실제 차단은 Cloudflare → Security → Bots 의 Block AI bots

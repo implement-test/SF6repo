@@ -1,7 +1,7 @@
 # SF6 Repository — 사양
 
 스트리트 파이터 6 캐릭터 공략 정리 사이트. 첫 캐릭터는 테리이고, 캐릭터를 계속 추가할 수 있는 구조다.
-도메인: sf6repository.com (구입 예정)
+도메인: sf6.nogamenogain.com (Cloudflare 에서 nogamenogain.com 구입)
 
 ## 운영 원칙
 

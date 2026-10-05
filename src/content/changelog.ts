@@ -13,6 +13,19 @@ export type ChangelogEntry = { date: string; items: ChangelogItem[] };
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    date: "2026-10-05",
+    items: [
+      {
+        kind: "changed",
+        text: {
+          ko: "사이트 주소를 sf6.nogamenogain.com 으로 변경",
+          en: "Site moved to sf6.nogamenogain.com",
+          ja: "サイトのアドレスを sf6.nogamenogain.com に変更",
+        },
+      },
+    ],
+  },
+  {
     date: "2026-10-02",
     items: [
       {
