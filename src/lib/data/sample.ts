@@ -191,8 +191,8 @@ export const sampleSetups: Setup[] = [
 ];
 
 export const sampleSetupLinks: SetupComboLink[] = [
-  { id: 1, setup_id: 1, combo_id: 2, sort_order: 0 },
-  { id: 2, setup_id: 1, combo_id: 3, sort_order: 1 },
+  { id: 1, setup_id: 1, combo_id: 2, sort_order: 0, route_index: 0, finish_index: null },
+  { id: 2, setup_id: 1, combo_id: 2, sort_order: 1, route_index: 1, finish_index: 1 },
 ];
 const vsBase = {
   character_id: 1,

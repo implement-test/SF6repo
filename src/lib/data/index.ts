@@ -17,6 +17,7 @@ import type {
 import { normalizeOptions, normalizePractice } from "@/lib/setup";
 import { normalizeStarterGroups } from "@/lib/starters";
 import { normalizeVsActions } from "@/lib/vs-actions";
+import { linkedCombosFor, type LinkedCombo } from "@/lib/setup-links";
 import {
   sampleCharacters,
   sampleCombos,
@@ -146,7 +147,7 @@ export async function getSetups(characterId: number): Promise<Setup[]> {
  */
 export async function getSetupForEmbed(
   id: number,
-): Promise<{ setup: Setup; character: Character; linkedCombos: Combo[] } | null> {
+): Promise<{ setup: Setup; character: Character; linkedCombos: LinkedCombo[] } | null> {
   const c = db();
   let setup: Setup | undefined;
   if (!c) {
@@ -161,7 +162,7 @@ export async function getSetupForEmbed(
   if (!character) return null;
   const [links, combos] = await Promise.all([getSetupComboLinks([setup.id]), getCombos(character.id)]);
   const byId = new Map(combos.filter((cb) => cb.is_published).map((cb) => [cb.id, cb]));
-  const linkedCombos = links.map((l) => byId.get(l.combo_id)).filter((cb) => cb !== undefined);
+  const linkedCombos = linkedCombosFor(setup.id, links, byId);
   return { setup, character, linkedCombos };
 }
 
@@ -194,7 +195,8 @@ export async function getSetupComboLinks(setupIds: number[]): Promise<SetupCombo
   if (!c) return sampleSetupLinks.filter((l) => setupIds.includes(l.setup_id));
   if (setupIds.length === 0) return [];
   const { data } = await c.from("setup_combos").select("*").in("setup_id", setupIds).order("sort_order");
-  return (data ?? []) as SetupComboLink[];
+  // 0024 이전 연결은 루트 1, 마무리 없음
+  return ((data ?? []) as SetupComboLink[]).map((l) => ({ ...l, route_index: l.route_index ?? 0, finish_index: l.finish_index ?? null }));
 }
 
 /** Vs 가이드 (이 캐릭터가 상대를 만났을 때). 표가 아직 없으면(0014 실행 전) 빈 목록 */

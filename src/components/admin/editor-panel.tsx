@@ -7,7 +7,7 @@ import { copyValues } from "@/lib/admin/copy";
 import { VsCopyTo } from "./vs-copy";
 import { findUnknownTokens, parseNotation } from "@/lib/notation/parse";
 import { describeError, revalidateSite, supabaseBrowser } from "@/lib/supabase/browser";
-import type { ComboRoute, Localized, Patch, PracticeConfig, SetupOption, StarterGroup, VsAction } from "@/lib/types";
+import type { ComboLinkTarget, ComboRoute, Localized, Patch, PracticeConfig, SetupOption, StarterGroup, VsAction } from "@/lib/types";
 import { parseYouTube } from "@/lib/youtube";
 import { normalizeOptions, normalizePractice } from "@/lib/setup";
 import { normalizeStarterGroups } from "@/lib/starters";
@@ -31,6 +31,7 @@ import {
   SituationsInput,
   cleanOptions,
   cleanPractice,
+  normalizeComboLinks,
 } from "./setup-fields";
 
 type Values = Record<string, unknown>;
@@ -47,6 +48,8 @@ function normalizeValues(v: Values): Values {
   if ("practice" in out) out.practice = normalizePractice(out.practice);
   if ("starters" in out) out.starters = normalizeStarterGroups(out.starters);
   if ("actions" in out) out.actions = normalizeVsActions(out.actions);
+  // 셋업의 이어지는 콤보: 예전 형식(콤보 id 목록)은 루트 1 · 마무리 없음으로 (0024)
+  if ("combo_links" in out) out.combo_links = normalizeComboLinks(out.combo_links);
   // 콤보: 칼럼(첫 번째 루트) + extra_routes 를 루트 목록 하나로
   if (!("routes" in out) && "extra_routes" in out) out.routes = comboRoutes(out as Parameters<typeof comboRoutes>[0]);
   // 0021 이전 임시 내용의 루트에는 마무리(finishes)가 없다. 작성 중인 빈 루트 · 마무리는 그대로 둔다
@@ -117,10 +120,10 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
         if (usesComboLinks) {
           const { data: links } = await sb
             .from("setup_combos")
-            .select("combo_id")
+            .select("*")
             .eq("setup_id", request.id)
             .order("sort_order");
-          initial.combo_links = (links ?? []).map((l) => l.combo_id);
+          initial.combo_links = normalizeComboLinks(links ?? []);
         }
       }
       if (cancelled) return;
@@ -131,7 +134,7 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
       const draft = key ? getDraft(key) : undefined;
       setRestored(!!draft);
       setValues(draft ? normalizeValues(draft.values) : normalized);
-      setInitialLinks(draft ? draft.initialLinks : ((initial.combo_links as number[] | undefined) ?? []));
+      setInitialLinks(draft ? draft.initialLinks : ((initial.combo_links as ComboLinkTarget[] | undefined) ?? []).map((l) => l.combo_id));
       setBaseUpdatedAt(draft ? draft.baseUpdatedAt : ((initial.updated_at as string | undefined) ?? null));
     })();
     return () => {
@@ -169,19 +172,24 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
     setReloadN((n) => n + 1);
   }
 
-  /** 셋업 ↔ 콤보 연결 맞추기: 빠진 것은 지우고, 나머지는 순서까지 저장 */
+  /**
+   * 셋업 ↔ 콤보 루트(마무리) 연결 맞추기: 이 셋업의 연결을 지우고 지금 목록을 순서대로 다시 넣는다.
+   * (같은 콤보의 다른 루트 · 마무리에 여러 번 연결할 수 있어서 콤보 id 로 맞출 수 없다)
+   */
   async function syncComboLinks(setupId: number): Promise<string | null> {
     if (!usesComboLinks || !values) return null;
-    const wanted = (values.combo_links as number[] | undefined) ?? [];
-    const removed = initialLinks.filter((id) => !wanted.includes(id));
-    if (removed.length) {
-      const { error } = await sb.from("setup_combos").delete().eq("setup_id", setupId).in("combo_id", removed);
-      if (error) return describeError(error);
-    }
+    const wanted = normalizeComboLinks(values.combo_links);
+    const { error: deleteError } = await sb.from("setup_combos").delete().eq("setup_id", setupId);
+    if (deleteError) return describeError(deleteError);
     if (wanted.length) {
-      const { error } = await sb.from("setup_combos").upsert(
-        wanted.map((combo_id, sort_order) => ({ setup_id: setupId, combo_id, sort_order })),
-        { onConflict: "setup_id,combo_id" },
+      const { error } = await sb.from("setup_combos").insert(
+        wanted.map((l, sort_order) => ({
+          setup_id: setupId,
+          combo_id: l.combo_id,
+          route_index: l.route_index,
+          finish_index: l.finish_index,
+          sort_order,
+        })),
       );
       if (error) return describeError(error);
     }
@@ -589,7 +597,7 @@ function FieldInput({
           label={field.label}
           help={field.help}
           characterId={characterId}
-          value={(value as number[] | null) ?? []}
+          value={normalizeComboLinks(value)}
           onChange={onChange}
         />
       );

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import type { Combo, Practice, Setup } from "@/lib/types";
+import type { Practice, Setup } from "@/lib/types";
+import type { LinkedCombo } from "@/lib/setup-links";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { pickLocalized } from "@/lib/i18n/localized";
@@ -35,7 +36,8 @@ export function SetupCard({
   locale: Locale;
   dict: Dictionary;
   situationNames: Record<string, string>;
-  linkedCombos: Combo[];
+  /** 이 셋업으로 이어지는 콤보의 루트(마무리) */
+  linkedCombos: LinkedCombo[];
   latestPatchId: number | null;
   authors: Record<string, string>;
   characterSlug: string;
@@ -96,10 +98,11 @@ export function SetupCard({
           <section className="flex flex-col gap-2">
             <p className="eyebrow">{t.combos}</p>
             <ul className="flex flex-col divide-y divide-border border border-border bg-inset">
-              {linkedCombos.map((combo) => {
+              {linkedCombos.map(({ combo, route, routeIndex, finish }, i) => {
                 const comboTitle = combo.title ? pickLocalized(combo.title, locale).text : null;
+                const frameAfter = finish ? finish.frame_after : route.frame_after;
                 return (
-                  <li key={combo.id}>
+                  <li key={i}>
                     {/* 줄 전체가 콤보 페이지의 해당 콤보로 가는 링크 */}
                     <Link
                       href={`/${characterSlug}/combos#combo-${combo.id}`}
@@ -107,17 +110,22 @@ export function SetupCard({
                     >
                       <div className="flex min-w-0 flex-col gap-1">
                         <span className="text-xs font-semibold text-muted group-hover:text-accent">
-                          {comboTitle ?? t.route}
+                          {comboTitle ?? t.route} · {dict.combo.route} {routeIndex + 1}
                         </span>
-                        <ControlNotation
-                          classic={combo.notation_classic}
-                          modern={combo.notation_modern}
-                          classicOnlyLabel={dict.combo.classicOnly}
-                        />
+                        <div className="flex flex-wrap items-center gap-2">
+                          <ControlNotation classic={route.classic} modern={route.modern} classicOnlyLabel={dict.combo.classicOnly} />
+                          {finish && (
+                            // 이 셋업으로 이어지는 마무리
+                            <>
+                              <span className="notation-finish">FINISH</span>
+                              <ControlNotation classic={finish.classic} modern={finish.modern} classicOnlyLabel={dict.combo.classicOnly} />
+                            </>
+                          )}
+                        </div>
                       </div>
                       <span className="flex items-center gap-1.5 text-sm">
                         <span className="text-xs text-muted">{t.frameAfter}</span>
-                        <b className="display text-lg tabular-nums text-highlight-text">{combo.frame_after ?? "—"}</b>
+                        <b className="display text-lg tabular-nums text-highlight-text">{frameAfter ?? "—"}</b>
                       </span>
                     </Link>
                   </li>

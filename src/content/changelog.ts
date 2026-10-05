@@ -16,6 +16,22 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-10-05",
     items: [
       {
+        kind: "changed",
+        text: {
+          ko: "셋업을 콤보의 루트 · 마무리별로 연결: 콤보 카드에서 해당 루트 옆(마무리는 FINISH 팝업 안)에 셋업 표시",
+          en: "Setups now link to a specific route or finisher; they appear next to that route (or inside the FINISH popup)",
+          ja: "セットプレイをコンボのルート・締めごとに紐付け、該当ルートの横（締めは FINISH ポップアップ内）に表示",
+        },
+      },
+      {
+        kind: "changed",
+        text: {
+          ko: "FINISH 팝업이 마우스를 옮기는 동안 닫히지 않도록",
+          en: "The FINISH popup no longer closes while moving the mouse into it",
+          ja: "FINISH ポップアップにマウスを移動しても閉じないように",
+        },
+      },
+      {
         kind: "removed",
         adminOnly: true,
         text: {

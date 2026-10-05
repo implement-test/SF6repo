@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
-import type { Character, Combo, Localized, Practice, Setup, VsGuide } from "@/lib/types";
+import type { Character, Combo, Localized, Practice, Setup, SetupComboLink, VsGuide } from "@/lib/types";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { pickLocalized } from "@/lib/i18n/localized";
@@ -11,6 +11,7 @@ import { FAVORITE_KINDS, useAllFavorites, type FavoriteKind } from "@/lib/favori
 import { normalizeOptions, normalizePractice } from "@/lib/setup";
 import { normalizeStarterGroups } from "@/lib/starters";
 import { normalizeVsActions } from "@/lib/vs-actions";
+import { linkedCombosFor, type LinkedCombo } from "@/lib/setup-links";
 import { ComboCard } from "./combo-card";
 import { SetupCard } from "./setup-card";
 import { VsGuideCard } from "./vs-guide-card";
@@ -23,7 +24,7 @@ type Loaded = {
   situationNames: Record<string, string>;
   combos: Combo[];
   setups: Setup[];
-  setupCombos: Map<number, Combo[]>;
+  setupCombos: Map<number, LinkedCombo[]>;
   practices: Practice[];
   vs: VsGuide[];
 };
@@ -184,22 +185,20 @@ async function load(favorites: Record<FavoriteKind, number[]>): Promise<Loaded> 
   ]);
 
   // 셋업으로 이어지는 콤보
-  const setupCombos = new Map<number, Combo[]>();
+  const setupCombos = new Map<number, LinkedCombo[]>();
   if (setups.length > 0) {
     const { data: links } = await sb
       .from("setup_combos")
-      .select("setup_id,combo_id")
+      .select("*")
       .in(
         "setup_id",
         setups.map((s) => s.id),
       )
       .order("sort_order");
-    const linked = await pick<Combo>("combos", [...new Set((links ?? []).map((l) => l.combo_id as number))]);
+    const rows = (links ?? []) as SetupComboLink[];
+    const linked = await pick<Combo>("combos", [...new Set(rows.map((l) => l.combo_id))]);
     const byId = new Map(linked.map((c) => [c.id, c]));
-    for (const l of links ?? []) {
-      const combo = byId.get(l.combo_id);
-      if (combo) setupCombos.set(l.setup_id, [...(setupCombos.get(l.setup_id) ?? []), combo]);
-    }
+    for (const s of setups) setupCombos.set(s.id, linkedCombosFor(s.id, rows, byId));
   }
 
   const authorRows = (authors.data ?? []) as { user_id: string; display_name: string }[];

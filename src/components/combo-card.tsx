@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { Combo, ComboRoute } from "@/lib/types";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
@@ -8,7 +7,8 @@ import { damageBasisIndex, flattenStarters } from "@/lib/starters";
 import { comboRoutes } from "@/lib/combo-routes";
 import { ControlNotation } from "./notation";
 import { RouteList, RoutePanels, RouteRow, RouteScope } from "./combo-route-switch";
-import { FinishBadge } from "./combo-finish";
+import { FinishBadge, SetupChips } from "./combo-finish";
+import type { LinkedSetup } from "@/lib/setup-links";
 import { LevelBadge, NotTranslatedBadge, OutdatedBadge, PositionBadge, Tag } from "./badges";
 import { CardShell } from "./card-shell";
 import { ItemMedia } from "./media";
@@ -32,8 +32,8 @@ export function ComboCard({
   latestPatchId: number | null;
   authors: Record<string, string>;
   characterSlug: string;
-  /** 이 콤보에서 이어지는 셋업. preview 는 마우스를 올렸을 때 보여 줄 텍스트 */
-  linkedSetups?: { id: number; title: string; preview: string }[];
+  /** 이 콤보의 루트(마무리)에서 이어지는 셋업. preview 는 마우스를 올렸을 때 보여 줄 텍스트 */
+  linkedSetups?: LinkedSetup[];
   /** 다른 사이트에 퍼간 화면: 펼친 채로 보여 주고, 퍼가기·수정 버튼을 빼고, 방문자의 대상 수준 숨김 설정도 무시한다 */
   embedded?: boolean;
 }) {
@@ -58,10 +58,29 @@ export function ComboCard({
   const basisNote = dict.combo.damageBasis.replace("{n}", String(basisIndex + 1));
   const hasMedia = !!combo.media_url || !!parseYouTube(combo.youtube_url);
 
-  const routeNotation = (route: ComboRoute) => (
-    <div className="flex min-w-0 flex-wrap items-center gap-2">
-      <ControlNotation classic={route.classic} modern={route.modern} classicOnlyLabel={dict.combo.classicOnly} />
-      <FinishBadge finishes={route.finishes} dict={dict} />
+  // 셋업 연결을 루트별로. 콤보를 고쳐서 없어진 루트 · 마무리를 가리키면 루트 1 · 마무리 없음으로
+  const setupsByRoute = routes.map((_, r) =>
+    linkedSetups
+      .map((s) => {
+        const routeIndex = s.routeIndex < routes.length ? s.routeIndex : 0;
+        const finishIndex = s.finishIndex !== null && s.finishIndex < routes[routeIndex].finishes.length ? s.finishIndex : null;
+        return { ...s, routeIndex, finishIndex };
+      })
+      .filter((s) => s.routeIndex === r),
+  );
+
+  // 루트 표기 + 마무리 배지(마무리별 셋업은 팝업 안) + 루트 전체에서 이어지는 셋업
+  const routeNotation = (route: ComboRoute, r: number) => (
+    <div className="flex min-w-0 flex-col gap-1.5">
+      <div className="flex min-w-0 flex-wrap items-center gap-2">
+        <ControlNotation classic={route.classic} modern={route.modern} classicOnlyLabel={dict.combo.classicOnly} />
+        <FinishBadge finishes={route.finishes} setups={setupsByRoute[r]} characterSlug={characterSlug} dict={dict} />
+      </div>
+      <SetupChips
+        setups={setupsByRoute[r].filter((s) => s.finishIndex === null)}
+        characterSlug={characterSlug}
+        dict={dict}
+      />
     </div>
   );
 
@@ -157,14 +176,14 @@ export function ComboCard({
                           {r + 1}
                         </span>
                         {starters.length > 0 && <span className="pt-1 text-muted">→</span>}
-                        {routeNotation(route)}
+                        {routeNotation(route, r)}
                       </RouteRow>
                     ))}
                   </RouteList>
                 ) : (
                   <div className="flex min-w-0 items-start gap-2">
                     {starters.length > 0 && <span className="pt-1 text-muted">→</span>}
-                    {routeNotation(routes[0])}
+                    {routeNotation(routes[0], 0)}
                   </div>
                 )}
               </div>
@@ -204,22 +223,6 @@ export function ComboCard({
                   );
                 })}
               />
-            )}
-
-            {linkedSetups.length > 0 && (
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="eyebrow">{dict.setup.linked}</span>
-                {linkedSetups.map((s) => (
-                  <Link
-                    key={s.id}
-                    href={`/${characterSlug}/setups#setup-${s.id}`}
-                    title={s.preview}
-                    className="skew border border-highlight/60 px-2.5 py-0.5 text-xs font-bold text-highlight-text transition-colors hover:bg-highlight hover:text-highlight-fg"
-                  >
-                    <span>{s.title} →</span>
-                  </Link>
-                ))}
-              </div>
             )}
           </div>
 

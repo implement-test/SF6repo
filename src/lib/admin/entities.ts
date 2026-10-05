@@ -220,7 +220,7 @@ export const ENTITIES: Record<EntityType, Entity> = {
             label: "이 셋업으로 이어지는 콤보",
             type: "comboLinks",
             wide: true,
-            help: "콤보의 루트(마무리 루트), 콤보 후 위치, 콤보 후 프레임이 셋업에 표시됩니다. 잡기 후 셋업처럼 콤보가 없어도 됩니다.",
+            help: "콤보 → 루트 → (마무리가 있으면) 마무리 순으로 골라 추가합니다. 고른 루트 · 마무리와 그 후상황이 셋업에 표시되고, 콤보 카드에는 그 루트 옆(마무리는 FINISH 팝업 안)에 이 셋업이 붙습니다. 잡기 후 셋업처럼 콤보가 없어도 됩니다.",
           },
           { key: "notation_classic", label: "셋업 초반 공통 루트 (클래식)", type: "notation", wide: true, help: "옵션으로 갈라지기 전 공통 부분 (없으면 비움)" },
           { key: "notation_modern", label: "셋업 초반 공통 루트 (모던)", type: "notation", wide: true },

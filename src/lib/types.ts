@@ -231,7 +231,21 @@ export type Practice = ContentBase &
     practice: PracticeConfig | null;
   };
 
-export type SetupComboLink = { id: number; setup_id: number; combo_id: number; sort_order: number };
+/**
+ * 셋업 ↔ 콤보의 루트(마무리) 연결 (0024).
+ * route_index: 콤보의 몇 번째 루트인지 (0 = 루트 1), finish_index: 그 루트의 몇 번째 마무리인지 (null = 마무리 없음)
+ */
+export type SetupComboLink = {
+  id: number;
+  setup_id: number;
+  combo_id: number;
+  sort_order: number;
+  route_index: number;
+  finish_index: number | null;
+};
+
+/** 셋업 편집 창에서 다루는 연결 하나 */
+export type ComboLinkTarget = { combo_id: number; route_index: number; finish_index: number | null };
 
 // ───────────────────────── Vs 가이드 ─────────────────────────
 

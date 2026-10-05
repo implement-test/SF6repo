@@ -11,6 +11,7 @@ import {
 import { hasLocale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { pickLocalized } from "@/lib/i18n/localized";
+import { linkedCombosFor } from "@/lib/setup-links";
 import { SetupCard } from "@/components/setup-card";
 import { SetupFilters } from "@/components/setup-filters";
 import { AddButton } from "@/components/admin/admin-context";
@@ -64,10 +65,7 @@ export default async function SetupsPage({ params }: PageProps<"/[lang]/[charact
               locale={lang}
               dict={dict}
               situationNames={situationNames}
-              linkedCombos={links
-                .filter((l) => l.setup_id === setup.id)
-                .map((l) => comboById.get(l.combo_id))
-                .filter((c) => c !== undefined)}
+              linkedCombos={linkedCombosFor(setup.id, links, comboById)}
               latestPatchId={latestPatchId}
               authors={authors}
               characterSlug={slug}
