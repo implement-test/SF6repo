@@ -16,6 +16,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-10-05",
     items: [
       {
+        kind: "removed",
+        text: {
+          ko: "초급 / 숙련 옆의 티어 표기",
+          en: "Rank tier hints next to Beginner / Skilled",
+          ja: "初級 / 熟練 の横のランク表記",
+        },
+      },
+      {
         kind: "changed",
         text: {
           ko: "짧은 영상 칸에 YouTube 링크가 들어간 항목도 영상이 나오도록 수정",

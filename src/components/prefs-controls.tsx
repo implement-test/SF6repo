@@ -125,7 +125,6 @@ export function ContentFilters({ dict }: { dict: Dictionary }) {
             data-pref="level"
             data-value={level}
             aria-pressed={!prefs.hidden.includes(level)}
-            title={dict.levelHint[level]}
             onClick={() => toggleLevel(level)}
             className="level-chip skew px-3 py-1 text-sm font-bold"
           >

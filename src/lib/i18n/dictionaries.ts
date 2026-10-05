@@ -41,7 +41,6 @@ const ko = {
     dark: "다크",
   },
   level: { beginner: "초급", advanced: "숙련" },
-  levelHint: { beginner: "플래티넘 이하", advanced: "다이아 이상" },
   hitState: { normal: "노멀", punish_counter: "퍼니시 카운터", corner_impact_guard: "구석 임팩트 가드", corner_impact_stun: "구석 임팩트 스턴", other: "기타" },
   position: { any: "거리 무관", midscreen: "필드", near_corner: "코너 근처", corner: "코너", other: "기타" },
   combo: {
@@ -210,7 +209,6 @@ const en: Dictionary = {
     dark: "Dark",
   },
   level: { beginner: "Beginner", advanced: "Skilled" },
-  levelHint: { beginner: "Platinum and below", advanced: "Diamond and above" },
   hitState: { normal: "Normal", punish_counter: "Punish counter", corner_impact_guard: "Corner DI (blocked)", corner_impact_stun: "Corner DI (stun)", other: "Other" },
   position: { any: "Any range", midscreen: "Midscreen", near_corner: "Near corner", corner: "Corner", other: "Other" },
   combo: {
@@ -377,7 +375,6 @@ const ja: Dictionary = {
     dark: "ダーク",
   },
   level: { beginner: "初級", advanced: "熟練" },
-  levelHint: { beginner: "プラチナ以下", advanced: "ダイヤ以上" },
   hitState: { normal: "ノーマル", punish_counter: "パニッシュカウンター", corner_impact_guard: "画面端インパクト（ガード）", corner_impact_stun: "画面端インパクト（スタン）", other: "その他" },
   position: { any: "距離不問", midscreen: "画面中央", near_corner: "画面端付近", corner: "画面端", other: "その他" },
   combo: {
