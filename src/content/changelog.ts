@@ -17,11 +17,10 @@ export const CHANGELOG: ChangelogEntry[] = [
     items: [
       {
         kind: "added",
-        adminOnly: true,
         text: {
-          ko: "상단 메뉴에 관리자 페이지 버튼 (관리자로 로그인했을 때만 보임)",
-          en: "Admin page button in the header (visible only when signed in as an admin)",
-          ja: "ヘッダーに管理者ページボタン（管理者ログイン時のみ表示）",
+          ko: "상단 메뉴에 관리자 페이지 버튼",
+          en: "Admin page button in the header",
+          ja: "ヘッダーに管理者ページボタン",
         },
       },
       {
