@@ -16,6 +16,15 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-10-05",
     items: [
       {
+        kind: "added",
+        adminOnly: true,
+        text: {
+          ko: "관리 페이지에 캐릭터 공개 On/Off (최고 관리자만)",
+          en: "Character visibility switches on the admin page (super admin only)",
+          ja: "管理ページにキャラクター公開 On/Off（最高管理者のみ）",
+        },
+      },
+      {
         kind: "removed",
         text: {
           ko: "초급 / 숙련 옆의 티어 표기",

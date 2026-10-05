@@ -7,6 +7,7 @@ import type { Patch } from "@/lib/types";
 import { formatPatchVersion } from "@/lib/patch";
 import { ADMIN_FLAG, AddButton, EditButton, useAdmin } from "./admin-context";
 import { AdminSection } from "./admin-section";
+import { CharacterVisibility } from "./character-visibility";
 import { AdminUsers } from "./admin-users";
 import { DeletedItems } from "./deleted-items";
 import { ReviewCenter } from "./review-center";
@@ -98,6 +99,7 @@ export function AdminConsole() {
     <div className="flex flex-col gap-10">
       <MyAccount onSignOut={signOut} />
       {isManager && <AdminUsers />}
+      <CharacterVisibility />
       {isManager && <PatchManager />}
       <ReviewCenter />
       <DeletedItems />

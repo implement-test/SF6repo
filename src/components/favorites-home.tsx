@@ -58,9 +58,9 @@ export function FavoritesHome({ locale, dict }: { locale: Locale; dict: Dictiona
   const t = dict.favoritesPage;
   if (!favorites || !data) return <p className="text-muted">{t.loading}</p>;
 
-  // 즐겨찾기에 담은 순서대로. 지워졌거나 비공개가 된 항목은 빠진다
-  const ordered = <T extends { id: number }>(kind: FavoriteKind, rows: T[]) => {
-    const byId = new Map(rows.map((r) => [r.id, r]));
+  // 즐겨찾기에 담은 순서대로. 지워졌거나 비공개가 된 항목, 비공개 캐릭터의 항목은 빠진다
+  const ordered = <T extends { id: number; character_id: number }>(kind: FavoriteKind, rows: T[]) => {
+    const byId = new Map(rows.filter((r) => data.characters.has(r.character_id)).map((r) => [r.id, r]));
     return favorites[kind].map((id) => byId.get(id)).filter((r) => r !== undefined);
   };
   const sections = {
