@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { revalidateSiteAction } from "@/lib/admin/revalidate-action";
 
 /**
  * 관리자 화면 전용 브라우저 클라이언트.
@@ -59,7 +60,8 @@ export async function revalidateSite(sb: SupabaseClient) {
   const { data } = await sb.auth.getSession();
   const token = data.session?.access_token;
   if (!token) return;
-  await fetch("/api/revalidate", { method: "POST", headers: { Authorization: `Bearer ${token}` } });
+  const res = await revalidateSiteAction(token);
+  if (!res.ok) console.error("revalidate failed:", res.error);
 }
 
 /** Supabase 오류를 관리자에게 보여 줄 문장으로 */

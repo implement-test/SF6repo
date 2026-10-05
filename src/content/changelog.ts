@@ -17,6 +17,15 @@ export const CHANGELOG: ChangelogEntry[] = [
     items: [
       {
         kind: "changed",
+        adminOnly: true,
+        text: {
+          ko: "콤보·셋업 등을 저장한 뒤 바로 화면에 반영되지 않던 문제 수정",
+          en: "Fixed saved combos/setups not showing up right away",
+          ja: "コンボ・セットアップ保存後にすぐ反映されない問題を修正",
+        },
+      },
+      {
+        kind: "changed",
         text: {
           ko: "사이트 주소를 sf6.nogamenogain.com 으로 변경",
           en: "Site moved to sf6.nogamenogain.com",
