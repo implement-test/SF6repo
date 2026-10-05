@@ -94,6 +94,8 @@ export function ComboFilters({
       items={sectionItems}
       visibleIds={visibleIds}
       className="flex flex-col gap-2"
+      // 콤보는 카드 옆 순서 변경 없이 '순서 · 그룹' 창에서만 바꾼다 (관리자 확인을 기다리는 동안 목록이 밀려 보여서)
+      inlineReorder={false}
     />
   );
 

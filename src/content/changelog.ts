@@ -16,6 +16,15 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-10-05",
     items: [
       {
+        kind: "removed",
+        adminOnly: true,
+        text: {
+          ko: "콤보 목록의 카드 옆 순서 변경 버튼 (순서 · 그룹 창에서만 변경)",
+          en: "Inline reorder rails on the combo list (use the Order & Groups dialog)",
+          ja: "コンボ一覧のカード横の並べ替えボタン（順序・グループ画面でのみ変更）",
+        },
+      },
+      {
         kind: "changed",
         adminOnly: true,
         text: {

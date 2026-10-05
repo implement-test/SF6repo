@@ -23,6 +23,7 @@ export function SortableCards({
   visibleIds,
   className,
   levelFilter = true,
+  inlineReorder = true,
 }: {
   table: "combos" | "setups" | "practices" | "vs_guides" | "moves" | "videos";
   characterId: number;
@@ -33,10 +34,12 @@ export function SortableCards({
   className: string;
   /** false 면 방문자의 대상 수준 숨김을 적용하지 않는다 (필터 바가 없는 탭) */
   levelFilter?: boolean;
+  /** false 면 관리자에게도 카드 옆 ▲ ⠿ ▼ 를 붙이지 않는다 (순서는 목록 위 버튼의 창에서만 바꾼다) */
+  inlineReorder?: boolean;
 }) {
   const { canEdit } = useAdmin();
   const router = useRouter();
-  const editable = canEdit(characterId);
+  const editable = inlineReorder && canEdit(characterId);
   const [order, setOrder] = useState<number[] | null>(null);
   const [armed, setArmed] = useState<number | null>(null);
   const [dragId, setDragId] = useState<number | null>(null);
