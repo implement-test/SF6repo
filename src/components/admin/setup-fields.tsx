@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
-import { normalizeNotation } from "@/lib/notation/parse";
 import {
   DRIVE_REVERSAL_OPTIONS,
   GUARD_SETTINGS,
@@ -18,12 +17,9 @@ import {
   type PracticeRow,
   type SetupOption,
   type SetupSituation,
-  type ComboFinish,
-  type ComboLinkTarget,
-  type ComboRoute,
+  type ComboEnder,
 } from "@/lib/types";
 import { normalizeDriveReversal } from "@/lib/setup";
-import { comboRoutes } from "@/lib/combo-routes";
 import { NotationImage } from "../notation";
 import { inputClass, NotationRow } from "./starters-input";
 import { ClockInput } from "./clock-input";
@@ -83,45 +79,18 @@ export function SituationsInput({ label, value, onChange }: { label: string; val
   );
 }
 
-// ───────────────────────── 연결 콤보 ─────────────────────────
+// ───────────────────────── 이어지는 엔더 ─────────────────────────
 
-type ComboRow = {
-  id: number;
-  title: { ko: string } | null;
-  notation_classic: string;
-  notation_modern: string | null;
-  damage: number | null;
-  frame_after: string | null;
-  extra_routes: unknown;
-  finishes: unknown;
-  route_note: unknown;
-  is_published: boolean;
-};
-
-/** 예전 형식(콤보 id 목록)도 루트 1 · 마무리 없음 연결로 읽는다 */
-export function normalizeComboLinks(raw: unknown): ComboLinkTarget[] {
-  if (!Array.isArray(raw)) return [];
-  return raw.flatMap((v): ComboLinkTarget[] => {
-    if (typeof v === "number") return [{ combo_id: v, route_index: 0, finish_index: null }];
-    if (v && typeof v === "object" && typeof (v as ComboLinkTarget).combo_id === "number") {
-      const t = v as ComboLinkTarget;
-      return [{ combo_id: t.combo_id, route_index: t.route_index ?? 0, finish_index: t.finish_index ?? null }];
-    }
-    return [];
-  });
+/** 저장된 값(엔더 id 목록)을 읽는다. 예전 형식(콤보 연결)은 버린다 — 0025 에서 엔더 연결로 옮겼다 */
+export function normalizeEnderLinks(raw: unknown): number[] {
+  return Array.isArray(raw) ? raw.filter((v): v is number => typeof v === "number") : [];
 }
 
-const sameTarget = (a: ComboLinkTarget, b: ComboLinkTarget) =>
-  a.combo_id === b.combo_id && a.route_index === b.route_index && a.finish_index === b.finish_index;
-
-const routeLabel = (r: ComboRoute, i: number) => `루트 ${i + 1}: ${normalizeNotation(r.classic)}`;
-const finishLabel = (f: ComboFinish, i: number) => `마무리 ${i + 1}: ${normalizeNotation(f.classic)}`;
-
 /**
- * 이 셋업으로 이어지는 콤보의 루트(마무리) 고르기.
- * 콤보 → 루트 → (마무리가 있으면) 마무리 순으로 드롭다운을 골라 추가하고, 순서를 바꾸거나 뺀다.
+ * 이 셋업으로 이어지는 엔더 고르기. 엔더로 끝나는 콤보(루트 · 마무리)에는 이 셋업이 자동으로 붙는다.
+ * 엔더 목록은 콤보 탭의 '엔더 관리'에서 만든다.
  */
-export function ComboLinksInput({
+export function EnderLinksInput({
   label,
   help,
   characterId,
@@ -131,200 +100,57 @@ export function ComboLinksInput({
   label: string;
   help?: string;
   characterId?: number;
-  value: ComboLinkTarget[];
-  onChange: (v: ComboLinkTarget[]) => void;
+  value: number[];
+  onChange: (v: number[]) => void;
 }) {
-  const [combos, setCombos] = useState<ComboRow[]>([]);
-  const [draft, setDraft] = useState<{ combo: number | null; route: number | null; finish: number | null }>({
-    combo: null,
-    route: null,
-    finish: null,
-  });
+  const [enders, setEnders] = useState<ComboEnder[] | null>(null);
 
   useEffect(() => {
     if (characterId === undefined) return;
     supabaseBrowser()
-      .from("combos")
-      .select("id,title,notation_classic,notation_modern,damage,frame_after,extra_routes,finishes,route_note,is_published")
+      .from("combo_enders")
+      .select("*")
       .eq("character_id", characterId)
       .order("sort_order")
-      .then(({ data }) => setCombos((data ?? []) as ComboRow[]));
+      .order("id")
+      .then(({ data }) => setEnders((data ?? []) as ComboEnder[]));
   }, [characterId]);
-
-  const byId = useMemo(() => new Map(combos.map((c) => [c.id, c])), [combos]);
-  const routesOf = (id: number | null) => {
-    const c = id === null ? undefined : byId.get(id);
-    return c ? comboRoutes(c) : [];
-  };
-
-  const draftRoutes = routesOf(draft.combo);
-  const draftFinishes = draft.route === null ? [] : (draftRoutes[draft.route]?.finishes ?? []);
-  const draftTarget: ComboLinkTarget | null =
-    draft.combo !== null && draft.route !== null
-      ? { combo_id: draft.combo, route_index: draft.route, finish_index: draft.finish }
-      : null;
-  const duplicate = !!draftTarget && value.some((v) => sameTarget(v, draftTarget));
-
-  const move = (i: number, dir: -1 | 1) => {
-    const next = [...value];
-    [next[i], next[i + dir]] = [next[i + dir], next[i]];
-    onChange(next);
-  };
-  const update = (i: number, patch: Partial<ComboLinkTarget>) =>
-    onChange(value.map((v, j) => (j === i ? { ...v, ...patch } : v)));
 
   return (
     <div className="flex flex-col gap-2">
       <Heading label={label} help={help} />
-      {value.length > 0 && (
-        <ol className="flex flex-col gap-1.5">
-          {value.map((link, i) => {
-            const c = byId.get(link.combo_id);
-            const routes = routesOf(link.combo_id);
-            const route = routes[link.route_index];
-            const finish = link.finish_index === null ? null : (route?.finishes[link.finish_index] ?? null);
-            const frameAfter = finish ? finish.frame_after : route?.frame_after;
+      {enders === null ? (
+        <p className="text-xs text-muted">불러오는 중…</p>
+      ) : enders.length === 0 ? (
+        <p className="text-xs text-muted">아직 엔더가 없습니다. 콤보 탭의 “엔더 관리”에서 만드세요.</p>
+      ) : (
+        <ul className="grid gap-1.5 sm:grid-cols-2">
+          {enders.map((e) => {
+            const on = value.includes(e.id);
             return (
-              <li key={i} className="flex items-start gap-2 border border-border bg-surface-2 p-2">
-                <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                  <span className="text-xs font-semibold">
-                    {c?.title?.ko ?? `콤보 #${link.combo_id}`}
-                    {c && !c.is_published && <span className="ml-1 text-warn">(비공개)</span>}
+              <li key={e.id}>
+                <label
+                  className={`flex cursor-pointer items-center gap-2.5 border px-2.5 py-2 transition-colors ${on ? "border-accent bg-accent/10" : "border-border bg-surface-2 hover:border-border-strong"}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={on}
+                    onChange={() => onChange(on ? value.filter((id) => id !== e.id) : [...value, e.id])}
+                    className="size-4 accent-[var(--accent)]"
+                  />
+                  <span className="flex min-w-0 flex-1 flex-col gap-1">
+                    <span className="flex flex-wrap items-center gap-2">
+                      <NotationImage notation={e.notation_classic} />
+                      {e.label && <span className="text-xs font-semibold">{e.label.ko}</span>}
+                    </span>
+                    {e.frame_after && <span className="text-xs text-muted">후상황 {e.frame_after}</span>}
                   </span>
-                  {c && (
-                    <div className="grid gap-1.5 sm:grid-cols-2">
-                      <select
-                        value={link.route_index}
-                        onChange={(e) => update(i, { route_index: Number(e.target.value), finish_index: null })}
-                        className={inputClass}
-                        aria-label="루트"
-                      >
-                        {routes.map((r, ri) => (
-                          <option key={ri} value={ri}>
-                            {routeLabel(r, ri)}
-                          </option>
-                        ))}
-                      </select>
-                      <select
-                        value={link.finish_index ?? ""}
-                        disabled={!route || route.finishes.length === 0}
-                        onChange={(e) => update(i, { finish_index: e.target.value === "" ? null : Number(e.target.value) })}
-                        className={`${inputClass} disabled:opacity-40`}
-                        aria-label="마무리"
-                      >
-                        <option value="">{route && route.finishes.length > 0 ? "마무리 선택 안 함" : "마무리 없음"}</option>
-                        {route?.finishes.map((f, fi) => (
-                          <option key={fi} value={fi}>
-                            {finishLabel(f, fi)}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-                  {route && (
-                    <div className="flex flex-wrap items-center gap-2">
-                      <NotationImage notation={route.classic} />
-                      {finish && (
-                        <>
-                          <span className="notation-finish">FINISH</span>
-                          <NotationImage notation={finish.classic} />
-                        </>
-                      )}
-                    </div>
-                  )}
-                  {c && !route && <span className="text-xs text-warn">이 루트가 콤보에서 없어졌습니다. 다시 고르세요.</span>}
-                  {route && <span className="text-xs text-muted">콤보 후 프레임 {frameAfter ?? "미입력"}</span>}
-                </div>
-                <span className="flex gap-1">
-                  <button type="button" className={iconButton} disabled={i === 0} onClick={() => move(i, -1)} aria-label="위로">
-                    ↑
-                  </button>
-                  <button
-                    type="button"
-                    className={iconButton}
-                    disabled={i === value.length - 1}
-                    onClick={() => move(i, 1)}
-                    aria-label="아래로"
-                  >
-                    ↓
-                  </button>
-                  <button
-                    type="button"
-                    className={`${iconButton} hover:border-warn hover:text-warn`}
-                    onClick={() => onChange(value.filter((_, j) => j !== i))}
-                    aria-label="빼기"
-                  >
-                    ×
-                  </button>
-                </span>
+                </label>
               </li>
             );
           })}
-        </ol>
+        </ul>
       )}
-
-      {/* 추가: 콤보 → 루트 → (있으면) 마무리 */}
-      <div className="grid gap-1.5 border border-dashed border-border-strong p-2 sm:grid-cols-[1fr_1fr_1fr_auto]">
-        <select
-          value={draft.combo ?? ""}
-          onChange={(e) => {
-            const combo = e.target.value ? Number(e.target.value) : null;
-            const routes = routesOf(combo);
-            // 루트가 하나뿐이면 바로 고른다
-            setDraft({ combo, route: routes.length === 1 ? 0 : null, finish: null });
-          }}
-          className={inputClass}
-          aria-label="콤보"
-        >
-          <option value="">콤보 선택</option>
-          {combos.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.title?.ko ?? `콤보 #${c.id}`}
-              {!c.is_published ? " (비공개)" : ""}
-            </option>
-          ))}
-        </select>
-        <select
-          value={draft.route ?? ""}
-          disabled={draft.combo === null}
-          onChange={(e) => setDraft({ ...draft, route: e.target.value === "" ? null : Number(e.target.value), finish: null })}
-          className={`${inputClass} disabled:opacity-40`}
-          aria-label="루트"
-        >
-          <option value="">루트 선택</option>
-          {draftRoutes.map((r, ri) => (
-            <option key={ri} value={ri}>
-              {routeLabel(r, ri)}
-            </option>
-          ))}
-        </select>
-        <select
-          value={draft.finish ?? ""}
-          disabled={draftFinishes.length === 0}
-          onChange={(e) => setDraft({ ...draft, finish: e.target.value === "" ? null : Number(e.target.value) })}
-          className={`${inputClass} disabled:opacity-40`}
-          aria-label="마무리"
-        >
-          <option value="">{draftFinishes.length > 0 ? "마무리 선택" : "마무리 없음"}</option>
-          {draftFinishes.map((f, fi) => (
-            <option key={fi} value={fi}>
-              {finishLabel(f, fi)}
-            </option>
-          ))}
-        </select>
-        <button
-          type="button"
-          disabled={!draftTarget || duplicate}
-          onClick={() => {
-            if (!draftTarget) return;
-            onChange([...value, draftTarget]);
-            setDraft({ combo: null, route: null, finish: null });
-          }}
-          className="border border-accent px-3 py-1.5 text-sm font-bold text-accent hover:bg-accent hover:text-accent-fg disabled:opacity-40"
-        >
-          {duplicate ? "이미 있음" : "추가"}
-        </button>
-      </div>
     </div>
   );
 }

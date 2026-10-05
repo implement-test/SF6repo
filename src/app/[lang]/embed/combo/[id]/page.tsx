@@ -32,7 +32,7 @@ export default async function EmbedComboPage({ params }: PageProps<"/[lang]/embe
   const found = await load(lang, id);
   if (!found) notFound();
 
-  const { combo, character, setups, links } = found;
+  const { combo, character, setups, enders, links } = found;
   const dict = getDictionary(lang);
   const [latestPatchId, authors] = await Promise.all([getLatestPatchId(), getAuthorNames()]);
 
@@ -45,7 +45,8 @@ export default async function EmbedComboPage({ params }: PageProps<"/[lang]/embe
         latestPatchId={latestPatchId}
         authors={authors}
         characterSlug={character.slug}
-        linkedSetups={linkedSetupsFor(combo.id, links, setups, lang, dict)}
+        enders={enders}
+        linkedSetups={linkedSetupsFor(combo, enders, links, setups, lang, dict)}
         embedded
       />
       <EmbedFooter href={`/${character.slug}/combos#combo-${combo.id}`} label={dict.share.viewOnSite} />

@@ -1,4 +1,4 @@
-import type { Character, CharacterOverview, Move, Video, VsAction, Combo, Patch, Setup, SetupComboLink, SetupSituation, VsGuide } from "@/lib/types";
+import type { Character, CharacterOverview, Move, Video, VsAction, Combo, Patch, Setup, SetupSituation, VsGuide, ComboEnder, SetupEnderLink } from "@/lib/types";
 import { ROSTER } from "@/lib/roster";
 
 /**
@@ -67,9 +67,10 @@ export const sampleCombos: Combo[] = [
         modern: null,
         damage: null,
         frame_after: null,
+        ender_id: null,
         finishes: [
-          { classic: "236HP", modern: null, damage: 2300, frame_after: "다운 +30" },
-          { classic: "sa2", modern: null, damage: 3800, frame_after: "다운 +14" },
+          { classic: "236HP", modern: null, damage: 2300, frame_after: "다운 +30", ender_id: null },
+          { classic: "sa2", modern: null, damage: 3800, frame_after: "다운 +14", ender_id: null },
         ],
         note: { ko: "게이지가 있으면 SA2 로 마무리." },
       },
@@ -190,9 +191,14 @@ export const sampleSetups: Setup[] = [
   },
 ];
 
-export const sampleSetupLinks: SetupComboLink[] = [
-  { id: 1, setup_id: 1, combo_id: 2, sort_order: 0, route_index: 0, finish_index: null },
-  { id: 2, setup_id: 1, combo_id: 2, sort_order: 1, route_index: 1, finish_index: 1 },
+export const sampleEnders: ComboEnder[] = [
+  { id: 1, character_id: 1, notation_classic: "236HP", notation_modern: null, label: null, frame_after: "다운 +30", note: null, sort_order: 0 },
+  { id: 2, character_id: 1, notation_classic: "sa2", notation_modern: null, label: null, frame_after: "다운 +14", note: null, sort_order: 1 },
+];
+
+export const sampleSetupEnders: SetupEnderLink[] = [
+  { id: 1, setup_id: 1, ender_id: 1, sort_order: 0 },
+  { id: 2, setup_id: 1, ender_id: 2, sort_order: 1 },
 ];
 const vsBase = {
   character_id: 1,

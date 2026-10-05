@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Practice, Setup } from "@/lib/types";
-import type { LinkedCombo } from "@/lib/setup-links";
+import type { LinkedEnder } from "@/lib/setup-links";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { pickLocalized } from "@/lib/i18n/localized";
@@ -25,7 +25,7 @@ export function SetupCard({
   locale,
   dict,
   situationNames,
-  linkedCombos,
+  linkedEnders,
   latestPatchId,
   authors,
   characterSlug,
@@ -36,8 +36,8 @@ export function SetupCard({
   locale: Locale;
   dict: Dictionary;
   situationNames: Record<string, string>;
-  /** 이 셋업으로 이어지는 콤보의 루트(마무리) */
-  linkedCombos: LinkedCombo[];
+  /** 이 셋업으로 이어지는 엔더 (그 기술로 끝나는 콤보 수와 함께) */
+  linkedEnders: LinkedEnder[];
   latestPatchId: number | null;
   authors: Record<string, string>;
   characterSlug: string;
@@ -94,38 +94,35 @@ export function SetupCard({
           </section>
         )}
 
-        {linkedCombos.length > 0 && (
+        {linkedEnders.length > 0 && (
           <section className="flex flex-col gap-2">
             <p className="eyebrow">{t.combos}</p>
             <ul className="flex flex-col divide-y divide-border border border-border bg-inset">
-              {linkedCombos.map(({ combo, route, routeIndex, finish }, i) => {
-                const comboTitle = combo.title ? pickLocalized(combo.title, locale).text : null;
-                const frameAfter = finish ? finish.frame_after : route.frame_after;
+              {linkedEnders.map(({ ender, comboCount }) => {
+                const label = ender.label ? pickLocalized(ender.label, locale).text : null;
                 return (
-                  <li key={i}>
-                    {/* 줄 전체가 콤보 페이지의 해당 콤보로 가는 링크 */}
+                  <li key={ender.id}>
+                    {/* 줄 전체가 콤보 페이지로 가는 링크 (이 엔더로 끝나는 콤보만 거른다) */}
                     <Link
-                      href={`/${characterSlug}/combos#combo-${combo.id}`}
+                      href={`/${characterSlug}/combos?ender=${ender.id}`}
                       className="group grid gap-2 px-3 py-2.5 transition-colors hover:bg-surface-2 md:grid-cols-[1fr_auto] md:items-center"
                     >
                       <div className="flex min-w-0 flex-col gap-1">
-                        <span className="text-xs font-semibold text-muted group-hover:text-accent">
-                          {comboTitle ?? t.route} · {dict.combo.route} {routeIndex + 1}
-                        </span>
                         <div className="flex flex-wrap items-center gap-2">
-                          <ControlNotation classic={route.classic} modern={route.modern} classicOnlyLabel={dict.combo.classicOnly} />
-                          {finish && (
-                            // 이 셋업으로 이어지는 마무리
-                            <>
-                              <span className="notation-finish">FINISH</span>
-                              <ControlNotation classic={finish.classic} modern={finish.modern} classicOnlyLabel={dict.combo.classicOnly} />
-                            </>
-                          )}
+                          <ControlNotation
+                            classic={ender.notation_classic}
+                            modern={ender.notation_modern}
+                            classicOnlyLabel={dict.combo.classicOnly}
+                          />
+                          {label && <span className="text-sm font-semibold">{label}</span>}
                         </div>
+                        <span className="text-xs font-semibold text-muted group-hover:text-accent">
+                          {t.comboCount.replace("{n}", String(comboCount))} →
+                        </span>
                       </div>
                       <span className="flex items-center gap-1.5 text-sm">
                         <span className="text-xs text-muted">{t.frameAfter}</span>
-                        <b className="display text-lg tabular-nums text-highlight-text">{frameAfter ?? "—"}</b>
+                        <b className="display text-lg tabular-nums text-highlight-text">{ender.frame_after ?? "—"}</b>
                       </span>
                     </Link>
                   </li>

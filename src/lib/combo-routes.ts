@@ -2,7 +2,7 @@ import type { Combo, ComboFinish, ComboRoute, Localized } from "./types";
 
 /**
  * 콤보의 루트 목록.
- * 첫 번째 루트는 기존 칼럼(notation_classic, damage …, 메모는 route_note, 마무리는 finishes)에,
+ * 첫 번째 루트는 기존 칼럼(notation_classic, damage …, 메모는 route_note, 마무리는 finishes, 엔더는 ender_id)에,
  * 2번째부터는 extra_routes(jsonb)에 저장한다.
  * 셋업 연결 등 루트 하나만 쓰는 곳은 계속 칼럼(= 첫 번째 루트)을 쓴다.
  */
@@ -11,6 +11,7 @@ export function comboRoutes(
     extra_routes?: unknown;
     route_note?: unknown;
     finishes?: unknown;
+    ender_id?: number | null;
   },
 ): ComboRoute[] {
   const first: ComboRoute = {
@@ -18,6 +19,7 @@ export function comboRoutes(
     modern: c.notation_modern ?? null,
     damage: c.damage ?? null,
     frame_after: c.frame_after ?? null,
+    ender_id: typeof c.ender_id === "number" ? c.ender_id : null,
     finishes: normalizeFinishes(c.finishes),
     note: toLocalized(c.route_note),
   };
@@ -44,6 +46,7 @@ export function normalizeFinishes(raw: unknown): ComboFinish[] {
         modern: textOrNull(f.modern),
         damage: numberOrNull(f.damage),
         frame_after: textOrNull(f.frame_after),
+        ender_id: numberOrNull(f.ender_id),
       };
     })
     .filter((f) => f.classic);
@@ -60,6 +63,7 @@ export function normalizeExtraRoutes(raw: unknown): ComboRoute[] {
         modern: textOrNull(r.modern),
         damage: numberOrNull(r.damage),
         frame_after: textOrNull(r.frame_after),
+        ender_id: numberOrNull(r.ender_id),
         finishes: normalizeFinishes(r.finishes),
         note: toLocalized(r.note),
       };
@@ -67,13 +71,14 @@ export function normalizeExtraRoutes(raw: unknown): ComboRoute[] {
     .filter((r) => r.classic);
 }
 
-export const emptyFinish = (): ComboFinish => ({ classic: "", modern: null, damage: null, frame_after: null });
+export const emptyFinish = (): ComboFinish => ({ classic: "", modern: null, damage: null, frame_after: null, ender_id: null });
 
 export const emptyRoute = (): ComboRoute => ({
   classic: "",
   modern: null,
   damage: null,
   frame_after: null,
+  ender_id: null,
   finishes: [],
   note: null,
 });
@@ -96,6 +101,7 @@ function cleanFinishes(finishes: ComboFinish[] | undefined): ComboFinish[] {
       modern: f.modern?.trim() || null,
       damage: typeof f.damage === "number" ? f.damage : null,
       frame_after: f.frame_after?.trim() || null,
+      ender_id: typeof f.ender_id === "number" ? f.ender_id : null,
     }))
     .filter((f) => f.classic);
 }
@@ -114,6 +120,7 @@ export function routesToColumns(routes: ComboRoute[]): Record<string, unknown> |
         modern: r.modern?.trim() || null,
         damage: finishes.length === 0 && typeof r.damage === "number" ? r.damage : null,
         frame_after: (finishes.length === 0 && r.frame_after?.trim()) || null,
+        ender_id: finishes.length === 0 && typeof r.ender_id === "number" ? r.ender_id : null,
         finishes,
         note: cleanNote(r.note),
       };
@@ -127,6 +134,7 @@ export function routesToColumns(routes: ComboRoute[]): Record<string, unknown> |
     notation_modern: first.modern,
     damage: first.damage,
     frame_after: first.frame_after,
+    ender_id: first.ender_id,
     finishes: first.finishes,
     route_note: first.note,
     extra_routes: rest,

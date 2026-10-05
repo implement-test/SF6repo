@@ -7,7 +7,7 @@ import { copyValues } from "@/lib/admin/copy";
 import { VsCopyTo } from "./vs-copy";
 import { findUnknownTokens, parseNotation } from "@/lib/notation/parse";
 import { describeError, revalidateSite, supabaseBrowser } from "@/lib/supabase/browser";
-import type { ComboLinkTarget, ComboRoute, Localized, Patch, PracticeConfig, SetupOption, StarterGroup, VsAction } from "@/lib/types";
+import type { ComboRoute, Localized, Patch, PracticeConfig, SetupOption, StarterGroup, VsAction } from "@/lib/types";
 import { parseYouTube } from "@/lib/youtube";
 import { normalizeOptions, normalizePractice } from "@/lib/setup";
 import { normalizeStarterGroups } from "@/lib/starters";
@@ -25,13 +25,13 @@ import { History, useAuthorNames } from "./history";
 import { StarterGroupsInput, cleanStarterGroups, inputClass } from "./starters-input";
 import { ClockInput } from "./clock-input";
 import {
-  ComboLinksInput,
+  EnderLinksInput,
   OptionsInput,
   PracticeInput,
   SituationsInput,
   cleanOptions,
   cleanPractice,
-  normalizeComboLinks,
+  normalizeEnderLinks,
 } from "./setup-fields";
 
 type Values = Record<string, unknown>;
@@ -48,8 +48,8 @@ function normalizeValues(v: Values): Values {
   if ("practice" in out) out.practice = normalizePractice(out.practice);
   if ("starters" in out) out.starters = normalizeStarterGroups(out.starters);
   if ("actions" in out) out.actions = normalizeVsActions(out.actions);
-  // 셋업의 이어지는 콤보: 예전 형식(콤보 id 목록)은 루트 1 · 마무리 없음으로 (0024)
-  if ("combo_links" in out) out.combo_links = normalizeComboLinks(out.combo_links);
+  // 셋업의 이어지는 엔더 (0025)
+  if ("ender_links" in out) out.ender_links = normalizeEnderLinks(out.ender_links);
   // 콤보: 칼럼(첫 번째 루트) + extra_routes 를 루트 목록 하나로
   if (!("routes" in out) && "extra_routes" in out) out.routes = comboRoutes(out as Parameters<typeof comboRoutes>[0]);
   // 0021 이전 임시 내용의 루트에는 마무리(finishes)가 없다. 작성 중인 빈 루트 · 마무리는 그대로 둔다
@@ -59,7 +59,8 @@ function normalizeValues(v: Values): Values {
       modern: r.modern ?? null,
       damage: r.damage ?? null,
       frame_after: r.frame_after ?? null,
-      finishes: Array.isArray(r.finishes) ? r.finishes : [],
+      ender_id: r.ender_id ?? null,
+      finishes: Array.isArray(r.finishes) ? r.finishes.map((f) => ({ ...f, ender_id: f.ender_id ?? null })) : [],
       note: r.note ?? null,
     }));
   }
@@ -80,7 +81,7 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
   const sb = supabaseBrowser();
   const isNew = request.id === undefined;
   const usesPatch = entity.groups.some((g) => g.fields.some((f) => f.type === "patch"));
-  const usesComboLinks = entity.groups.some((g) => g.fields.some((f) => f.type === "comboLinks"));
+  const usesEnderLinks = entity.groups.some((g) => g.fields.some((f) => f.type === "enderLinks"));
 
   const [values, setValues] = useState<Values | null>(null);
   /** 불러왔을 때 연결돼 있던 콤보 (셋업). 저장할 때 달라진 것만 반영한다. */
@@ -117,13 +118,13 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
           return;
         }
         initial = data;
-        if (usesComboLinks) {
+        if (usesEnderLinks) {
           const { data: links } = await sb
             .from("setup_combos")
             .select("*")
             .eq("setup_id", request.id)
             .order("sort_order");
-          initial.combo_links = normalizeComboLinks(links ?? []);
+          initial.ender_links = (links ?? []).map((l) => l.ender_id as number);
         }
       }
       if (cancelled) return;
@@ -134,13 +135,13 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
       const draft = key ? getDraft(key) : undefined;
       setRestored(!!draft);
       setValues(draft ? normalizeValues(draft.values) : normalized);
-      setInitialLinks(draft ? draft.initialLinks : ((initial.combo_links as ComboLinkTarget[] | undefined) ?? []).map((l) => l.combo_id));
+      setInitialLinks(draft ? draft.initialLinks : normalizeEnderLinks(initial.ender_links));
       setBaseUpdatedAt(draft ? draft.baseUpdatedAt : ((initial.updated_at as string | undefined) ?? null));
     })();
     return () => {
       cancelled = true;
     };
-  }, [sb, entity, isNew, request.id, request.defaults, request.initial, usesPatch, usesComboLinks, key, getDraft, reloadN]);
+  }, [sb, entity, isNew, request.id, request.defaults, request.initial, usesPatch, usesEnderLinks, key, getDraft, reloadN]);
 
   // 작성 중인 내용을 브라우저에 저장한다: 입력하는 동안 잠깐 멈출 때마다, 그리고 창이 닫힐 때.
   // 새로 고침은 창이 닫히는 과정 없이 일어나므로 입력 중에 계속 저장해 둔다. 바뀐 게 없으면 지운다.
@@ -172,24 +173,19 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
     setReloadN((n) => n + 1);
   }
 
-  /**
-   * 셋업 ↔ 콤보 루트(마무리) 연결 맞추기: 이 셋업의 연결을 지우고 지금 목록을 순서대로 다시 넣는다.
-   * (같은 콤보의 다른 루트 · 마무리에 여러 번 연결할 수 있어서 콤보 id 로 맞출 수 없다)
-   */
-  async function syncComboLinks(setupId: number): Promise<string | null> {
-    if (!usesComboLinks || !values) return null;
-    const wanted = normalizeComboLinks(values.combo_links);
-    const { error: deleteError } = await sb.from("setup_combos").delete().eq("setup_id", setupId);
-    if (deleteError) return describeError(deleteError);
+  /** 셋업 ↔ 엔더 연결 맞추기: 빠진 것은 지우고, 나머지는 순서까지 저장 */
+  async function syncEnderLinks(setupId: number): Promise<string | null> {
+    if (!usesEnderLinks || !values) return null;
+    const wanted = normalizeEnderLinks(values.ender_links);
+    const removed = initialLinks.filter((id) => !wanted.includes(id));
+    if (removed.length) {
+      const { error } = await sb.from("setup_enders").delete().eq("setup_id", setupId).in("ender_id", removed);
+      if (error) return describeError(error);
+    }
     if (wanted.length) {
-      const { error } = await sb.from("setup_combos").insert(
-        wanted.map((l, sort_order) => ({
-          setup_id: setupId,
-          combo_id: l.combo_id,
-          route_index: l.route_index,
-          finish_index: l.finish_index,
-          sort_order,
-        })),
+      const { error } = await sb.from("setup_enders").upsert(
+        wanted.map((ender_id, sort_order) => ({ setup_id: setupId, ender_id, sort_order })),
+        { onConflict: "setup_id,ender_id" },
       );
       if (error) return describeError(error);
     }
@@ -246,7 +242,7 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
         .select("id")
         .single();
       if (error) return fail(describeError(error));
-      const linkError = await syncComboLinks(inserted.id);
+      const linkError = await syncEnderLinks(inserted.id);
       if (linkError) return fail(`저장했지만 콤보 연결에 실패했습니다: ${linkError}`);
       return finish();
     }
@@ -265,7 +261,7 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
       }
       return fail("이 항목을 수정할 권한이 없습니다.");
     }
-    const linkError = await syncComboLinks(request.id!);
+    const linkError = await syncEnderLinks(request.id!);
     if (linkError) return fail(`저장했지만 콤보 연결에 실패했습니다: ${linkError}`);
     await finish();
   }
@@ -310,7 +306,7 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
   function loadVersion(snapshot: Values) {
     // 연결 콤보는 이력에 없는 따로 저장되는 값이라 지금 값을 유지한다.
     setValues((current) =>
-      normalizeValues({ ...upgradeRow(entity.table, snapshot), combo_links: current?.combo_links, updated_at: baseUpdatedAt }),
+      normalizeValues({ ...upgradeRow(entity.table, snapshot), ender_links: current?.ender_links, updated_at: baseUpdatedAt }),
     );
     setShowHistory(false);
     setError("과거 버전을 불러왔습니다. 확인 후 저장하면 되돌려집니다.");
@@ -574,6 +570,7 @@ function FieldInput({
           help={field.help}
           value={(value as ComboRoute[] | null) ?? []}
           onChange={onChange}
+          characterId={characterId}
         />
       );
 
@@ -591,13 +588,13 @@ function FieldInput({
     case "situations":
       return <SituationsInput label={field.label} value={(value as string[] | null) ?? []} onChange={onChange} />;
 
-    case "comboLinks":
+    case "enderLinks":
       return (
-        <ComboLinksInput
+        <EnderLinksInput
           label={field.label}
           help={field.help}
           characterId={characterId}
-          value={normalizeComboLinks(value)}
+          value={normalizeEnderLinks(value)}
           onChange={onChange}
         />
       );
@@ -809,8 +806,8 @@ function buildPayload(fields: Field[], values: Values): { payload: Values; probl
         // 한 번도 누르지 않은 체크박스도 false 로 (DB 칼럼이 not null)
         payload[field.key] = raw === true;
         break;
-      case "comboLinks":
-        // 칼럼이 아니라 setup_combos 에 따로 저장한다 (syncComboLinks)
+      case "enderLinks":
+        // 칼럼이 아니라 setup_enders 에 따로 저장한다 (syncEnderLinks)
         break;
       case "date":
         // 비워 두면 보내지 않는다 (DB 기본값 = 오늘)

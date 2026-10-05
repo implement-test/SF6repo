@@ -93,7 +93,10 @@ export type ComboFinish = {
   classic: string;
   modern: string | null;
   damage: number | null;
+  /** 비우면 엔더의 후상황 */
   frame_after: string | null;
+  /** 자동으로 찾은 것과 다른 엔더를 쓸 때 (null = 마지막 기술로 자동) */
+  ender_id: number | null;
 };
 
 /**
@@ -104,11 +107,31 @@ export type ComboRoute = {
   classic: string;
   modern: string | null;
   damage: number | null;
+  /** 비우면 엔더의 후상황 (마무리가 없는 루트) */
   frame_after: string | null;
+  /** 자동으로 찾은 것과 다른 엔더를 쓸 때 (null = 마지막 기술로 자동, 마무리가 없는 루트) */
+  ender_id: number | null;
   finishes: ComboFinish[];
   /** 이 루트만의 메모 (콤보 메모는 모든 루트 공용) */
   note: Localized | null;
 };
+
+/**
+ * 엔더: 콤보를 끝낸 기술 (0025). 셋업은 엔더에 연결한다.
+ * 같은 기술의 다른 상황은 label 로 나눈다 (예: 214LP / 214LP 카운터 히트).
+ */
+export type ComboEnder = {
+  id: number;
+  character_id: number;
+  notation_classic: string;
+  notation_modern: string | null;
+  label: Localized | null;
+  frame_after: string | null;
+  note: Localized | null;
+  sort_order: number;
+};
+
+export type SetupEnderLink = { id: number; setup_id: number; ender_id: number; sort_order: number };
 
 /** 콤보 그룹. 그룹 없는 콤보는 목록 맨 위 */
 export type ComboGroup = { id: number; character_id: number; name: Localized; sort_order: number };
@@ -125,6 +148,8 @@ export type Combo = ContentBase &
     route_note?: Localized | null;
     /** 루트 1의 마무리 (2번째부터는 extra_routes 안에) */
     finishes?: unknown;
+    /** 루트 1 이 자동으로 찾은 것과 다른 엔더를 쓸 때 */
+    ender_id?: number | null;
     group_id?: number | null;
     /** 첫 번째 루트 */
     notation_classic: string;
@@ -230,22 +255,6 @@ export type Practice = ContentBase &
     options: SetupOption[];
     practice: PracticeConfig | null;
   };
-
-/**
- * 셋업 ↔ 콤보의 루트(마무리) 연결 (0024).
- * route_index: 콤보의 몇 번째 루트인지 (0 = 루트 1), finish_index: 그 루트의 몇 번째 마무리인지 (null = 마무리 없음)
- */
-export type SetupComboLink = {
-  id: number;
-  setup_id: number;
-  combo_id: number;
-  sort_order: number;
-  route_index: number;
-  finish_index: number | null;
-};
-
-/** 셋업 편집 창에서 다루는 연결 하나 */
-export type ComboLinkTarget = { combo_id: number; route_index: number; finish_index: number | null };
 
 // ───────────────────────── Vs 가이드 ─────────────────────────
 

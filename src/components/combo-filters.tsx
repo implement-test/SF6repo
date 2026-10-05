@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { HIT_STATES, POSITIONS, type HitState, type ScreenPosition, type TargetLevel } from "@/lib/types";
 import { SortableCards } from "./admin/sortable-cards";
@@ -8,6 +8,7 @@ import { useHiddenLevels } from "./use-hidden-levels";
 import { FavoriteFilter } from "./favorite-button";
 import { useFavorites } from "@/lib/favorites";
 import { ExpandAllButton } from "./card-controls";
+import { displayNotation } from "@/lib/notation/parse";
 
 export type ComboFilterItem = {
   id: number;
@@ -15,8 +16,13 @@ export type ComboFilterItem = {
   hitStates: HitState[];
   positionStart: ScreenPosition;
   groupId: number | null;
+  /** 이 콤보가 끝나는 엔더 (루트 · 마무리별) */
+  enderIds: number[];
   card: ReactNode;
 };
+
+/** 엔더 필터 칩 (이름은 서버에서 언어에 맞춰 골라 둔다) */
+export type ComboEnderItem = { id: number; notation: string; label: string | null };
 
 /** 콤보 그룹 (이름은 서버에서 언어에 맞춰 골라 둔다) */
 export type ComboGroupItem = { id: number; name: string };
@@ -45,17 +51,26 @@ function toggle<T>(list: T[], value: T): T[] {
 export function ComboFilters({
   items,
   groups,
+  enders = [],
   dict,
   characterId,
 }: {
   items: ComboFilterItem[];
   groups: ComboGroupItem[];
+  enders?: ComboEnderItem[];
   dict: Dictionary;
   characterId: number;
 }) {
   const [hit, setHit] = useState<HitState[]>([]);
   const [pos, setPos] = useState<ScreenPosition[]>([]);
   const [favOnly, setFavOnly] = useState(false);
+  const [ender, setEnder] = useState<number | null>(null);
+
+  // 셋업 카드의 엔더 링크(?ender=3)로 들어오면 그 엔더로 거른다
+  useEffect(() => {
+    const id = Number(new URLSearchParams(window.location.search).get("ender"));
+    if (id) Promise.resolve().then(() => setEnder(id));
+  }, []);
   const favorites = useFavorites("combo");
   const favCount = items.filter((item) => favorites.has(item.id)).length;
 
@@ -66,7 +81,8 @@ export function ComboFilters({
       (hit.length === 0 || item.hitStates.some((h) => hit.includes(h))) &&
       // '거리 무관' 콤보는 어떤 위치를 골라도 함께 보여 준다.
       (pos.length === 0 || pos.includes(item.positionStart) || item.positionStart === "any") &&
-      (!favOnly || favorites.has(item.id)),
+      (!favOnly || favorites.has(item.id)) &&
+      (ender === null || item.enderIds.includes(ender)),
   );
   // 건수는 대상 수준 숨김까지 반영한다 (카드 자체는 CSS 가 숨긴다)
   const shown = visible.filter((item) => !isHidden(item.level));
@@ -122,6 +138,25 @@ export function ComboFilters({
             ))}
           </div>
         </div>
+        {enders.length > 0 && (
+          <div className="flex flex-col gap-1.5">
+            <span className="eyebrow">{dict.filter.ender}</span>
+            <select
+              value={ender ?? ""}
+              onChange={(e) => setEnder(e.target.value ? Number(e.target.value) : null)}
+              aria-label={dict.filter.ender}
+              className={`border bg-surface px-2.5 py-1 font-mono text-sm ${ender !== null ? "border-accent text-accent" : "border-border-strong"}`}
+            >
+              <option value="">{dict.filter.all}</option>
+              {enders.map((e) => (
+                <option key={e.id} value={e.id}>
+                  {displayNotation(e.notation)}
+                  {e.label ? ` (${e.label})` : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
         <FavoriteFilter on={favOnly} onToggle={() => setFavOnly(!favOnly)} count={favCount} label={dict.favorite.only} />
         <span className="ml-auto">
           <ExpandAllButton labels={dict.list} />

@@ -12,7 +12,15 @@ describe("comboRoutes", () => {
   it("칼럼이 첫 번째 루트, extra_routes 가 그 뒤", () => {
     const routes = comboRoutes({ ...base, extra_routes: [{ classic: "2MK → 236LP", damage: 1500, drive_cost: 2 }] });
     expect(routes.map((r) => r.classic)).toEqual(["2MK → 236HP", "2MK → 236LP"]);
-    expect(routes[1]).toEqual({ classic: "2MK → 236LP", modern: null, damage: 1500, frame_after: null, finishes: [], note: null });
+    expect(routes[1]).toEqual({
+      classic: "2MK → 236LP",
+      modern: null,
+      damage: 1500,
+      frame_after: null,
+      ender_id: null,
+      finishes: [],
+      note: null,
+    });
   });
 
   it("extra_routes 가 없거나 이상하면 루트 하나", () => {
@@ -26,13 +34,13 @@ describe("comboRoutes", () => {
       finishes: [{ classic: "SA3", damage: 4200, frame_after: "다운 +20" }, { classic: "" }],
       extra_routes: [{ classic: "5MP", finishes: [{ classic: "236HP", modern: "" }] }],
     });
-    expect(routes[0].finishes).toEqual([{ classic: "SA3", modern: null, damage: 4200, frame_after: "다운 +20" }]);
-    expect(routes[1].finishes).toEqual([{ classic: "236HP", modern: null, damage: null, frame_after: null }]);
+    expect(routes[0].finishes).toEqual([{ classic: "SA3", modern: null, damage: 4200, frame_after: "다운 +20", ender_id: null }]);
+    expect(routes[1].finishes).toEqual([{ classic: "236HP", modern: null, damage: null, frame_after: null, ender_id: null }]);
   });
 });
 
 describe("routesToColumns", () => {
-  const r = { modern: null, damage: null, frame_after: null, finishes: [], note: null };
+  const r = { modern: null, damage: null, frame_after: null, ender_id: null, finishes: [], note: null };
 
   it("첫 번째는 칼럼으로, 나머지는 extra_routes 로 (빈 루트는 버림)", () => {
     const cols = routesToColumns([
@@ -58,15 +66,15 @@ describe("routesToColumns", () => {
         damage: 2000,
         frame_after: "+30",
         finishes: [
-          { classic: " SA3 ", modern: null, damage: 4200, frame_after: " 다운 +20 " },
-          { classic: "", modern: null, damage: 1, frame_after: null },
+          { classic: " SA3 ", modern: null, damage: 4200, frame_after: " 다운 +20 ", ender_id: 7 },
+          { classic: "", modern: null, damage: 1, frame_after: null, ender_id: null },
         ],
       },
     ]);
     expect(cols).toMatchObject({
       damage: null,
       frame_after: null,
-      finishes: [{ classic: "SA3", modern: null, damage: 4200, frame_after: "다운 +20" }],
+      finishes: [{ classic: "SA3", modern: null, damage: 4200, frame_after: "다운 +20", ender_id: 7 }],
     });
   });
 

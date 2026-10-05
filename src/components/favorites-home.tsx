@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
-import type { Character, Combo, Localized, Practice, Setup, SetupComboLink, VsGuide } from "@/lib/types";
+import type { Character, Combo, ComboEnder, Localized, Practice, Setup, SetupEnderLink, VsGuide } from "@/lib/types";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { pickLocalized } from "@/lib/i18n/localized";
@@ -11,7 +11,7 @@ import { FAVORITE_KINDS, useAllFavorites, type FavoriteKind } from "@/lib/favori
 import { normalizeOptions, normalizePractice } from "@/lib/setup";
 import { normalizeStarterGroups } from "@/lib/starters";
 import { normalizeVsActions } from "@/lib/vs-actions";
-import { linkedCombosFor, type LinkedCombo } from "@/lib/setup-links";
+import { linkedEndersFor, type LinkedEnder } from "@/lib/setup-links";
 import { ComboCard } from "./combo-card";
 import { SetupCard } from "./setup-card";
 import { VsGuideCard } from "./vs-guide-card";
@@ -24,7 +24,8 @@ type Loaded = {
   situationNames: Record<string, string>;
   combos: Combo[];
   setups: Setup[];
-  setupCombos: Map<number, LinkedCombo[]>;
+  setupEnders: Map<number, LinkedEnder[]>;
+  enders: ComboEnder[];
   practices: Practice[];
   vs: VsGuide[];
 };
@@ -129,6 +130,7 @@ function renderCard(kind: FavoriteKind, item: unknown, data: Loaded, locale: Loc
           latestPatchId={data.latestPatchId}
           authors={data.authors}
           characterSlug={slugOf(combo.character_id)}
+          enders={data.enders.filter((e) => e.character_id === combo.character_id)}
         />
       );
     }
@@ -142,7 +144,7 @@ function renderCard(kind: FavoriteKind, item: unknown, data: Loaded, locale: Loc
           locale={locale}
           dict={dict}
           situationNames={data.situationNames}
-          linkedCombos={kind === "setup" ? (data.setupCombos.get(setup.id) ?? []) : []}
+          linkedEnders={kind === "setup" ? (data.setupEnders.get(setup.id) ?? []) : []}
           latestPatchId={data.latestPatchId}
           authors={data.authors}
           characterSlug={slugOf(setup.character_id)}
@@ -184,21 +186,40 @@ async function load(favorites: Record<FavoriteKind, number[]>): Promise<Loaded> 
     pick<VsGuide>("vs_guides", favorites.vs),
   ]);
 
-  // 셋업으로 이어지는 콤보
-  const setupCombos = new Map<number, LinkedCombo[]>();
+  // 엔더(콤보 카드의 후상황 기본값, 셋업 카드의 이어지는 엔더): 즐겨찾기한 콤보 · 셋업의 캐릭터만
+  const characterIds = [...new Set([...combos, ...setups].map((x) => x.character_id))];
+  const enders =
+    characterIds.length === 0
+      ? []
+      : (((await sb.from("combo_enders").select("*").in("character_id", characterIds).order("sort_order").order("id"))
+          .data ?? []) as ComboEnder[]);
+
+  // 셋업으로 이어지는 엔더와 그 엔더로 끝나는 콤보 수
+  const setupEnders = new Map<number, LinkedEnder[]>();
   if (setups.length > 0) {
-    const { data: links } = await sb
-      .from("setup_combos")
-      .select("*")
-      .in(
-        "setup_id",
-        setups.map((s) => s.id),
-      )
-      .order("sort_order");
-    const rows = (links ?? []) as SetupComboLink[];
-    const linked = await pick<Combo>("combos", [...new Set(rows.map((l) => l.combo_id))]);
-    const byId = new Map(linked.map((c) => [c.id, c]));
-    for (const s of setups) setupCombos.set(s.id, linkedCombosFor(s.id, rows, byId));
+    const setupCharacters = [...new Set(setups.map((s) => s.character_id))];
+    const [{ data: links }, { data: characterCombos }] = await Promise.all([
+      sb
+        .from("setup_enders")
+        .select("*")
+        .in(
+          "setup_id",
+          setups.map((s) => s.id),
+        )
+        .order("sort_order"),
+      sb.from("combos").select("*").in("character_id", setupCharacters).eq("is_published", true),
+    ]);
+    for (const s of setups) {
+      setupEnders.set(
+        s.id,
+        linkedEndersFor(
+          s.id,
+          (links ?? []) as SetupEnderLink[],
+          enders.filter((e) => e.character_id === s.character_id),
+          ((characterCombos ?? []) as Combo[]).filter((c) => c.character_id === s.character_id),
+        ),
+      );
+    }
   }
 
   const authorRows = (authors.data ?? []) as { user_id: string; display_name: string }[];
@@ -211,7 +232,8 @@ async function load(favorites: Record<FavoriteKind, number[]>): Promise<Loaded> 
     ),
     combos: combos.map((c) => ({ ...c, starters: normalizeStarterGroups(c.starters) })),
     setups: setups.map((s) => ({ ...s, options: normalizeOptions(s.options), practice: normalizePractice(s.practice) })),
-    setupCombos,
+    setupEnders,
+    enders,
     practices: practices.map((p) => ({ ...p, options: normalizeOptions(p.options), practice: normalizePractice(p.practice) })),
     vs: vs.map((g) => ({ ...g, actions: normalizeVsActions(g.actions) })),
   };

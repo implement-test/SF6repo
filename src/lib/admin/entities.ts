@@ -35,8 +35,8 @@ export type Field = { key: string; label: string; help?: string; required?: bool
   | { type: "setupOptions" }
   /** 트레이닝 모드 더미 설정 */
   | { type: "practice" }
-  /** 이 셋업으로 이어지는 콤보. 칼럼이 아니라 setup_combos 연결 표에 저장한다 */
-  | { type: "comboLinks" }
+  /** 이 셋업으로 이어지는 엔더. 칼럼이 아니라 setup_enders 연결 표에 저장한다 */
+  | { type: "enderLinks" }
 );
 
 export type FieldGroup = { title: string; fields: Field[] };
@@ -216,11 +216,11 @@ export const ENTITIES: Record<EntityType, Entity> = {
           { key: "title", label: "제목", type: "localized", required: true },
           { key: "situations", label: "상황", type: "situations", wide: true },
           {
-            key: "combo_links",
-            label: "이 셋업으로 이어지는 콤보",
-            type: "comboLinks",
+            key: "ender_links",
+            label: "이 셋업으로 이어지는 엔더",
+            type: "enderLinks",
             wide: true,
-            help: "콤보 → 루트 → (마무리가 있으면) 마무리 순으로 골라 추가합니다. 고른 루트 · 마무리와 그 후상황이 셋업에 표시되고, 콤보 카드에는 그 루트 옆(마무리는 FINISH 팝업 안)에 이 셋업이 붙습니다. 잡기 후 셋업처럼 콤보가 없어도 됩니다.",
+            help: "이 셋업으로 이어지는 엔더(콤보를 끝낸 기술)를 고릅니다. 그 기술로 끝나는 콤보의 루트 · 마무리에는 이 셋업이 자동으로 붙습니다. 엔더 목록은 콤보 탭의 '엔더 관리'에서 만듭니다. 잡기 후 셋업처럼 엔더가 없어도 됩니다.",
           },
           { key: "notation_classic", label: "셋업 초반 공통 루트 (클래식)", type: "notation", wide: true, help: "옵션으로 갈라지기 전 공통 부분 (없으면 비움)" },
           { key: "notation_modern", label: "셋업 초반 공통 루트 (모던)", type: "notation", wide: true },
@@ -247,7 +247,7 @@ export const ENTITIES: Record<EntityType, Entity> = {
         youtube_url: null,
       })),
       practice: null,
-      combo_links: [],
+      ender_links: [],
     }),
   },
 

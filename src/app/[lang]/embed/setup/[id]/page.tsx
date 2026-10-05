@@ -29,7 +29,7 @@ export default async function EmbedSetupPage({ params }: PageProps<"/[lang]/embe
   const found = await load(lang, id);
   if (!found) notFound();
 
-  const { setup, character, linkedCombos } = found;
+  const { setup, character, linkedEnders } = found;
   const dict = getDictionary(lang);
   const [situations, latestPatchId, authors] = await Promise.all([
     getSetupSituations(),
@@ -45,7 +45,7 @@ export default async function EmbedSetupPage({ params }: PageProps<"/[lang]/embe
         locale={lang}
         dict={dict}
         situationNames={situationNames}
-        linkedCombos={linkedCombos}
+        linkedEnders={linkedEnders}
         latestPatchId={latestPatchId}
         authors={authors}
         characterSlug={character.slug}

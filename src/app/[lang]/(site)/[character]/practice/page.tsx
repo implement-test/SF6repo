@@ -54,7 +54,7 @@ export default async function PracticePage({ params }: PageProps<"/[lang]/[chara
                 locale={lang}
                 dict={dict}
                 situationNames={{}}
-                linkedCombos={[]}
+                linkedEnders={[]}
                 latestPatchId={latestPatchId}
                 authors={authors}
                 characterSlug={slug}

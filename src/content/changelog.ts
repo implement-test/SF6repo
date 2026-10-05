@@ -18,6 +18,31 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         kind: "changed",
         text: {
+          ko: "셋업을 엔더(콤보를 끝낸 기술)별로 연결: 같은 기술로 끝나는 콤보에는 셋업이 자동으로 붙고, 셋업에서 그 기술로 끝나는 콤보를 바로 볼 수 있음",
+          en: "Setups now link to enders (the move that ends a combo): every combo ending with that move shows the setup, and setups link to those combos",
+          ja: "セットプレイを締め技ごとに紐付け：同じ技で終わるコンボに自動で表示され、セットプレイからそのコンボ一覧へ移動可能",
+        },
+      },
+      {
+        kind: "added",
+        text: {
+          ko: "콤보 탭에 엔더 필터 추가",
+          en: "Ender filter on the combo tab",
+          ja: "コンボタブに締め技フィルターを追加",
+        },
+      },
+      {
+        kind: "added",
+        adminOnly: true,
+        text: {
+          ko: "엔더 관리 창 (콤보에서 찾아 추가, 후상황 기본값), 콤보 루트 · 마무리별 엔더 선택",
+          en: "Ender manager (find from combos, default frame advantage) and per-route/finisher ender choice",
+          ja: "締め技の管理画面（コンボから追加、状況の既定値）、ルート・締めごとの締め技選択",
+        },
+      },
+      {
+        kind: "changed",
+        text: {
           ko: "셋업을 콤보의 루트 · 마무리별로 연결: 콤보 카드에서 해당 루트 옆(마무리는 FINISH 팝업 안)에 셋업 표시",
           en: "Setups now link to a specific route or finisher; they appear next to that route (or inside the FINISH popup)",
           ja: "セットプレイをコンボのルート・締めごとに紐付け、該当ルートの横（締めは FINISH ポップアップ内）に表示",

@@ -9,7 +9,8 @@ import type {
   Patch,
   Practice,
   Setup,
-  SetupComboLink,
+  ComboEnder,
+  SetupEnderLink,
   SetupSituation,
   Video,
   VsGuide,
@@ -17,12 +18,13 @@ import type {
 import { normalizeOptions, normalizePractice } from "@/lib/setup";
 import { normalizeStarterGroups } from "@/lib/starters";
 import { normalizeVsActions } from "@/lib/vs-actions";
-import { linkedCombosFor, type LinkedCombo } from "@/lib/setup-links";
+import { linkedEndersFor, type LinkedEnder } from "@/lib/setup-links";
 import {
   sampleCharacters,
   sampleCombos,
   samplePatches,
-  sampleSetupLinks,
+  sampleEnders,
+  sampleSetupEnders,
   sampleSetups,
   sampleSituations,
   sampleMoves,
@@ -142,12 +144,12 @@ export async function getSetups(characterId: number): Promise<Setup[]> {
 }
 
 /**
- * 퍼가기(embed) 페이지용: 공개된 셋업 하나와, 카드에 필요한 캐릭터 · 연결 콤보.
+ * 퍼가기(embed) 페이지용: 공개된 셋업 하나와, 카드에 필요한 캐릭터 · 이어지는 엔더.
  * 없거나 비공개면 null.
  */
 export async function getSetupForEmbed(
   id: number,
-): Promise<{ setup: Setup; character: Character; linkedCombos: LinkedCombo[] } | null> {
+): Promise<{ setup: Setup; character: Character; linkedEnders: LinkedEnder[] } | null> {
   const c = db();
   let setup: Setup | undefined;
   if (!c) {
@@ -160,19 +162,25 @@ export async function getSetupForEmbed(
 
   const character = (await getCharacters()).find((ch) => ch.id === setup.character_id);
   if (!character) return null;
-  const [links, combos] = await Promise.all([getSetupComboLinks([setup.id]), getCombos(character.id)]);
-  const byId = new Map(combos.filter((cb) => cb.is_published).map((cb) => [cb.id, cb]));
-  const linkedCombos = linkedCombosFor(setup.id, links, byId);
-  return { setup, character, linkedCombos };
+  const [links, enders, combos] = await Promise.all([
+    getSetupEnders([setup.id]),
+    getEnders(character.id),
+    getCombos(character.id),
+  ]);
+  return { setup, character, linkedEnders: linkedEndersFor(setup.id, links, enders, combos) };
 }
 
 /**
- * 퍼가기(embed) 페이지용: 공개된 콤보 하나와, 카드에 필요한 캐릭터 · 이 콤보에서 이어지는 셋업.
+ * 퍼가기(embed) 페이지용: 공개된 콤보 하나와, 카드에 필요한 캐릭터 · 엔더 · 이어지는 셋업.
  * 없거나 비공개면 null.
  */
-export async function getComboForEmbed(
-  id: number,
-): Promise<{ combo: Combo; character: Character; setups: Setup[]; links: SetupComboLink[] } | null> {
+export async function getComboForEmbed(id: number): Promise<{
+  combo: Combo;
+  character: Character;
+  setups: Setup[];
+  enders: ComboEnder[];
+  links: SetupEnderLink[];
+} | null> {
   const c = db();
   let combo: Combo | undefined;
   if (!c) combo = sampleCombos.find((cb) => cb.id === id);
@@ -184,19 +192,35 @@ export async function getComboForEmbed(
 
   const character = (await getCharacters()).find((ch) => ch.id === combo.character_id);
   if (!character) return null;
-  const setups = (await getSetups(character.id)).filter((s) => s.is_published);
-  const links = (await getSetupComboLinks(setups.map((s) => s.id))).filter((l) => l.combo_id === combo.id);
-  return { combo, character, setups, links };
+  const [setups, enders] = await Promise.all([
+    getSetups(character.id).then((list) => list.filter((s) => s.is_published)),
+    getEnders(character.id),
+  ]);
+  const links = await getSetupEnders(setups.map((s) => s.id));
+  return { combo, character, setups, enders, links };
 }
 
-/** 셋업 ↔ 콤보 연결 (이 캐릭터의 셋업만). 연결 표가 없거나 실패해도 페이지는 그대로 보여 준다. */
-export async function getSetupComboLinks(setupIds: number[]): Promise<SetupComboLink[]> {
+/** 엔더 목록 (0025). 표가 아직 없으면 빈 목록 */
+export async function getEnders(characterId: number): Promise<ComboEnder[]> {
   const c = db();
-  if (!c) return sampleSetupLinks.filter((l) => setupIds.includes(l.setup_id));
+  if (!c) return sampleEnders.filter((e) => e.character_id === characterId);
+  const { data, error } = await c
+    .from("combo_enders")
+    .select("*")
+    .eq("character_id", characterId)
+    .order("sort_order")
+    .order("id");
+  if (error) return [];
+  return (data ?? []) as ComboEnder[];
+}
+
+/** 셋업 ↔ 엔더 연결 (이 셋업들만). 표가 없거나 실패해도 페이지는 그대로 보여 준다 */
+export async function getSetupEnders(setupIds: number[]): Promise<SetupEnderLink[]> {
+  const c = db();
+  if (!c) return sampleSetupEnders.filter((l) => setupIds.includes(l.setup_id));
   if (setupIds.length === 0) return [];
-  const { data } = await c.from("setup_combos").select("*").in("setup_id", setupIds).order("sort_order");
-  // 0024 이전 연결은 루트 1, 마무리 없음
-  return ((data ?? []) as SetupComboLink[]).map((l) => ({ ...l, route_index: l.route_index ?? 0, finish_index: l.finish_index ?? null }));
+  const { data } = await c.from("setup_enders").select("*").in("setup_id", setupIds).order("sort_order");
+  return (data ?? []) as SetupEnderLink[];
 }
 
 /** Vs 가이드 (이 캐릭터가 상대를 만났을 때). 표가 아직 없으면(0014 실행 전) 빈 목록 */

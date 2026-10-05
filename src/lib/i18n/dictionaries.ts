@@ -14,7 +14,7 @@ const ko = {
     disclaimer:
       "Street Fighter 6 는 CAPCOM 의 상표입니다. 이 사이트는 CAPCOM 과 관계없는 팬 사이트입니다.",
   },
-  filter: { hitState: "히트 상태", position: "시작 위치", display: "표시", count: "건" },
+  filter: { hitState: "히트 상태", position: "시작 위치", ender: "엔더", all: "전체", display: "표시", count: "건" },
   nav: {
     overview: "개요",
     moves: "커맨드 리스트",
@@ -127,7 +127,8 @@ const ko = {
   favorite: { add: "즐겨찾기에 추가", remove: "즐겨찾기 해제", only: "즐겨찾기만", empty: "즐겨찾기한 항목이 없습니다. 카드의 ☆ 를 눌러 추가하세요." },
   share: { button: "퍼가기", titles: { setup: "셋업 퍼가기", combo: "콤보 퍼가기" }, note: "블로그나 커뮤니티 글에 링크나 임베드 코드를 붙여 넣으면 지금 모습 그대로 보입니다.", link: "링크", embed: "임베드 코드 (iframe)", copy: "복사", copied: "복사됨", preview: "미리 보기", viewOnSite: "SF6 Repository에서 보기" },
   setup: {
-    combos: "이 셋업으로 이어지는 콤보",
+    combos: "이 셋업으로 이어지는 엔더",
+    comboCount: "이 기술로 끝나는 콤보 {n}개",
     route: "마무리 루트",
     frameAfter: "콤보 후 프레임",
     input: "셋업 초반 공통 루트",
@@ -182,7 +183,7 @@ const en: Dictionary = {
   footer: {
     disclaimer: "Street Fighter 6 is a trademark of CAPCOM. This is a fan site not affiliated with CAPCOM.",
   },
-  filter: { hitState: "Hit state", position: "Starting position", display: "Display", count: "" },
+  filter: { hitState: "Hit state", position: "Starting position", ender: "Ender", all: "All", display: "Display", count: "" },
   nav: {
     overview: "Overview",
     moves: "Command list",
@@ -295,7 +296,8 @@ const en: Dictionary = {
   favorite: { add: "Add to favorites", remove: "Remove from favorites", only: "Favorites only", empty: "No favorites yet. Tap ☆ on a card to add one." },
   share: { button: "Share", titles: { setup: "Share setup", combo: "Share combo" }, note: "Paste the link or embed code into a blog or forum post to show it exactly as it looks here.", link: "Link", embed: "Embed code (iframe)", copy: "Copy", copied: "Copied", preview: "Preview", viewOnSite: "View on SF6 Repository" },
   setup: {
-    combos: "Combos leading into this setup",
+    combos: "Enders leading into this setup",
+    comboCount: "{n} combos end with this",
     route: "Ending route",
     frameAfter: "Frame adv. after",
     input: "Common opening route",
@@ -348,7 +350,7 @@ const ja: Dictionary = {
   footer: {
     disclaimer: "Street Fighter 6 は CAPCOM の商標です。本サイトは CAPCOM とは関係のないファンサイトです。",
   },
-  filter: { hitState: "ヒット状況", position: "開始位置", display: "表示", count: "件" },
+  filter: { hitState: "ヒット状況", position: "開始位置", ender: "締め技", all: "すべて", display: "表示", count: "件" },
   nav: {
     overview: "概要",
     moves: "コマンドリスト",
@@ -461,7 +463,8 @@ const ja: Dictionary = {
   favorite: { add: "お気に入りに追加", remove: "お気に入り解除", only: "お気に入りのみ", empty: "お気に入りはまだありません。カードの ☆ を押して追加してください。" },
   share: { button: "共有", titles: { setup: "セットプレイを共有", combo: "コンボを共有" }, note: "ブログや掲示板にリンクか埋め込みコードを貼ると、そのまま表示されます。", link: "リンク", embed: "埋め込みコード（iframe）", copy: "コピー", copied: "コピーしました", preview: "プレビュー", viewOnSite: "SF6 Repository で見る" },
   setup: {
-    combos: "このセットプレイにつながるコンボ",
+    combos: "このセットプレイにつながる締め技",
+    comboCount: "この技で終わるコンボ {n}件",
     route: "締めのルート",
     frameAfter: "コンボ後の有利F",
     input: "序盤の共通ルート",

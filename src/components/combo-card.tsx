@@ -1,10 +1,11 @@
-import type { Combo, ComboRoute } from "@/lib/types";
+import type { Combo, ComboEnder, ComboRoute } from "@/lib/types";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { pickLocalized } from "@/lib/i18n/localized";
 import { parseYouTube } from "@/lib/youtube";
 import { damageBasisIndex, flattenStarters } from "@/lib/starters";
 import { comboRoutes } from "@/lib/combo-routes";
+import { withEnderFrames } from "@/lib/enders";
 import { ControlNotation } from "./notation";
 import { RouteList, RoutePanels, RouteRow, RouteScope } from "./combo-route-switch";
 import { FinishBadge, SetupChips } from "./combo-finish";
@@ -24,6 +25,7 @@ export function ComboCard({
   authors,
   characterSlug,
   linkedSetups = [],
+  enders = [],
   embedded = false,
 }: {
   combo: Combo;
@@ -34,6 +36,8 @@ export function ComboCard({
   characterSlug: string;
   /** 이 콤보의 루트(마무리)에서 이어지는 셋업. preview 는 마우스를 올렸을 때 보여 줄 텍스트 */
   linkedSetups?: LinkedSetup[];
+  /** 이 캐릭터의 엔더: 후상황을 비워 둔 루트 · 마무리에 엔더의 후상황을 보여 준다 */
+  enders?: ComboEnder[];
   /** 다른 사이트에 퍼간 화면: 펼친 채로 보여 주고, 퍼가기·수정 버튼을 빼고, 방문자의 대상 수준 숨김 설정도 무시한다 */
   embedded?: boolean;
 }) {
@@ -49,7 +53,7 @@ export function ComboCard({
   const groupOffsets = groups.map((_, g) => groups.slice(0, g).reduce((sum, x) => sum + x.starters.length, 0));
   // 데미지 기준 시동기 (관리자가 고른 것, 없으면 첫 번째)
   const basisIndex = damageBasisIndex(groups);
-  const routes = comboRoutes(combo);
+  const routes = withEnderFrames(comboRoutes(combo), enders);
   const multiRoute = routes.length > 1;
   const damages = routes.flatMap((r) => [r.damage, ...r.finishes.map((f) => f.damage)]);
   const hasDamage = damages.some((d) => d !== null);
