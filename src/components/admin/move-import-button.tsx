@@ -1,9 +1,10 @@
 "use client";
 
-import { lazy, Suspense, useState } from "react";
+import { Suspense, useState } from "react";
+import { lazyWithReload } from "./lazy-reload";
 import { useAdmin } from "./admin-context";
 
-const MoveImportPanel = lazy(() => import("./move-import-panel"));
+const MoveImportPanel = lazyWithReload(() => import("./move-import-panel"));
 
 /** 커맨드 리스트의 '표 붙여넣기' 버튼. 이 캐릭터를 편집할 수 있는 관리자에게만 보인다. */
 export function MoveImportButton({ characterId, characterName }: { characterId: number; characterName: string }) {

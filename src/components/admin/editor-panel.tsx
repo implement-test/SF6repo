@@ -35,15 +35,31 @@ import {
 
 type Values = Record<string, unknown>;
 
-/** 이전 형식으로 저장된 셋업 옵션·프랙티스 설정을 현재 형식으로 맞춘다 */
+/**
+ * 이전 형식으로 저장된 값을 현재 형식으로 맞춘다 (DB 의 행, 과거 버전, 저장하지 않고 닫았던 임시 내용 모두).
+ * 임시 내용은 브라우저에 7일 남으므로 구조를 바꾼 뒤에도 예전 형식이 들어올 수 있다.
+ */
 function normalizeValues(v: Values): Values {
   const out = { ...v };
+  // 0021: 중급 · 상급 → 숙련
+  if (out.target_level === "intermediate") out.target_level = "advanced";
   if ("options" in out) out.options = normalizeOptions(out.options);
   if ("practice" in out) out.practice = normalizePractice(out.practice);
   if ("starters" in out) out.starters = normalizeStarterGroups(out.starters);
   if ("actions" in out) out.actions = normalizeVsActions(out.actions);
   // 콤보: 칼럼(첫 번째 루트) + extra_routes 를 루트 목록 하나로
   if (!("routes" in out) && "extra_routes" in out) out.routes = comboRoutes(out as Parameters<typeof comboRoutes>[0]);
+  // 0021 이전 임시 내용의 루트에는 마무리(finishes)가 없다. 작성 중인 빈 루트 · 마무리는 그대로 둔다
+  if (Array.isArray(out.routes)) {
+    out.routes = (out.routes as Partial<ComboRoute>[]).map((r) => ({
+      classic: r.classic ?? "",
+      modern: r.modern ?? null,
+      damage: r.damage ?? null,
+      frame_after: r.frame_after ?? null,
+      finishes: Array.isArray(r.finishes) ? r.finishes : [],
+      note: r.note ?? null,
+    }));
+  }
   return out;
 }
 const LANGS = [
@@ -114,7 +130,7 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
       // 저장하지 않고 닫았던 내용이 있으면 그것으로
       const draft = key ? getDraft(key) : undefined;
       setRestored(!!draft);
-      setValues(draft ? draft.values : normalized);
+      setValues(draft ? normalizeValues(draft.values) : normalized);
       setInitialLinks(draft ? draft.initialLinks : ((initial.combo_links as number[] | undefined) ?? []));
       setBaseUpdatedAt(draft ? draft.baseUpdatedAt : ((initial.updated_at as string | undefined) ?? null));
     })();

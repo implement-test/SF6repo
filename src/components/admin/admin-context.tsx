@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, lazy, Suspense, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, Suspense, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { lazyWithReload } from "./lazy-reload";
 import type { EntityType } from "@/lib/admin/entities";
 import type { AdminInfo } from "@/lib/supabase/browser";
 
@@ -99,8 +100,8 @@ const AdminContext = createContext<AdminState>({
 
 export const useAdmin = () => useContext(AdminContext);
 
-const EditorPanel = lazy(() => import("./editor-panel"));
-const AdminBar = lazy(() => import("./admin-bar"));
+const EditorPanel = lazyWithReload(() => import("./editor-panel"));
+const AdminBar = lazyWithReload(() => import("./admin-bar"));
 
 function hasFlag() {
   try {

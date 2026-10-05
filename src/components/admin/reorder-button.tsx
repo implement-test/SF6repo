@@ -1,11 +1,12 @@
 "use client";
 
-import { lazy, Suspense, useState } from "react";
+import { Suspense, useState } from "react";
+import { lazyWithReload } from "./lazy-reload";
 import { useAdmin } from "./admin-context";
 
-const ReorderPanel = lazy(() => import("./reorder-panel"));
+const ReorderPanel = lazyWithReload(() => import("./reorder-panel"));
 // 콤보는 그룹까지 함께 편집한다
-const ComboReorderPanel = lazy(() => import("./combo-reorder-panel"));
+const ComboReorderPanel = lazyWithReload(() => import("./combo-reorder-panel"));
 
 /** 콤보·셋업 목록의 '순서 변경' 버튼. 이 캐릭터를 편집할 수 있는 관리자에게만 보인다. */
 export function ReorderButton({

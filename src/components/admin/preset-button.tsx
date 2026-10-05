@@ -1,9 +1,10 @@
 "use client";
 
-import { lazy, Suspense, useState } from "react";
+import { Suspense, useState } from "react";
+import { lazyWithReload } from "./lazy-reload";
 import { useAdmin } from "./admin-context";
 
-const PresetManager = lazy(() => import("./preset-manager"));
+const PresetManager = lazyWithReload(() => import("./preset-manager"));
 
 /** 캐릭터 페이지의 '시동기 프리셋' 버튼. 이 캐릭터를 편집할 수 있는 관리자에게만 보인다. */
 export function PresetButton({ characterId, characterName }: { characterId: number; characterName: string }) {
