@@ -5,6 +5,7 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import { pickLocalized } from "@/lib/i18n/localized";
 import { SitePrefs } from "@/components/prefs-controls";
 import { AdminProvider } from "@/components/admin/admin-context";
+import { AdminLink } from "@/components/admin/admin-link";
 import { ChangelogButton } from "@/components/changelog";
 import { CHANGELOG } from "@/content/changelog";
 
@@ -41,7 +42,8 @@ export default async function SiteLayout({ children, params }: LayoutProps<"/[la
               }))}
             />
           </nav>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-3">
+            <AdminLink />
             <SitePrefs locale={lang} dict={dict} />
           </div>
         </div>

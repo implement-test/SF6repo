@@ -17,6 +17,15 @@ export const CHANGELOG: ChangelogEntry[] = [
     items: [
       {
         kind: "added",
+        adminOnly: true,
+        text: {
+          ko: "상단 메뉴에 관리자 페이지 버튼 (관리자로 로그인했을 때만 보임)",
+          en: "Admin page button in the header (visible only when signed in as an admin)",
+          ja: "ヘッダーに管理者ページボタン（管理者ログイン時のみ表示）",
+        },
+      },
+      {
+        kind: "added",
         text: {
           ko: "추천 연습 탭 추가 (셋업과 같은 구성, 상황을 글로 설명)",
           en: "New Practice tab (same layout as setups, with a written situation)",
