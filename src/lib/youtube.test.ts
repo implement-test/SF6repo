@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatClock, parseClock, parseYouTube, youTubeEmbedUrl } from "./youtube";
+import { formatClock, isVideoLink, parseClock, parseXPost, parseYouTube, youTubeEmbedUrl } from "./youtube";
 
 describe("parseClock / formatClock", () => {
   it("초, 분:초, 시:분:초를 읽는다", () => {
@@ -57,5 +57,29 @@ describe("parseYouTube", () => {
     expect(youTubeEmbedUrl("dQw4w9WgXcQ", 90)).toContain("youtube-nocookie.com/embed/dQw4w9WgXcQ?");
     expect(youTubeEmbedUrl("dQw4w9WgXcQ", 90)).toContain("start=90");
     expect(youTubeEmbedUrl("dQw4w9WgXcQ", null)).toContain("vq=hd1080");
+  });
+});
+
+describe("parseXPost", () => {
+  it("x.com / twitter.com 게시물 링크에서 ID 를 뽑는다", () => {
+    expect(parseXPost("https://x.com/capcom_fighters/status/1840000000000000001")).toEqual({ id: "1840000000000000001" });
+    expect(parseXPost("https://twitter.com/user_1/status/1840000000000000001/video/1?s=20")).toEqual({
+      id: "1840000000000000001",
+    });
+    expect(parseXPost("https://mobile.twitter.com/user/status/123456789")).toEqual({ id: "123456789" });
+    expect(parseXPost("https://x.com/jack/status/20")).toEqual({ id: "20" });
+    expect(parseXPost("https://x.com/jack/status/20abc")).toBeNull();
+  });
+
+  it("게시물이 아닌 링크는 null", () => {
+    expect(parseXPost("https://x.com/capcom_fighters")).toBeNull();
+    expect(parseXPost("https://example.com/user/status/123456789")).toBeNull();
+    expect(parseXPost("not a url")).toBeNull();
+  });
+
+  it("isVideoLink 는 YouTube 와 X 게시물 모두", () => {
+    expect(isVideoLink("https://youtu.be/abcdefghijk")).toBe(true);
+    expect(isVideoLink("https://x.com/user/status/123456789")).toBe(true);
+    expect(isVideoLink("https://pub-xx.r2.dev/a.mp4")).toBe(false);
   });
 });

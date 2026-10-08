@@ -3,7 +3,7 @@ import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { pickLocalized } from "@/lib/i18n/localized";
 import { rosterBySlug } from "@/lib/roster";
-import { parseYouTube } from "@/lib/youtube";
+import { isVideoLink } from "@/lib/youtube";
 import { ControlNotation } from "./notation";
 import { LevelBadge, NotTranslatedBadge, OutdatedBadge, PositionBadge, Tag } from "./badges";
 import { ItemMedia } from "./media";
@@ -33,7 +33,7 @@ export function VsGuideCard({
   const body = guide.body ? pickLocalized(guide.body, locale) : null;
   const outdated = latestPatchId !== null && guide.patch_id !== latestPatchId;
   const createdBy = guide.created_by ? authors[guide.created_by] : undefined;
-  const hasMedia = !!guide.media_url || !!parseYouTube(guide.youtube_url);
+  const hasMedia = !!guide.media_url || isVideoLink(guide.youtube_url);
   const scope = opponentCharacterId ? [guide.character_id, opponentCharacterId] : guide.character_id;
 
   return (

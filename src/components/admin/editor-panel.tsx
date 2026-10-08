@@ -8,7 +8,7 @@ import { VsCopyTo } from "./vs-copy";
 import { findUnknownTokens, parseNotation } from "@/lib/notation/parse";
 import { describeError, revalidateSite, supabaseBrowser } from "@/lib/supabase/browser";
 import type { ComboRoute, Localized, Patch, PracticeConfig, SetupOption, StarterGroup, VsAction } from "@/lib/types";
-import { parseYouTube } from "@/lib/youtube";
+import { isVideoLink, parseXPost, parseYouTube } from "@/lib/youtube";
 import { normalizeOptions, normalizePractice } from "@/lib/setup";
 import { normalizeStarterGroups } from "@/lib/starters";
 import { comboRoutes, routesToColumns } from "@/lib/combo-routes";
@@ -609,6 +609,7 @@ function FieldInput({
     case "url": {
       const text = (value as string | null) ?? "";
       const yt = field.type === "url" ? parseYouTube(text) : null;
+      const xPost = field.type === "url" && !yt ? parseXPost(text) : null;
       return (
         <Label field={field}>
           <input
@@ -626,6 +627,7 @@ function FieldInput({
               </span>
             </span>
           )}
+          {xPost && <span className="text-xs text-muted">X 게시물 확인됨 · 게시물 카드로 보이고 구간 설정은 쓰지 않습니다</span>}
         </Label>
       );
     }
@@ -823,10 +825,10 @@ function buildPayload(fields: Field[], values: Values): { payload: Values; probl
         payload[field.key] = raw ?? null;
     }
   }
-  // 짧은 영상(R2) 칸에 YouTube 링크를 넣었으면 YouTube 칸으로 옮긴다
-  if (typeof payload.media_url === "string" && parseYouTube(payload.media_url)) {
+  // 짧은 영상(R2) 칸에 YouTube · X 링크를 넣었으면 YouTube / X 칸으로 옮긴다
+  if (typeof payload.media_url === "string" && isVideoLink(payload.media_url)) {
     if (payload.youtube_url && payload.youtube_url !== payload.media_url) {
-      return { payload, problem: "짧은 영상 URL 칸에는 R2 영상 주소를 넣으세요. YouTube 링크는 YouTube URL 칸에 넣습니다." };
+      return { payload, problem: "짧은 영상 URL 칸에는 R2 영상 주소를 넣으세요. YouTube · X 링크는 YouTube / X URL 칸에 넣습니다." };
     }
     payload.youtube_url = payload.media_url;
     payload.media_url = null;

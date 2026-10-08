@@ -4,7 +4,7 @@ import type { LinkedEnder } from "@/lib/setup-links";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { pickLocalized } from "@/lib/i18n/localized";
-import { parseYouTube } from "@/lib/youtube";
+import { isVideoLink } from "@/lib/youtube";
 import { ControlNotation } from "./notation";
 import { LevelBadge, NotTranslatedBadge, OutdatedBadge, Tag } from "./badges";
 import { ItemMedia } from "./media";
@@ -50,7 +50,7 @@ export function SetupCard({
   const outdated = latestPatchId !== null && setup.patch_id !== latestPatchId;
   const createdBy = setup.created_by ? authors[setup.created_by] : undefined;
   const updatedBy = setup.updated_by ? authors[setup.updated_by] : undefined;
-  const hasMedia = !!setup.media_url || !!parseYouTube(setup.youtube_url);
+  const hasMedia = !!setup.media_url || isVideoLink(setup.youtube_url);
   const situations = "situations" in setup ? setup.situations : [];
   const situationText = "situation" in setup && setup.situation ? pickLocalized(setup.situation, locale) : null;
   const entity = kind === "practice" ? "practice" : "setup";

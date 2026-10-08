@@ -2,7 +2,7 @@ import type { Move } from "@/lib/types";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { pickLocalized } from "@/lib/i18n/localized";
-import { parseYouTube } from "@/lib/youtube";
+import { isVideoLink } from "@/lib/youtube";
 import { ControlNotation } from "./notation";
 import { NotTranslatedBadge, OutdatedBadge } from "./badges";
 import { ItemMedia } from "./media";
@@ -31,7 +31,7 @@ export function MoveCard({
   const name = pickLocalized(move.name, locale);
   const notes = move.notes ? pickLocalized(move.notes, locale) : null;
   const outdated = latestPatchId !== null && move.patch_id !== latestPatchId;
-  const hasMedia = !!move.media_url || !!parseYouTube(move.youtube_url);
+  const hasMedia = !!move.media_url || isVideoLink(move.youtube_url);
   const stats: { label: string; value: string | null; tone?: string }[] = [
     { label: dict.moves.damage, value: move.damage },
     { label: dict.moves.startup, value: move.startup },

@@ -2,7 +2,7 @@ import type { Combo, ComboEnder, ComboRoute } from "@/lib/types";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { pickLocalized } from "@/lib/i18n/localized";
-import { parseYouTube } from "@/lib/youtube";
+import { isVideoLink } from "@/lib/youtube";
 import { damageBasisIndex, flattenStarters } from "@/lib/starters";
 import { comboRoutes } from "@/lib/combo-routes";
 import { withEnderFrames } from "@/lib/enders";
@@ -60,7 +60,7 @@ export function ComboCard({
   // 직접 고른 기준은 데미지가 아직 비어 있어도 강조한다 (고르지 않았으면 데미지가 있을 때만 첫 번째를 강조)
   const basisChosen = starters.some((s) => s.damage_basis);
   const basisNote = dict.combo.damageBasis.replace("{n}", String(basisIndex + 1));
-  const hasMedia = !!combo.media_url || !!parseYouTube(combo.youtube_url);
+  const hasMedia = !!combo.media_url || isVideoLink(combo.youtube_url);
 
   // 셋업 연결을 루트별로. 콤보를 고쳐서 없어진 루트 · 마무리를 가리키면 루트 1 · 마무리 없음으로
   const setupsByRoute = routes.map((_, r) =>

@@ -13,6 +13,19 @@ export type ChangelogEntry = { date: string; items: ChangelogItem[] };
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    date: "2026-10-08",
+    items: [
+      {
+        kind: "added",
+        text: {
+          ko: "영상 칸에 X(트위터) 게시물 링크를 넣으면 게시물 카드로 영상 표시",
+          en: "X (Twitter) post links in the video field now show the post with its video",
+          ja: "動画欄に X（Twitter）の投稿リンクを入れると投稿カードで動画を表示",
+        },
+      },
+    ],
+  },
+  {
     date: "2026-10-05",
     items: [
       {

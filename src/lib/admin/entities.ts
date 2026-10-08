@@ -125,7 +125,13 @@ const MEDIA_GROUP: FieldGroup = {
   title: "영상",
   fields: [
     { key: "media_url", label: "짧은 영상 URL (R2)", type: "url", wide: true },
-    { key: "youtube_url", label: "YouTube URL", type: "url", wide: true, help: "링크에 t= 가 있으면 그 시점부터 재생합니다." },
+    {
+      key: "youtube_url",
+      label: "YouTube / X URL",
+      type: "url",
+      wide: true,
+      help: "YouTube 는 링크에 t= 가 있으면 그 시점부터 재생합니다. X(트위터) 게시물 링크는 게시물 카드(작성자 · 본문 · 영상)로 보이고, 구간 설정은 쓰지 않습니다.",
+    },
     {
       key: "youtube_start",
       label: "구간 시작",

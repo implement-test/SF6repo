@@ -68,3 +68,26 @@ export function formatClock(seconds: number): string {
   const pad = (n: number) => String(n).padStart(2, "0");
   return h ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
 }
+
+/**
+ * X(구 트위터) 게시물 링크에서 게시물 ID 를 뽑는다. 영상만 따로 넣는 공식 방법이 없어 게시물 카드 전체를 임베드한다.
+ * 지원: x.com / twitter.com / mobile.twitter.com 의 /{계정}/status/{id} (뒤에 /video/1, ?s=20 등이 붙어도 된다)
+ */
+export function parseXPost(url: string | null | undefined): { id: string } | null {
+  if (!url) return null;
+  let u: URL;
+  try {
+    u = new URL(url.trim());
+  } catch {
+    return null;
+  }
+  const host = u.hostname.replace(/^(www\.|mobile\.)/, "");
+  if (host !== "x.com" && host !== "twitter.com") return null;
+  const m = /^\/(?:[\w]+\/status|i\/web\/status)\/(\d{1,25})(?:\/|$)/.exec(u.pathname);
+  return m ? { id: m[1] } : null;
+}
+
+/** 영상 칸에 넣을 수 있는 링크인지 (YouTube 또는 X 게시물) */
+export function isVideoLink(url: string | null | undefined): boolean {
+  return !!parseYouTube(url) || !!parseXPost(url);
+}
