@@ -8,10 +8,10 @@ import type { Combo, ComboEnder, ComboRoute } from "./types";
  * 루트 · 마무리에 ender_id 가 있으면 그 엔더를 쓴다. 후상황은 루트 · 마무리에 적은 값, 없으면 엔더의 값.
  */
 
-/** 표기의 마지막 기술 (비교용: 표준 기호 · 대문자, 생략 표시 { } 는 뺀다) */
+/** 표기의 마지막 기술 (비교용: 표준 기호 · 대문자, 생략 표시 { } 는 뺀다. 마지막 단계가 '이 중 하나(::)'면 첫 번째 선택지) */
 export function lastStepKey(notation: string): string {
   const steps = normalizeNotation(notation.replace(/[{}]/g, " ")).split("→");
-  return (steps[steps.length - 1] ?? "").trim().replace(/\s+/g, " ").toUpperCase();
+  return (steps[steps.length - 1] ?? "").split("::")[0].trim().replace(/\s+/g, " ").toUpperCase();
 }
 
 /** 직접 고른 엔더, 없으면 마지막 기술이 같은 첫 엔더 (enders 는 sort_order 순) */

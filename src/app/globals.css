@@ -397,6 +397,37 @@ article[id] {
   line-height: 1;
 }
 
+/* 이 중 하나(::): 선택지를 세로로 쌓고 왼쪽에 [ 모양 괄호, 괄호 가운데에 OR */
+.notation-or {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 0.4rem;
+  margin-left: 0.6rem;
+  vertical-align: middle;
+}
+.notation-or-bracket {
+  position: relative;
+  width: 0.45rem;
+  border: 2px solid var(--accent);
+  border-right: 0;
+  border-radius: 0.3rem 0 0 0.3rem;
+}
+.notation-or-tag {
+  position: absolute;
+  top: 50%;
+  left: -0.15rem;
+  transform: translate(-50%, -50%);
+  padding: 0.05rem 0.2rem;
+  background: var(--accent);
+  color: var(--accent-fg);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 900;
+  font-size: 0.55rem;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+}
+
 /* Vs 가이드 대응의 딜캐 구분: 확정(초록) / 거리 한정(주황) */
 .vs-punish {
   display: inline-flex;

@@ -15,6 +15,7 @@
  *   L M H SP A            모던 버튼 (A = AUTO)
  *   (텍스트)              괄호 안은 그대로 메모로 표시
  *   2MP → {DRC 5HP} → 236HP   중괄호 안은 통째로 생략 가능 (이미지에서 점선 상자로 묶는다)
+ *   5HP :: 2HP → 236HP    콜론 2개(::)는 이 중 하나 (이미지에서 세로로 쌓고 OR 괄호, 텍스트는 /)
  */
 
 /** 커맨드가 아니라 히트 상황. 커맨드와 구분되는 배지로 그린다. */
@@ -38,7 +39,9 @@ export type Move =
   /** 잡기: f.throw = 앞잡기, b.throw = 뒤잡기, throw = 방향 없음 */
   | { kind: "throw"; modifiers: Modifier[]; direction: "f" | "b" | null }
   | { kind: "note"; text: string }
-  | { kind: "unknown"; text: string };
+  | { kind: "unknown"; text: string }
+  /** 이 중 하나 (`5HP :: 2HP`). 선택지마다 타겟 콤보 묶음 하나 */
+  | { kind: "or"; options: Move[][] };
 
 /** 타겟 콤보(..)로 묶인 기술 묶음 */
 export type Step = Move[];
@@ -85,6 +88,8 @@ export function normalizeNotation(src: string): string {
     .replace(/[・•]/g, "·")
     .replace(/\s*→\s*/g, " → ")
     .replace(/\s*·\s*/g, "·")
+    // 콜론 2개(::)가 '이 중 하나'
+    .replace(/\s*::\s*/g, " :: ")
     .replace(/[ \t]+/g, " ")
     .trim();
 }
@@ -104,7 +109,8 @@ export function displayNotation(src: string): string {
               /\b(\d*)((?:lp|mp|hp|lk|mk|hk|pp|kk|sp|p|k|l|m|h)+|parry|drc|dr|di|sa[123])\b/gi,
               (_, digits: string, buttons: string) => digits + buttons.toUpperCase(),
             )
-            .replace(/·/g, ".."),
+            .replace(/·/g, "..")
+            .replace(/ :: /g, " / "),
     )
     .join("");
 }
@@ -197,16 +203,28 @@ export function parseNotationSegments(src: string): NotationSegment[] {
 function parsePlain(src: string): Combo {
   const normalized = normalizeNotation(src);
   if (!normalized) return [];
-  return normalized.split("→").map((step) =>
-    step
-      .split("·")
-      .map((part) => part.trim())
-      .filter(Boolean)
-      .flatMap(parsePart),
-  );
+  return normalized.split("→").map((step) => {
+    // "5HP :: 2HP" = 이 중 하나. 선택지마다 타겟 콤보 묶음으로 읽는다
+    const options = step.split("::").map(parseChain).filter((o) => o.length > 0);
+    return options.length > 1 ? [{ kind: "or", options }] : (options[0] ?? []);
+  });
+}
+
+/** 타겟 콤보(..)로 묶인 기술 묶음 하나 */
+function parseChain(src: string): Move[] {
+  return src
+    .split("·")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .flatMap(parsePart);
+}
+
+/** or 묶음을 풀어 모든 기술을 */
+function allMoves(moves: Move[]): Move[] {
+  return moves.flatMap((m) => (m.kind === "or" ? m.options.flatMap(allMoves) : [m]));
 }
 
 /** 파싱 결과에 해석하지 못한 조각이 있는지 (관리자 입력 검증용) */
 export function findUnknownTokens(combo: Combo): string[] {
-  return combo.flat().flatMap((m) => (m.kind === "unknown" ? [m.text] : []));
+  return allMoves(combo.flat()).flatMap((m) => (m.kind === "unknown" ? [m.text] : []));
 }

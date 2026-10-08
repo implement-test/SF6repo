@@ -23,6 +23,7 @@ const LEGEND: { notation: string; ko: string; en: string; ja: string }[] = [
   { notation: "f.throw → b.throw", ko: "앞잡기 / 뒤잡기", en: "Forward throw / back throw", ja: "前投げ / 後ろ投げ" },
   { notation: "DR → DRC → DI", ko: "생 드라이브 러시 / 캔슬 드라이브 러시 / 드라이브 임팩트", en: "Raw Drive Rush / Drive Rush cancel / Drive Impact", ja: "生ドライブラッシュ / キャンセルラッシュ / ドライブインパクト" },
   { notation: "DRC 5HP → DR 5MP", ko: "DR · DRC 는 기술 앞에 붙여서도 쓴다", en: "DR / DRC can also prefix a move", ja: "DR・DRC は技の前に付けても書ける" },
+  { notation: "2MP → 5HP :: 2HP :: 2MK → 236HP", ko: ":: 는 이 중 하나 (세로로 쌓아 표시)", en: ":: means any one of these (stacked)", ja: ":: はこの中のどれか（縦に並べて表示）" },
   { notation: "2MP → {DRC 5HP} → 236HP", ko: "{ } 안은 통째로 생략 가능", en: "{ } marks a part you can skip", ja: "{ } の中は省略可能" },
   { notation: "SA1 → SA2 → SA3", ko: "sa1 · sa2 · sa3 슈퍼 아츠", en: "sa1 / sa2 / sa3: Super Arts", ja: "sa1・sa2・sa3 スーパーアーツ" },
   { notation: "parry → 5HP", ko: "parry 저스트 패리", en: "parry: Perfect Parry", ja: "parry ジャストパリィ" },

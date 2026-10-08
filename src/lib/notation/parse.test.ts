@@ -14,6 +14,32 @@ describe("normalizeNotation", () => {
   });
 });
 
+describe("이 중 하나 ::", () => {
+  it("한 단계 안의 :: 를 선택지로 묶는다 (선택지마다 타겟 콤보 · 수식어 가능)", () => {
+    const combo = parseNotation("2MP → 5HP :: 2HP :: DRC MP..HP → 236HP");
+    expect(combo).toHaveLength(3);
+    expect(combo[1]).toEqual([
+      {
+        kind: "or",
+        options: [
+          [{ kind: "input", modifiers: [], direction: null, buttons: ["HP"] }],
+          [{ kind: "input", modifiers: [], direction: "2", buttons: ["HP"] }],
+          [
+            { kind: "input", modifiers: ["DRC"], direction: null, buttons: ["MP"] },
+            { kind: "input", modifiers: [], direction: null, buttons: ["HP"] },
+          ],
+        ],
+      },
+    ]);
+    expect(findUnknownTokens(combo)).toEqual([]);
+  });
+
+  it("선택지 안의 해석 못 한 조각도 찾는다, 텍스트로는 /", () => {
+    expect(findUnknownTokens(parseNotation("5HP :: 뭔가"))).toEqual(["뭔가"]);
+    expect(displayNotation("5hp::2hp > 236hp")).toBe("5HP / 2HP → 236HP");
+  });
+});
+
 describe("생략 가능 구간 {}", () => {
   it("중괄호 안을 생략 가능 조각으로 나눈다 (경계의 → 는 뗀다)", () => {
     const segs = parseNotationSegments("2MP → {DRC 5HP →} 236HP");

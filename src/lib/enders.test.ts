@@ -70,3 +70,9 @@ describe("routeEnds", () => {
     ]);
   });
 });
+
+describe("lastStepKey 와 이 중 하나(::)", () => {
+  it("마지막 단계가 선택지면 첫 번째 선택지로 엔더를 찾는다", () => {
+    expect(lastStepKey("2LP > 214LP :: 214MP")).toBe("214LP");
+  });
+});

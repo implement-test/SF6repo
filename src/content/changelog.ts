@@ -16,6 +16,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-10-08",
     items: [
       {
+        kind: "added",
+        text: {
+          ko: "콤보 표기: 5HP :: 2HP 처럼 :: 로 '이 중 하나'를 적으면 세로로 쌓아 표시",
+          en: "Notation: write alternatives with :: (5HP :: 2HP); they are shown stacked",
+          ja: "表記：5HP :: 2HP のように :: で「どれか一つ」を書くと縦に並べて表示",
+        },
+      },
+      {
         kind: "changed",
         text: {
           ko: "캐릭터 · 아이콘 이미지를 브라우저에 저장해 Vs 상대 선택 등이 빨리 뜨도록",

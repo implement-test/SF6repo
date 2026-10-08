@@ -87,6 +87,8 @@ function Modifiers({ modifiers }: { modifiers: Modifier[] }) {
 
 function MoveIcons({ move }: { move: Move }) {
   switch (move.kind) {
+    case "or":
+      return <OrGroup options={move.options} />;
     case "note":
       return <span className="text-sm text-muted">({move.text})</span>;
     case "unknown":
@@ -160,20 +162,41 @@ function Steps({ combo }: { combo: Combo }) {
       {combo.map((step, i) => (
         <Fragment key={i}>
           {i > 0 && <span className="text-muted" aria-label="then">→</span>}
-          <span className="inline-flex items-center gap-1">
-            {step.map((move, j) => (
-              <Fragment key={j}>
-                {/* 타겟 콤보 구분점. 괄호 메모 앞뒤에는 찍지 않는다 */}
-                {j > 0 && move.kind !== "note" && step[j - 1].kind !== "note" && (
-                  <span className="font-bold text-muted">..</span>
-                )}
-                <MoveIcons move={move} />
-              </Fragment>
-            ))}
-          </span>
+          <Chain moves={step} />
         </Fragment>
       ))}
     </>
+  );
+}
+
+/** 타겟 콤보(..)로 묶인 기술 묶음 */
+function Chain({ moves }: { moves: Move[] }) {
+  return (
+    <span className="inline-flex items-center gap-1">
+      {moves.map((move, j) => (
+        <Fragment key={j}>
+          {/* 타겟 콤보 구분점. 괄호 메모 앞뒤에는 찍지 않는다 */}
+          {j > 0 && move.kind !== "note" && moves[j - 1].kind !== "note" && <span className="font-bold text-muted">..</span>}
+          <MoveIcons move={move} />
+        </Fragment>
+      ))}
+    </span>
+  );
+}
+
+/** 이 중 하나 (5HP :: 2HP): 선택지를 세로로 쌓고 왼쪽에 괄호 + OR */
+function OrGroup({ options }: { options: Move[][] }) {
+  return (
+    <span className="notation-or" role="group" aria-label="or">
+      <span aria-hidden className="notation-or-bracket">
+        <span className="notation-or-tag">OR</span>
+      </span>
+      <span className="flex flex-col items-start gap-1.5">
+        {options.map((option, i) => (
+          <Chain key={i} moves={option} />
+        ))}
+      </span>
+    </span>
   );
 }
 
