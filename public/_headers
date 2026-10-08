@@ -1,0 +1,10 @@
+# Cloudflare Workers 정적 파일의 캐시 기간.
+# 기본값(max-age=0)이면 브라우저가 이미지를 쓸 때마다 서버에 다시 묻는다.
+# 캐릭터 · 아이콘 이미지는 거의 바뀌지 않으므로 30일 동안 브라우저 캐시를 그대로 쓴다.
+# 이미지를 같은 이름으로 바꿔 넣으면 길게는 30일 동안 예전 그림이 보일 수 있다 → 파일 이름을 바꾸거나 주소에 ?v=2 를 붙인다.
+
+/characters/*
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
+
+/icons/*
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
