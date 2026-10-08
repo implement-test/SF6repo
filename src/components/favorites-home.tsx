@@ -37,7 +37,16 @@ const PAGE: Record<FavoriteKind, string> = { combo: "combos", setup: "setups", p
  * 개인 홈: 이 브라우저에 저장된 즐겨찾기(콤보 · 셋업 · 추천 연습 · Vs 가이드)를 모아 보여 준다.
  * 페이지는 정적이고, 즐겨찾기 id 로 공개 항목만 브라우저에서 직접 불러온다 (anon 키, 로그인 없음).
  */
-export function FavoritesHome({ locale, dict }: { locale: Locale; dict: Dictionary }) {
+export function FavoritesHome({
+  locale,
+  dict,
+  characterSlug,
+}: {
+  locale: Locale;
+  dict: Dictionary;
+  /** 캐릭터 페이지의 즐겨찾기 탭: 이 캐릭터의 항목만 */
+  characterSlug?: string;
+}) {
   const favorites = useAllFavorites();
   const [data, setData] = useState<Loaded | null>(null);
   const key = favorites ? JSON.stringify(favorites) : "";
@@ -60,7 +69,12 @@ export function FavoritesHome({ locale, dict }: { locale: Locale; dict: Dictiona
 
   // 즐겨찾기에 담은 순서대로. 지워졌거나 비공개가 된 항목, 비공개 캐릭터의 항목은 빠진다
   const ordered = <T extends { id: number; character_id: number }>(kind: FavoriteKind, rows: T[]) => {
-    const byId = new Map(rows.filter((r) => data.characters.has(r.character_id)).map((r) => [r.id, r]));
+    const byId = new Map(
+      rows
+        .filter((r) => data.characters.has(r.character_id))
+        .filter((r) => !characterSlug || data.characters.get(r.character_id)?.slug === characterSlug)
+        .map((r) => [r.id, r]),
+    );
     return favorites[kind].map((id) => byId.get(id)).filter((r) => r !== undefined);
   };
   const sections = {
@@ -70,7 +84,19 @@ export function FavoritesHome({ locale, dict }: { locale: Locale; dict: Dictiona
     vs: ordered("vs", data.vs),
   };
   const total = FAVORITE_KINDS.reduce((sum, k) => sum + sections[k].length, 0);
-  if (total === 0) return <p className="border border-dashed border-border py-12 text-center text-muted">{t.empty}</p>;
+  // 캐릭터 탭에서는 모든 캐릭터 모아보기로 가는 링크
+  const allLink = characterSlug ? (
+    <Link href="/favorites" className="text-sm font-semibold text-muted hover:text-accent">
+      {t.all} →
+    </Link>
+  ) : null;
+  if (total === 0)
+    return (
+      <div className="flex flex-col gap-3">
+        {allLink && <div className="flex justify-end">{allLink}</div>}
+        <p className="border border-dashed border-border py-12 text-center text-muted">{t.empty}</p>
+      </div>
+    );
 
   const origin = (kind: FavoriteKind, item: { id: number; character_id: number; opponent?: string }) => {
     const character = data.characters.get(item.character_id);
@@ -90,7 +116,8 @@ export function FavoritesHome({ locale, dict }: { locale: Locale; dict: Dictiona
 
   return (
     <div className="flex flex-col gap-10" data-card-list="">
-      <div className="flex justify-end">
+      <div className="flex items-center justify-end gap-4">
+        {allLink}
         <ExpandAllButton labels={dict.list} />
       </div>
       {FAVORITE_KINDS.map((kind) => {

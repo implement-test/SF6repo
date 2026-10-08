@@ -16,6 +16,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-10-08",
     items: [
       {
+        kind: "changed",
+        text: {
+          ko: "즐겨찾기를 상단 메뉴에서 캐릭터 탭(개요 왼쪽)으로 옮김: 그 캐릭터의 즐겨찾기를 보고, 링크로 전체 모아보기",
+          en: "Favorites moved from the header to a character tab (left of Overview), showing that character with a link to all favorites",
+          ja: "お気に入りをヘッダーからキャラのタブ（概要の左）へ移動：そのキャラの項目を表示し、全体一覧へのリンク付き",
+        },
+      },
+      {
         kind: "added",
         text: {
           ko: "콤보 표기: 5HP :: 2HP 처럼 :: 로 '이 중 하나'를 적으면 세로로 쌓아 표시",
