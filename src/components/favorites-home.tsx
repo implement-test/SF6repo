@@ -10,7 +10,7 @@ import { pickLocalized } from "@/lib/i18n/localized";
 import { FAVORITE_KINDS, useAllFavorites, type FavoriteKind } from "@/lib/favorites";
 import { normalizeOptions, normalizePractice } from "@/lib/setup";
 import { normalizeStarterGroups } from "@/lib/starters";
-import { normalizeVsActions } from "@/lib/vs-actions";
+import { normalizeVsPatterns } from "@/lib/vs-patterns";
 import { linkedEndersFor, type LinkedEnder } from "@/lib/setup-links";
 import { ComboCard } from "./combo-card";
 import { SetupCard } from "./setup-card";
@@ -235,6 +235,6 @@ async function load(favorites: Record<FavoriteKind, number[]>): Promise<Loaded> 
     setupEnders,
     enders,
     practices: practices.map((p) => ({ ...p, options: normalizeOptions(p.options), practice: normalizePractice(p.practice) })),
-    vs: vs.map((g) => ({ ...g, actions: normalizeVsActions(g.actions) })),
+    vs: vs.map((g) => ({ ...g, patterns: normalizeVsPatterns(g.patterns) })),
   };
 }

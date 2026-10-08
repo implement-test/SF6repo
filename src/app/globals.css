@@ -397,6 +397,27 @@ article[id] {
   line-height: 1;
 }
 
+/* Vs 가이드 대응의 딜캐 구분: 확정(초록) / 거리 한정(주황) */
+.vs-punish {
+  display: inline-flex;
+  align-items: center;
+  height: 1.35rem;
+  padding: 0 0.45rem;
+  border: 1px solid currentColor;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.vs-punish[data-punish="confirmed"] {
+  color: var(--drive);
+  background: color-mix(in srgb, var(--drive) 12%, transparent);
+}
+.vs-punish[data-punish="range"] {
+  color: var(--warn);
+  background: color-mix(in srgb, var(--warn) 12%, transparent);
+}
+
 /* 접히는 카드(콤보·셋업·추천 연습): 기본은 제목 줄만 */
 .card-details > summary {
   list-style: none;

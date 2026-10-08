@@ -18,6 +18,14 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         kind: "changed",
         text: {
+          ko: "Vs 가이드: 한 포스트에 상대 패턴 여러 개와 패턴마다 대응 여러 개, 프레임 범위(가드 시 -8 ~ -12 등), 확정 / 거리 한정 표시, 패턴별 영상",
+          en: "Vs guides: several opponent patterns per post with multiple responses each, frame ranges, guaranteed / range-dependent tags and a video per pattern",
+          ja: "キャラ対策：1つの投稿に相手の行動を複数、行動ごとに対応を複数、フレーム範囲、確定 / 距離次第の表示、行動ごとの動画",
+        },
+      },
+      {
+        kind: "changed",
+        text: {
           ko: "Vs 가이드 주제 이름을 짧게: 윕퍼 / 딜캐 / 끼어들기 / 패턴 대응",
           en: "Shorter Vs guide topic names: Whiff punish / Block punish / Interrupts / Pattern counters",
           ja: "キャラ対策のテーマ名を短く：差し返し / 確定反撃 / 割り込み / パターン対策",

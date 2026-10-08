@@ -262,8 +262,30 @@ export type Practice = ContentBase &
 export type VsTopic = "whiff_punish" | "block_punish" | "pressure_gap" | "cheese" | "setup";
 export const VS_TOPICS: VsTopic[] = ["whiff_punish", "block_punish", "pressure_gap", "cheese", "setup"];
 
-/** Vs 가이드의 관련 동작·대응 하나 (선택지): 표기 + 이 선택지만의 설명 */
-export type VsAction = { classic: string; modern: string | null; note: Localized | null };
+/** 딜캐 구분: 확정 / 거리 한정 (관리자가 직접 고른다) */
+export type VsPunish = "confirmed" | "range";
+export const VS_PUNISHES: VsPunish[] = ["confirmed", "range"];
+
+/** 상대 패턴 하나에 대한 대응 하나: 내 기술 표기 + 설명 + 딜캐 구분 */
+export type VsResponse = { classic: string; modern: string | null; note: Localized | null; punish: VsPunish | null };
+
+/**
+ * 상대 패턴 하나 (0027): 상대 기술 표기 · 이름 · 설명 · 프레임 범위 · 패턴별 영상 + 대응 여러 개.
+ * 프레임은 거리에 따라 다를 때 frame_min ~ frame_max 로 적는다 (하나만 적으면 단일 값).
+ */
+export type VsPattern = {
+  classic: string;
+  modern: string | null;
+  name: Localized | null;
+  note: Localized | null;
+  frame_min: number | null;
+  frame_max: number | null;
+  youtube_url: string | null;
+  youtube_start: number | null;
+  youtube_end: number | null;
+  youtube_loop: boolean;
+  responses: VsResponse[];
+};
 
 export type VsGuide = ContentBase &
   Media & {
@@ -274,8 +296,8 @@ export type VsGuide = ContentBase &
     title: Localized | null;
     /** 공용 내용 */
     body: Localized | null;
-    /** 관련 동작·대응 (선택지별 표기와 설명) */
-    actions: VsAction[];
+    /** 상대 패턴 여러 개 (패턴마다 대응 여러 개) */
+    patterns: VsPattern[];
   };
 
 // ───────────────────────── 개요 ─────────────────────────

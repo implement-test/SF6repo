@@ -7,7 +7,7 @@ import { copyValues } from "@/lib/admin/copy";
 import { VsCopyTo } from "./vs-copy";
 import { findUnknownTokens, parseNotation } from "@/lib/notation/parse";
 import { describeError, revalidateSite, supabaseBrowser } from "@/lib/supabase/browser";
-import type { ComboRoute, Localized, Patch, PracticeConfig, SetupOption, StarterGroup, VsAction } from "@/lib/types";
+import type { ComboRoute, Localized, Patch, PracticeConfig, SetupOption, StarterGroup, VsPattern } from "@/lib/types";
 import { isVideoLink, parseXPost, parseYouTube } from "@/lib/youtube";
 import { normalizeOptions, normalizePractice } from "@/lib/setup";
 import { normalizeStarterGroups } from "@/lib/starters";
@@ -16,8 +16,8 @@ import { RoutesInput } from "./routes-input";
 import { ComboGroupSelect } from "./combo-group-select";
 import { upgradeRow } from "@/lib/admin/upgrade";
 import { LocalizedListInput, cleanLocalizedList } from "./localized-list-input";
-import { VsActionsInput, cleanVsActions } from "./vs-actions-input";
-import { normalizeVsActions } from "@/lib/vs-actions";
+import { VsPatternsInput } from "./vs-patterns-input";
+import { cleanVsPatterns, editableVsPatterns } from "@/lib/vs-patterns";
 import { NotationImage } from "../notation";
 import { draftKey, useAdmin, type EditorDraft, type EditorRequest } from "./admin-context";
 import { formatPatchVersion } from "@/lib/patch";
@@ -47,7 +47,7 @@ function normalizeValues(v: Values): Values {
   if ("options" in out) out.options = normalizeOptions(out.options);
   if ("practice" in out) out.practice = normalizePractice(out.practice);
   if ("starters" in out) out.starters = normalizeStarterGroups(out.starters);
-  if ("actions" in out) out.actions = normalizeVsActions(out.actions);
+  if ("patterns" in out) out.patterns = editableVsPatterns(out.patterns);
   // 셋업의 이어지는 엔더 (0025)
   if ("ender_links" in out) out.ender_links = normalizeEnderLinks(out.ender_links);
   // 콤보: 칼럼(첫 번째 루트) + extra_routes 를 루트 목록 하나로
@@ -543,12 +543,12 @@ function FieldInput({
         />
       );
 
-    case "vsActions":
+    case "vsPatterns":
       return (
-        <VsActionsInput
+        <VsPatternsInput
           label={field.label}
           help={field.help}
-          value={(value as VsAction[] | null) ?? []}
+          value={(value as VsPattern[] | null) ?? []}
           onChange={onChange}
         />
       );
@@ -775,9 +775,10 @@ function buildPayload(fields: Field[], values: Values): { payload: Values; probl
       case "starters":
         payload[field.key] = cleanStarterGroups(raw as StarterGroup[] | null);
         break;
-      case "vsActions": {
-        const list = cleanVsActions(raw as VsAction[] | null);
-        if (list === "missing-ko") return { payload, problem: `${field.label}: 설명의 한국어는 필수입니다.` };
+      case "vsPatterns": {
+        const list = cleanVsPatterns(raw as VsPattern[] | null);
+        if (list === "missing-ko") return { payload, problem: `${field.label}: 이름 · 설명의 한국어는 필수입니다.` };
+        if (list === "bad-clip") return { payload, problem: `${field.label}: 영상 구간 끝은 시작보다 뒤여야 합니다.` };
         payload[field.key] = list;
         break;
       }

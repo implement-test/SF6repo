@@ -1,4 +1,4 @@
-import type { Character, CharacterOverview, Move, Video, VsAction, Combo, Patch, Setup, SetupSituation, VsGuide, ComboEnder, SetupEnderLink } from "@/lib/types";
+import type { Character, CharacterOverview, Move, Video, VsPattern, Combo, Patch, Setup, SetupSituation, VsGuide, ComboEnder, SetupEnderLink } from "@/lib/types";
 import { ROSTER } from "@/lib/roster";
 
 /**
@@ -207,7 +207,7 @@ const vsBase = {
   media_url: null,
   youtube_url: null,
   youtube_start: null,
-  actions: [] as VsAction[],
+  patterns: [] as VsPattern[],
   target_level: "beginner",
   created_date: "2026-09-26",
 } as const;
@@ -229,10 +229,36 @@ export const sampleVsGuides: VsGuide[] = [
     topic: "block_punish",
     title: { ko: "[예시] 승룡권 가드 후" },
     body: { ko: "거리와 게이지에 따라 고른다. 공용 설명 예시." },
-    actions: [
-      { classic: "5HP → 236HP", modern: null, note: { ko: "가까울 때 기본 확정. 데미지 우선." } },
-      { classic: "2MK → DRC → 5HP", modern: null, note: { ko: "드라이브 게이지가 있을 때. 코너 운반." } },
-      { classic: "214214P", modern: "SP", note: { ko: "SA 게이지가 있으면 최대 데미지." } },
+    patterns: [
+      {
+        classic: "623HP",
+        modern: null,
+        name: { ko: "승룡권 (강)" },
+        note: { ko: "가드 후 거리가 조금 벌어진다." },
+        frame_min: -28,
+        frame_max: -31,
+        youtube_url: null,
+        youtube_start: null,
+        youtube_end: null,
+        youtube_loop: false,
+        responses: [
+          { classic: "5HP → 236HP", modern: null, note: { ko: "데미지 우선." }, punish: "confirmed" },
+          { classic: "2MK → DRC → 5HP", modern: null, note: { ko: "드라이브 게이지가 있을 때. 코너 운반." }, punish: "range" },
+        ],
+      },
+      {
+        classic: "236HP",
+        modern: null,
+        name: { ko: "장풍" },
+        note: null,
+        frame_min: -6,
+        frame_max: null,
+        youtube_url: null,
+        youtube_start: null,
+        youtube_end: null,
+        youtube_loop: false,
+        responses: [{ classic: "214214P", modern: "SP", note: { ko: "근거리에서 가드했을 때만." }, punish: "range" }],
+      },
     ],
     target_level: "advanced",
     sort_order: 2,

@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { supabaseBrowser, describeError } from "@/lib/supabase/browser";
 import { copyValues } from "@/lib/admin/copy";
 import { ROSTER, rosterBySlug } from "@/lib/roster";
-import { normalizeVsActions } from "@/lib/vs-actions";
-import type { Localized, VsAction } from "@/lib/types";
+import { normalizeVsPatterns } from "@/lib/vs-patterns";
+import type { Localized, VsPattern } from "@/lib/types";
 import { useAdmin } from "./admin-context";
 import { inputClass } from "./starters-input";
 import { NotationText } from "../notation";
@@ -17,7 +17,7 @@ type GuideRow = Record<string, unknown> & {
   topic: string;
   title: Localized | null;
   body: Localized | null;
-  actions: VsAction[];
+  patterns: VsPattern[];
   is_published: boolean;
 };
 type CharacterRow = { id: number; name: Localized };
@@ -63,7 +63,7 @@ export default function VsImportPanel({
       sb.from("characters").select("id,name").order("sort_order"),
     ]).then(([g, c]) => {
       if (g.error) setError(describeError(g.error));
-      setGuides(((g.data ?? []) as GuideRow[]).map((r) => ({ ...r, actions: normalizeVsActions(r.actions) })));
+      setGuides(((g.data ?? []) as GuideRow[]).map((r) => ({ ...r, patterns: normalizeVsPatterns(r.patterns) })));
       setCharacters(new Map(((c.data ?? []) as CharacterRow[]).map((r) => [r.id, r.name.ko])));
     });
   }, [sb, characterId]);
@@ -83,7 +83,13 @@ export default function VsImportPanel({
       const hay = [
         text(g.title),
         text(g.body),
-        ...g.actions.flatMap((a) => [a.classic, a.modern ?? "", text(a.note)]),
+        ...g.patterns.flatMap((p) => [
+          p.classic,
+          p.modern ?? "",
+          text(p.name),
+          text(p.note),
+          ...p.responses.flatMap((r) => [r.classic, r.modern ?? "", text(r.note)]),
+        ]),
         TOPIC_LABELS[g.topic] ?? "",
         characters.get(g.character_id) ?? "",
         rosterBySlug(g.opponent)?.name.ko ?? g.opponent,
@@ -178,11 +184,11 @@ export default function VsImportPanel({
                     </p>
                     {g.title?.ko && <p className="truncate text-sm font-semibold">{g.title.ko}</p>}
                     {g.body?.ko && <p className="line-clamp-2 text-xs whitespace-pre-line text-muted">{g.body.ko}</p>}
-                    {g.actions.length > 0 && (
+                    {g.patterns.length > 0 && (
                       <p className="truncate text-xs text-muted">
-                        {g.actions.map((a, i) => (
+                        {g.patterns.map((p, i) => (
                           <span key={i} className="mr-3">
-                            {i + 1}. <NotationText notation={a.classic || "—"} />
+                            {i + 1}. <NotationText notation={p.classic || p.name?.ko || "—"} /> (대응 {p.responses.length})
                           </span>
                         ))}
                       </p>

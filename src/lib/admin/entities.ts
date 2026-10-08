@@ -14,8 +14,8 @@ export type Field = { key: string; label: string; help?: string; required?: bool
   | { type: "starters" }
   /** 한 줄씩 적는 다국어 목록 (장점 / 단점 …) */
   | { type: "localizedList" }
-  /** Vs 가이드의 관련 동작·대응 (선택지별 표기와 설명) */
-  | { type: "vsActions" }
+  /** Vs 가이드의 상대 패턴 여러 개 (패턴마다 프레임 범위 · 영상 · 대응 여러 개) */
+  | { type: "vsPatterns" }
   /** 콤보 루트 여러 개 + 루트별 수치. 첫 번째는 칼럼, 나머지는 extra_routes 에 저장 */
   | { type: "routes" }
   /** 콤보 그룹 (combo_groups 에서 불러온다) */
@@ -401,18 +401,18 @@ export const ENTITIES: Record<EntityType, Entity> = {
           { key: "title", label: "제목", type: "localized" },
           { key: "body", label: "공용 내용", type: "localized", multiline: true, help: "모든 선택지에 공통인 설명" },
           {
-            key: "actions",
-            label: "관련 동작 · 대응 (선택지별)",
-            type: "vsActions",
+            key: "patterns",
+            label: "상대 패턴 · 대응",
+            type: "vsPatterns",
             wide: true,
-            help: "상대 기술이나 대응 방법을 선택지로 나눠 적고, 선택지마다 설명을 붙입니다.",
+            help: "한 포스트에 상대 패턴(기술)을 여러 개 담고, 패턴마다 대응을 여러 개 적습니다. 딜캐처럼 거리에 따라 프레임이 다르면 범위로 적고, 대응마다 확정 / 거리 한정을 고릅니다.",
           },
         ],
       },
       MEDIA_GROUP,
       META_GROUP,
     ],
-    defaults: () => ({ ...metaDefaults(), opponent: null, topic: "whiff_punish", actions: [] }),
+    defaults: () => ({ ...metaDefaults(), opponent: null, topic: "whiff_punish", patterns: [] }),
   },
 
   patch: {
