@@ -95,10 +95,10 @@ const OPPONENTS: Option[] = ROSTER.map((c) => ({
 }));
 
 const VS_TOPICS: Option[] = [
-  { value: "whiff_punish", label: "윕퍼 노릴 동작" },
-  { value: "block_punish", label: "가드 후 딜캐" },
-  { value: "pressure_gap", label: "압박 사이 끼어들기" },
-  { value: "cheese", label: "날먹/무뇌패턴 파해" },
+  { value: "whiff_punish", label: "윕퍼" },
+  { value: "block_punish", label: "딜캐" },
+  { value: "pressure_gap", label: "끼어들기" },
+  { value: "cheese", label: "패턴 대응" },
   { value: "setup", label: "주요 셋업" },
 ];
 

@@ -16,6 +16,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-10-08",
     items: [
       {
+        kind: "changed",
+        text: {
+          ko: "Vs 가이드 주제 이름을 짧게: 윕퍼 / 딜캐 / 끼어들기 / 패턴 대응",
+          en: "Shorter Vs guide topic names: Whiff punish / Block punish / Interrupts / Pattern counters",
+          ja: "キャラ対策のテーマ名を短く：差し返し / 確定反撃 / 割り込み / パターン対策",
+        },
+      },
+      {
         kind: "added",
         text: {
           ko: "영상 칸에 X(트위터) 게시물 링크를 넣으면 게시물 카드로 영상 표시",

@@ -258,7 +258,7 @@ export type Practice = ContentBase &
 
 // ───────────────────────── Vs 가이드 ─────────────────────────
 
-/** 윕퍼 노릴 동작 / 가드 후 딜캐 / 압박 사이 끼어들기 / 날먹·무뇌패턴 파해 / 주요 셋업 */
+/** 윕퍼 / 딜캐 / 끼어들기 / 패턴 대응 / 주요 셋업 */
 export type VsTopic = "whiff_punish" | "block_punish" | "pressure_gap" | "cheese" | "setup";
 export const VS_TOPICS: VsTopic[] = ["whiff_punish", "block_punish", "pressure_gap", "cheese", "setup"];
 

@@ -23,10 +23,10 @@ type GuideRow = Record<string, unknown> & {
 type CharacterRow = { id: number; name: Localized };
 
 const TOPIC_LABELS: Record<string, string> = {
-  whiff_punish: "윕퍼 노릴 동작",
-  block_punish: "가드 후 딜캐",
-  pressure_gap: "압박 사이 끼어들기",
-  cheese: "날먹/무뇌패턴 파해",
+  whiff_punish: "윕퍼",
+  block_punish: "딜캐",
+  pressure_gap: "끼어들기",
+  cheese: "패턴 대응",
   setup: "주요 셋업",
 };
 
