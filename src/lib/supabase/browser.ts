@@ -67,10 +67,26 @@ export async function revalidateSite(sb: SupabaseClient) {
     if (!token) return;
     const res = await fetch("/api/revalidate", { method: "POST", headers: { Authorization: `Bearer ${token}` } });
     if (!res.ok) console.error("revalidate failed:", res.status);
+    scheduleSecondRevalidate(token);
     await new Promise((resolve) => setTimeout(resolve, 1200));
   } catch (e) {
     console.error("revalidate failed:", e);
   }
+}
+
+let secondPass: ReturnType<typeof setTimeout> | null = null;
+
+/**
+ * 20초 뒤에 한 번 더 무효화한다. 페이지를 새로 만드는 데 길게는 15초쯤 걸려서,
+ * 저장 전에 만들기 시작한 페이지가 무효화보다 늦게 완성되면 예전 내용이 최신으로 남는다 (콤보 추가 직후 그룹 지정 등).
+ * 연달아 저장하면 마지막 저장 기준으로 한 번만 보낸다.
+ */
+function scheduleSecondRevalidate(token: string) {
+  if (secondPass) clearTimeout(secondPass);
+  secondPass = setTimeout(() => {
+    secondPass = null;
+    fetch("/api/revalidate", { method: "POST", headers: { Authorization: `Bearer ${token}` } }).catch(() => {});
+  }, 20_000);
 }
 
 /** Supabase 오류를 관리자에게 보여 줄 문장으로 */

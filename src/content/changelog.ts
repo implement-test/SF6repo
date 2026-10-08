@@ -13,6 +13,20 @@ export type ChangelogEntry = { date: string; items: ChangelogItem[] };
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    date: "2026-10-09",
+    items: [
+      {
+        kind: "changed",
+        adminOnly: true,
+        text: {
+          ko: "연달아 저장했을 때 일부 내용(새 콤보 등)이 사이트에 늦게 반영되던 문제 수정",
+          en: "Fixed some changes (e.g. a new combo) showing up late after saving several times in a row",
+          ja: "続けて保存したときに一部の内容（新しいコンボなど）の反映が遅れる問題を修正",
+        },
+      },
+    ],
+  },
+  {
     date: "2026-10-08",
     items: [
       {
