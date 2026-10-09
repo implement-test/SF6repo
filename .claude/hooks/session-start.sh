@@ -24,6 +24,11 @@ if [ -s "$NVM_DIR/nvm.sh" ]; then
   fi
 fi
 
+# Node 내장 fetch 는 HTTPS_PROXY 를 읽지 않아 빌드 중 Supabase 요청이 실패한다
+if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
+  echo "export NODE_USE_ENV_PROXY=1" >> "$CLAUDE_ENV_FILE"
+fi
+
 # 컨테이너 캐시를 활용하려고 npm ci 대신 npm install 을 쓴다
 npm install --no-audit --no-fund
 

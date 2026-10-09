@@ -15,5 +15,5 @@
 
 - 이 저장소의 작업은 곧바로 `main` 이 된다. 작업을 마치면 사용자에게 묻지 않고 커밋하고 `main` 에 push 한다 (Workers Builds 가 자동 배포). PR 은 만들지 않는다.
   - 세션 브랜치에서 작업했다면 `git fetch origin main && git rebase origin/main` 후 `git push origin HEAD:main`, 세션 브랜치에도 같이 push 한다.
-- push 전에 `npm run lint`, `npm test` 를 통과시킨다. `npm run build` 는 Supabase 환경변수(`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`)가 있어야 돈다.
+- push 전에 `npm run lint`, `npm test` 를 통과시킨다. `npm run build` 는 Supabase 환경변수(`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`)가 있어야 돈다. 클라우드 세션에서는 Node fetch 가 프록시를 타도록 `NODE_USE_ENV_PROXY=1` 이 필요하다 (훅이 설정).
 - 세션 시작 훅(`.claude/hooks/session-start.sh`)이 `.node-version` 의 Node 를 nvm 으로 맞추고 `npm install` 한다. 다른 npm 으로 설치하면 `package-lock.json` 이 바뀌니 커밋에 섞지 않는다.
