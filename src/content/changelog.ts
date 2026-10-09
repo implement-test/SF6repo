@@ -16,6 +16,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-10-09",
     items: [
       {
+        kind: "added",
+        text: {
+          ko: "콤보 표기에 etc 추가 (이후 자유롭게 이어 감, ETC 배지로 표시)",
+          en: "Added etc to combo notation (continue however you like, shown as an ETC badge)",
+          ja: "コンボ表記に etc を追加（以降は自由につなぐ、ETC バッジで表示）",
+        },
+      },
+      {
         kind: "changed",
         adminOnly: true,
         text: {

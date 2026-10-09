@@ -66,6 +66,15 @@ function DelayBadge() {
   );
 }
 
+/** etc: 이후 자유롭게 이어 간다. 커맨드가 아니므로 흐린 점선 알약 + 말줄임표 */
+function EtcBadge() {
+  return (
+    <span className="notation-etc" title="etc">
+      ETC
+    </span>
+  );
+}
+
 /** 수식어: 히트 상황은 리본 배지, delay 는 딜레이 배지, 앞에 붙인 DR · DRC 는 그 아이콘 */
 function Modifiers({ modifiers }: { modifiers: Modifier[] }) {
   if (modifiers.length === 0) return null;
@@ -91,6 +100,8 @@ function MoveIcons({ move }: { move: Move }) {
       return <OrGroup options={move.options} />;
     case "note":
       return <span className="text-sm text-muted">({move.text})</span>;
+    case "etc":
+      return <EtcBadge />;
     case "unknown":
       return <span className="rounded bg-warn/15 px-1 font-mono text-sm text-warn">{move.text}</span>;
     case "system":

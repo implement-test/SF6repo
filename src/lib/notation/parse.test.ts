@@ -225,3 +225,15 @@ describe("parry", () => {
     expect(displayNotation("parry > 5hp")).toBe("PARRY → 5HP");
   });
 });
+
+describe("etc", () => {
+  it("etc 는 '이후 자유롭게' 표시로 읽는다 (대소문자 · 마침표 무관)", () => {
+    expect(parseNotation("2MP → 236HP → etc")[2]).toEqual([{ kind: "etc" }]);
+    expect(parseNotation("2MP > ETC.")[1]).toEqual([{ kind: "etc" }]);
+    expect(findUnknownTokens(parseNotation("2MP → etc"))).toEqual([]);
+  });
+
+  it("텍스트 표기에서는 그대로 둔다", () => {
+    expect(displayNotation("2mp > etc")).toBe("2MP → etc");
+  });
+});

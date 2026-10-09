@@ -14,6 +14,7 @@
  *   f.throw / b.throw     앞잡기 / 뒤잡기
  *   L M H SP A            모던 버튼 (A = AUTO)
  *   (텍스트)              괄호 안은 그대로 메모로 표시
+ *   236HP → etc           etc = 이후 자유롭게 이어 간다 (콤보가 열려 있음)
  *   2MP → {DRC 5HP} → 236HP   중괄호 안은 통째로 생략 가능 (이미지에서 점선 상자로 묶는다)
  *   5HP :: 2HP → 236HP    콜론 2개(::)는 이 중 하나 (이미지에서 세로로 쌓고 OR 괄호, 텍스트는 /)
  */
@@ -39,6 +40,8 @@ export type Move =
   /** 잡기: f.throw = 앞잡기, b.throw = 뒤잡기, throw = 방향 없음 */
   | { kind: "throw"; modifiers: Modifier[]; direction: "f" | "b" | null }
   | { kind: "note"; text: string }
+  /** etc: 이후는 자유롭게 이어 간다 */
+  | { kind: "etc" }
   | { kind: "unknown"; text: string }
   /** 이 중 하나 (`5HP :: 2HP`). 선택지마다 타겟 콤보 묶음 하나 */
   | { kind: "or"; options: Move[][] };
@@ -130,6 +133,7 @@ function parseButtons(src: string): Button[] | null {
 function parseMove(src: string): Move {
   const text = src.trim();
   if (/^\(.*\)$/.test(text)) return { kind: "note", text: text.slice(1, -1).trim() };
+  if (/^etc\.?$/i.test(text)) return { kind: "etc" };
 
   const words = text.split(" ").filter(Boolean);
   const modifiers: Modifier[] = [];

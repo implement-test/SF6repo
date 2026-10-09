@@ -343,6 +343,29 @@ article[id] {
   flex: none;
 }
 
+/* etc 배지: 이후 자유롭게 이어 감. 커맨드보다 흐리게, 점선 테두리 + 말줄임표 */
+.notation-etc {
+  display: inline-flex;
+  align-items: center;
+  height: 1.45rem;
+  padding: 0 0.5rem;
+  border: 1.5px dotted color-mix(in srgb, var(--fg) 45%, transparent);
+  border-radius: 0.3rem;
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 800;
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  flex: none;
+}
+.notation-etc::after {
+  content: "…";
+  margin-left: 0.15rem;
+  letter-spacing: 0;
+}
+
 /* 마무리(FINISH) 배지: 커맨드·히트 상황·딜레이와 겹치지 않게 노란 이중 테두리 + 체크무늬 깃발 */
 .notation-finish {
   display: inline-flex;

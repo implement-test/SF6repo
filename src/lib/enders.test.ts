@@ -76,3 +76,9 @@ describe("lastStepKey 와 이 중 하나(::)", () => {
     expect(lastStepKey("2LP > 214LP :: 214MP")).toBe("214LP");
   });
 });
+
+describe("lastStepKey 와 etc", () => {
+  it("etc 로 끝나면 끝낸 기술이 없다", () => {
+    expect(lastStepKey("2MP → 236HP → etc")).toBe("");
+  });
+});
