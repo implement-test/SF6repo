@@ -25,6 +25,7 @@ import { History, useAuthorNames } from "./history";
 import { StarterGroupsInput, cleanStarterGroups, inputClass } from "./starters-input";
 import { ClockInput } from "./clock-input";
 import { scoped } from "@/lib/admin/scope";
+import { OpponentInput } from "./opponent-input";
 import {
   EnderLinksInput,
   OptionsInput,
@@ -670,6 +671,19 @@ function FieldInput({
         </Label>
       );
 
+    case "opponent":
+      // 드롭다운이 두 개라 <label> 대신 묶음으로
+      return (
+        <div className="flex flex-col gap-1.5" role="group" aria-label={field.label}>
+          <span className="text-xs font-semibold text-muted">
+            {field.label}
+            {field.required && <span className="text-accent"> *</span>}
+          </span>
+          <OpponentInput value={(value as string | null) || null} onChange={onChange} />
+          {field.help && <span className="text-xs text-muted">{field.help}</span>}
+        </div>
+      );
+
     case "multiselect": {
       const list = (value as string[] | null) ?? [];
       return (
@@ -821,6 +835,7 @@ function buildPayload(fields: Field[], values: Values): { payload: Values; probl
         if (raw) payload[field.key] = raw;
         break;
       case "select":
+      case "opponent":
         // 필수 선택 칸을 비워 두면 DB 오류 대신 알려 준다
         if ((raw === null || raw === undefined || raw === "") && field.required)
           return { payload, problem: `${field.label}을(를) 고르세요.` };

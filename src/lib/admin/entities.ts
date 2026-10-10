@@ -1,5 +1,3 @@
-import { ROSTER, ROSTER_GROUPS } from "@/lib/roster";
-
 /**
  * 관리자 편집 폼 정의. 필드 목록만 쓰면 편집 패널이 폼을 그린다.
  * 새 콘텐츠 종류(커맨드 리스트, 셋업 …)를 추가할 때는 여기에 항목을 추가한다.
@@ -23,6 +21,8 @@ export type Field = { key: string; label: string; help?: string; required?: bool
   | { type: "text" | "url" }
   | { type: "number"; step?: number; min?: number; max?: number; nullable?: boolean }
   | { type: "select"; options: Option[]; nullable?: boolean }
+  /** Vs 가이드의 상대 캐릭터: 분류 → 캐릭터 2단계 드롭다운 (값은 로스터 slug) */
+  | { type: "opponent" }
   | { type: "multiselect"; options: Option[] }
   | { type: "date" }
   | { type: "checkbox" }
@@ -87,12 +87,6 @@ const MOVE_CATEGORIES: Option[] = [
   { value: "special", label: "필살기" },
   { value: "super", label: "슈퍼 아츠" },
 ];
-
-/** 상대 캐릭터 (로스터 순서, 분류 이름을 붙여서) */
-const OPPONENTS: Option[] = ROSTER.map((c) => ({
-  value: c.slug,
-  label: `${c.name.ko} (${ROSTER_GROUPS.find((g) => g.id === c.group)!.name.ko})`,
-}));
 
 const VS_TOPICS: Option[] = [
   { value: "whiff_punish", label: "윕퍼" },
@@ -430,7 +424,7 @@ export const ENTITIES: Record<EntityType, Entity> = {
       {
         title: "Vs 가이드",
         fields: [
-          { key: "opponent", label: "상대 캐릭터", type: "select", options: OPPONENTS, required: true },
+          { key: "opponent", label: "상대 캐릭터", type: "opponent", required: true, help: "분류(초기 로스터 / 시즌)를 고른 뒤 캐릭터를 고릅니다." },
           { key: "topic", label: "주제", type: "select", options: VS_TOPICS },
           { key: "title", label: "제목", type: "localized" },
           { key: "body", label: "공용 내용", type: "localized", multiline: true, help: "모든 선택지에 공통인 설명" },

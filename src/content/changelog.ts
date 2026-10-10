@@ -17,6 +17,15 @@ export const CHANGELOG: ChangelogEntry[] = [
     items: [
       {
         kind: "changed",
+        adminOnly: true,
+        text: {
+          ko: "Vs 가이드 편집 창: 상대 캐릭터를 분류 → 캐릭터 2단계 드롭다운으로 고름",
+          en: "Vs guide editor: pick the opponent with two dropdowns (group, then character)",
+          ja: "Vs ガイド編集：対戦相手を分類 → キャラの2段階ドロップダウンで選択",
+        },
+      },
+      {
+        kind: "changed",
         text: {
           ko: "대상 수준 이름을 초급 / 숙련에서 기본 / 고급으로 변경",
           en: "Renamed the levels from Beginner / Skilled to Basic / Advanced",
