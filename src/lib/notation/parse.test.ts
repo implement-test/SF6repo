@@ -244,3 +244,36 @@ describe("etc", () => {
     expect(displayNotation("2mp > etc")).toBe("2MP → etc");
   });
 });
+
+describe("대괄호 묶음 [ :: ]", () => {
+  it("선택지마다 → 로 여러 단계를 이어 쓴다", () => {
+    const combo = parseNotation("2MP > [ 236MP :: MP..HP :: DR MP > 236HK > 623HP ]");
+    expect(combo).toHaveLength(2);
+    const branch = combo[1][0];
+    expect(branch.kind).toBe("branch");
+    if (branch.kind !== "branch") return;
+    expect(branch.options).toHaveLength(3);
+    expect(branch.options[0]).toEqual([[{ kind: "input", modifiers: [], direction: "236", buttons: ["MP"] }]]);
+    expect(branch.options[1]).toHaveLength(1);
+    expect(branch.options[2]).toHaveLength(3);
+    expect(branch.options[2][0]).toEqual([{ kind: "input", modifiers: ["DR"], direction: null, buttons: ["MP"] }]);
+  });
+
+  it("묶음 뒤에도 단계를 이어 쓸 수 있고, 대괄호 없는 :: 는 예전처럼 한 단계 안에서만 나뉜다", () => {
+    const combo = parseNotation("[5HP :: 2HP > 5MP] > 236HP");
+    expect(combo).toHaveLength(2);
+    expect(combo[0][0].kind).toBe("branch");
+    expect(parseNotation("5HP :: 2HP > 236HP")[0][0].kind).toBe("or");
+    expect(findUnknownTokens(parseNotation("2MP > [236MP (1040) :: DR MP > 236HK]"))).toEqual([]);
+  });
+
+  it("텍스트는 대괄호를 남기고 :: 를 / 로", () => {
+    expect(displayNotation("2mp > [ 236mp :: dr mp > 236hk ]")).toBe("2MP → [236MP / DR MP → 236HK]");
+  });
+
+  it("생략 구간 { } 과 함께 써도 된다", () => {
+    const segments = parseNotationSegments("2MP > {DRC 5HP} > [236MP :: 214MP > 623HP]");
+    expect(segments).toHaveLength(3);
+    expect(segments[2].combo[0][0].kind).toBe("branch");
+  });
+});

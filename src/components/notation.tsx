@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, type ReactNode } from "react";
 import {
   isSituation,
   displayNotation,
@@ -97,7 +97,18 @@ function Modifiers({ modifiers }: { modifiers: Modifier[] }) {
 function MoveIcons({ move }: { move: Move }) {
   switch (move.kind) {
     case "or":
-      return <OrGroup options={move.options} />;
+      return <OrGroup options={move.options.map((option, i) => <Chain key={i} moves={option} />)} />;
+    case "branch":
+      // 대괄호 묶음: 선택지마다 → 로 이어진 단계들을 한 줄에
+      return (
+        <OrGroup
+          options={move.options.map((option, i) => (
+            <span key={i} className="inline-flex flex-wrap items-center gap-x-1.5 gap-y-2">
+              <Steps combo={option} />
+            </span>
+          ))}
+        />
+      );
     case "note":
       return <span className="text-sm text-muted">({move.text})</span>;
     case "etc":
@@ -195,17 +206,15 @@ function Chain({ moves }: { moves: Move[] }) {
   );
 }
 
-/** 이 중 하나 (5HP :: 2HP): 선택지를 세로로 쌓고 왼쪽에 괄호 + OR */
-function OrGroup({ options }: { options: Move[][] }) {
+/** 이 중 하나 (5HP :: 2HP, [5HP :: DR MP → 236HK]): 선택지를 세로로 쌓고 왼쪽에 괄호 + OR */
+function OrGroup({ options }: { options: ReactNode[] }) {
   return (
     <span className="notation-or" role="group" aria-label="or">
       <span aria-hidden className="notation-or-bracket">
         <span className="notation-or-tag">OR</span>
       </span>
       <span className="flex flex-col items-start gap-1.5">
-        {options.map((option, i) => (
-          <Chain key={i} moves={option} />
-        ))}
+        {options}
       </span>
     </span>
   );

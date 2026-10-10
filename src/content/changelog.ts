@@ -18,6 +18,14 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         kind: "added",
         text: {
+          ko: "콤보 표기: [ ] 로 묶은 '이 중 하나'는 선택지마다 → 로 여러 단계를 이어 쓸 수 있음",
+          en: "Combo notation: an 'any one of' group in [ ] can have several → steps per option",
+          ja: "コンボ表記：[ ] で囲んだ「どれか1つ」は、選択肢ごとに → で複数の手順を書ける",
+        },
+      },
+      {
+        kind: "added",
+        text: {
           ko: "콤보 표기에 j.parry(저스트 패리) 추가 — 패리(parry)와 구분되는 J.Parry 아이콘",
           en: "Added j.parry (Perfect Parry) to combo notation, with a J.Parry icon distinct from parry",
           ja: "コンボ表記に j.parry（ジャストパリィ）を追加、パリィ(parry)と区別できる J.Parry アイコン",

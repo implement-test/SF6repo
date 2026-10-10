@@ -17,6 +17,7 @@
  *   236HP → etc           etc = 이후 자유롭게 이어 간다 (콤보가 열려 있음)
  *   2MP → {DRC 5HP} → 236HP   중괄호 안은 통째로 생략 가능 (이미지에서 점선 상자로 묶는다)
  *   5HP :: 2HP → 236HP    콜론 2개(::)는 이 중 하나 (이미지에서 세로로 쌓고 OR 괄호, 텍스트는 /)
+ *   [5HP :: DR MP → 236HK]  대괄호로 묶으면 선택지마다 → 로 여러 단계를 이어 쓴다 (텍스트는 [5HP / DR MP → 236HK])
  */
 
 /** 커맨드가 아니라 히트 상황. 커맨드와 구분되는 배지로 그린다. */
@@ -44,7 +45,9 @@ export type Move =
   | { kind: "etc" }
   | { kind: "unknown"; text: string }
   /** 이 중 하나 (`5HP :: 2HP`). 선택지마다 타겟 콤보 묶음 하나 */
-  | { kind: "or"; options: Move[][] };
+  | { kind: "or"; options: Move[][] }
+  /** 대괄호로 묶은 이 중 하나 (`[5HP :: DR MP → 236HK]`). 선택지마다 → 로 이어진 콤보 */
+  | { kind: "branch"; options: Combo[] };
 
 /** 타겟 콤보(..)로 묶인 기술 묶음 */
 export type Step = Move[];
@@ -95,6 +98,9 @@ export function normalizeNotation(src: string): string {
     .replace(/\s*·\s*/g, "·")
     // 콜론 2개(::)가 '이 중 하나'
     .replace(/\s*::\s*/g, " :: ")
+    // 대괄호 묶음은 안쪽 여백을 뗀다: "[ 5HP :: 2HP ]" → "[5HP :: 2HP]"
+    .replace(/\[\s+/g, "[")
+    .replace(/\s+\]/g, "]")
     .replace(/[ \t]+/g, " ")
     .trim();
 }
@@ -209,10 +215,50 @@ export function parseNotationSegments(src: string): NotationSegment[] {
     .filter((seg) => seg.combo.length > 0);
 }
 
+/**
+ * 대괄호 [ ] 밖에 있는 구분 기호로만 나눈다.
+ * "2MP → [5HP :: DR MP → 236HK]" 를 → 로 나누면 대괄호 안의 → 는 그대로 남는다.
+ */
+export function splitTopLevel(src: string, separator: string): string[] {
+  const parts: string[] = [];
+  let depth = 0;
+  let start = 0;
+  for (let i = 0; i < src.length; i++) {
+    const ch = src[i];
+    if (ch === "[") depth++;
+    else if (ch === "]") depth = Math.max(0, depth - 1);
+    else if (depth === 0 && src.startsWith(separator, i)) {
+      parts.push(src.slice(start, i));
+      start = i + separator.length;
+      i += separator.length - 1;
+    }
+  }
+  parts.push(src.slice(start));
+  return parts;
+}
+
+/** 단계 하나가 통째로 대괄호 묶음이면 그 안쪽 (아니면 null). 맨 앞의 [ 가 맨 끝의 ] 에서 닫혀야 한다 */
+export function bracketBody(step: string): string | null {
+  const t = step.trim();
+  if (!t.startsWith("[") || !t.endsWith("]")) return null;
+  let depth = 0;
+  for (let i = 0; i < t.length; i++) {
+    if (t[i] === "[") depth++;
+    else if (t[i] === "]" && --depth === 0 && i < t.length - 1) return null;
+  }
+  return depth === 0 ? t.slice(1, -1) : null;
+}
+
 function parsePlain(src: string): Combo {
   const normalized = normalizeNotation(src);
   if (!normalized) return [];
-  return normalized.split("→").map((step) => {
+  return splitTopLevel(normalized, "→").map((step) => {
+    // "[5HP :: DR MP → 236HK]" = 선택지마다 여러 단계가 있는 이 중 하나
+    const body = bracketBody(step);
+    if (body !== null) {
+      const options = splitTopLevel(body, "::").map(parsePlain).filter((o) => o.length > 0);
+      return options.length > 0 ? [{ kind: "branch", options }] : [];
+    }
     // "5HP :: 2HP" = 이 중 하나. 선택지마다 타겟 콤보 묶음으로 읽는다
     const options = step.split("::").map(parseChain).filter((o) => o.length > 0);
     return options.length > 1 ? [{ kind: "or", options }] : (options[0] ?? []);
@@ -230,7 +276,9 @@ function parseChain(src: string): Move[] {
 
 /** or 묶음을 풀어 모든 기술을 */
 function allMoves(moves: Move[]): Move[] {
-  return moves.flatMap((m) => (m.kind === "or" ? m.options.flatMap(allMoves) : [m]));
+  return moves.flatMap((m) =>
+    m.kind === "or" ? m.options.flatMap(allMoves) : m.kind === "branch" ? m.options.flatMap((c) => allMoves(c.flat())) : [m],
+  );
 }
 
 /** 파싱 결과에 해석하지 못한 조각이 있는지 (관리자 입력 검증용) */

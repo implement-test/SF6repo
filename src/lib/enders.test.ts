@@ -82,3 +82,10 @@ describe("lastStepKey 와 etc", () => {
     expect(lastStepKey("2MP → 236HP → etc")).toBe("");
   });
 });
+
+describe("lastStepKey 와 대괄호 묶음", () => {
+  it("대괄호 묶음으로 끝나면 첫 번째 선택지의 마지막 기술", () => {
+    expect(lastStepKey("2MP > [DR MP > 236HK > 623HP :: 236MP]")).toBe("623HP");
+    expect(lastStepKey("[5HP :: 2HP] > 236HP")).toBe("236HP");
+  });
+});

@@ -1,4 +1,4 @@
-import { normalizeNotation } from "./notation/parse";
+import { bracketBody, normalizeNotation, splitTopLevel } from "./notation/parse";
 import { comboRoutes } from "./combo-routes";
 import type { Combo, ComboEnder, ComboRoute } from "./types";
 
@@ -10,11 +10,16 @@ import type { Combo, ComboEnder, ComboRoute } from "./types";
 
 /**
  * 표기의 마지막 기술 (비교용: 표준 기호 · 대문자, 생략 표시 { } 는 뺀다. 마지막 단계가 '이 중 하나(::)'면 첫 번째 선택지).
+ * 대괄호 묶음([A :: B → C])으로 끝나면 첫 번째 선택지의 마지막 기술.
  * etc 로 끝나면 콤보가 열려 있으므로 끝낸 기술이 없다 ("").
  */
 export function lastStepKey(notation: string): string {
-  const steps = normalizeNotation(notation.replace(/[{}]/g, " ")).split("→");
-  const key = (steps[steps.length - 1] ?? "").split("::")[0].trim().replace(/\s+/g, " ").toUpperCase();
+  const lastOf = (src: string) => splitTopLevel(src, "→").at(-1)?.trim() ?? "";
+  let last = lastOf(normalizeNotation(notation.replace(/[{}]/g, " ")));
+  for (let body = bracketBody(last); body !== null; body = bracketBody(last)) {
+    last = lastOf(splitTopLevel(body, "::")[0]);
+  }
+  const key = last.split("::")[0].trim().replace(/\s+/g, " ").toUpperCase();
   return /^ETC\.?$/.test(key) ? "" : key;
 }
 
