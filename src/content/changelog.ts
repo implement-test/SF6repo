@@ -18,6 +18,14 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         kind: "changed",
         text: {
+          ko: "Vs 가이드: 상대 선택을 2단계 드롭다운으로 (초기 로스터 · 시즌을 고른 뒤 캐릭터)",
+          en: "Vs guides: opponent picker is now two dropdowns (launch roster / season, then character)",
+          ja: "Vs ガイド：対戦相手の選択を2段階のドロップダウンに（初期ロスター・シーズン → キャラクター）",
+        },
+      },
+      {
+        kind: "changed",
+        text: {
           ko: "Vs 가이드: 상단 필터(대상 · 콤보 표시 · 조작) 제거, 상대 캐릭터는 이름 드롭다운으로 바로 선택",
           en: "Vs guides: removed the top filters (level / display / controls); pick the opponent from a name dropdown",
           ja: "Vs ガイド：上部フィルター（対象・コンボ表示・操作）を削除、対戦相手は名前のドロップダウンで選択",

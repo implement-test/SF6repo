@@ -4,7 +4,8 @@ import { useEffect, useState, type ReactNode } from "react";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { VS_TOPICS, type TargetLevel, type VsTopic } from "@/lib/types";
 import { useFavorites } from "@/lib/favorites";
-import { setVsCounts, useVsOpponent } from "@/lib/vs-store";
+import { rosterBySlug } from "@/lib/roster";
+import { setVsCounts, useVsGroup, useVsOpponent } from "@/lib/vs-store";
 import { SortableCards } from "./admin/sortable-cards";
 import { AddButton } from "./admin/admin-context";
 import { ReorderButton } from "./admin/reorder-button";
@@ -30,6 +31,7 @@ export function VsGuideList({
   characterName: string;
 }) {
   const opponent = useVsOpponent();
+  const group = useVsGroup();
   const [topics, setTopics] = useState<VsTopic[]>([]);
   const [favOnly, setFavOnly] = useState(false);
   const favorites = useFavorites("vs");
@@ -42,7 +44,9 @@ export function VsGuideList({
     setVsCounts(counts);
   }, [countsKey]);
 
-  const forOpponent = items.filter((i) => !opponent || i.opponent === opponent);
+  const forOpponent = items.filter((i) =>
+    opponent ? i.opponent === opponent : !group || rosterBySlug(i.opponent)?.group === group,
+  );
   const favCount = forOpponent.filter((i) => favorites.has(i.id)).length;
   const visible = forOpponent.filter(
     (i) => (topics.length === 0 || topics.includes(i.topic)) && (!favOnly || favorites.has(i.id)),
