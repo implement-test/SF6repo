@@ -36,6 +36,12 @@ const LEGEND: { notation: string; ko: string; en: string; ja: string }[] = [
     en: "[ ] lets each option run several → steps",
     ja: "[ ] で囲むと、選択肢ごとに → で複数の手順を書ける",
   },
+  {
+    notation: "5HP(2) → 236HP =1040",
+    ko: "(2) 몇 번째 타격 / =1040 데미지 (숫자만 든 메모 (1040) 도 데미지)",
+    en: "(2) = which hit / =1040 = damage (a number-only memo (1040) counts too)",
+    ja: "(2) 何段目 / =1040 ダメージ (数字だけのメモ (1040) もダメージ)",
+  },
   { notation: "2MP → {DRC 5HP} → 236HP", ko: "{ } 안은 통째로 생략 가능", en: "{ } marks a part you can skip", ja: "{ } の中は省略可能" },
   { notation: "2MP → 236HP → etc", ko: "etc 이후는 자유롭게 이어 간다", en: "etc: continue however you like", ja: "etc 以降は自由につなぐ" },
   { notation: "SA1 → SA2 → SA3", ko: "sa1 · sa2 · sa3 슈퍼 아츠", en: "sa1 / sa2 / sa3: Super Arts", ja: "sa1・sa2・sa3 スーパーアーツ" },

@@ -19,7 +19,13 @@ export function lastStepKey(notation: string): string {
   for (let body = bracketBody(last); body !== null; body = bracketBody(last)) {
     last = lastOf(splitTopLevel(body, "::")[0]);
   }
-  const key = last.split("::")[0].trim().replace(/\s+/g, " ").toUpperCase();
+  // 데미지(=1040, 숫자만 든 메모 (1040))는 기술이 아니므로 뗀다
+  const key = last
+    .split("::")[0]
+    .replace(/\s*(?:=\d[\d~-]*|\(\d{3,5}(?:[~-]\d{3,5})?\))\s*$/, "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toUpperCase();
   return /^ETC\.?$/.test(key) ? "" : key;
 }
 

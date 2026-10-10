@@ -16,6 +16,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-10-10",
     items: [
       {
+        kind: "added",
+        text: {
+          ko: "콤보 표기에 데미지 추가 (236HP =1040 → 노란 숫자 칩), 타수 5HP(2) 는 괄호 대신 2hit 꼬리표로 구분",
+          en: "Added damage to combo notation (236HP =1040 → yellow number chip); hit numbers like 5HP(2) now show as a 2hit tag",
+          ja: "コンボ表記にダメージを追加（236HP =1040 → 黄色の数字）、5HP(2) の段数は 2hit タグで区別",
+        },
+      },
+      {
         kind: "changed",
         adminOnly: true,
         text: {

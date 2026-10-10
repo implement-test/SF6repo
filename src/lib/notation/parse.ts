@@ -15,6 +15,7 @@
  *   j.HP / nj.HP / bj.HP  점프 / 제자리 점프 / 뒤 점프 공격 (air 는 상대가 공중인 히트 상황이라 다르다)
  *   L M H SP A            모던 버튼 (A = AUTO)
  *   (텍스트)              괄호 안은 그대로 메모로 표시
+ *   236HP =1040           = 뒤 숫자는 데미지 (노란 숫자 칩). 숫자만 든 메모 (1040) 도 데미지로 본다
  *   236HP → etc           etc = 이후 자유롭게 이어 간다 (콤보가 열려 있음)
  *   2MP → {DRC 5HP} → 236HP   중괄호 안은 통째로 생략 가능 (이미지에서 점선 상자로 묶는다)
  *   5HP :: 2HP → 236HP    콜론 2개(::)는 이 중 하나 (이미지에서 세로로 쌓고 OR 괄호, 텍스트는 /)
@@ -44,6 +45,8 @@ export type Move =
   /** 잡기: f.throw = 앞잡기, b.throw = 뒤잡기, throw = 방향 없음 */
   | { kind: "throw"; modifiers: Modifier[]; direction: "f" | "b" | null }
   | { kind: "note"; text: string }
+  /** 데미지: "=1040" (범위 "=1040~1200"), 숫자만 든 메모 "(1040)" */
+  | { kind: "damage"; text: string }
   /** etc: 이후는 자유롭게 이어 간다 */
   | { kind: "etc" }
   | { kind: "unknown"; text: string }
@@ -99,6 +102,9 @@ export function normalizeNotation(src: string): string {
     .replace(/[・•]/g, "·")
     .replace(/\s*→\s*/g, " → ")
     .replace(/\s*·\s*/g, "·")
+    // 데미지 "= 1040" 은 붙여서 한 조각으로
+    .replace(/=\s+(?=\d)/g, "=")
+    .replace(/([^\s=])=(?=\d)/g, "$1 =")
     // 콜론 2개(::)가 '이 중 하나'
     .replace(/\s*::\s*/g, " :: ")
     // 대괄호 묶음은 안쪽 여백을 뗀다: "[ 5HP :: 2HP ]" → "[5HP :: 2HP]"
@@ -128,6 +134,8 @@ export function displayNotation(src: string): string {
             .replace(/\b(n|b)?j\.(?=\w)/gi, (m) => m.toLowerCase())
             .replace(/\bj\.parry\b/gi, "J.Parry")
             .replace(/·/g, "..")
+            // 데미지는 띄워서: "236HP = 1040"
+            .replace(/\s*=(?=\d)/g, " = ")
             .replace(/ :: /g, " / "),
     )
     .join("");
@@ -147,7 +155,8 @@ function parseButtons(src: string): Button[] | null {
 
 function parseMove(src: string): Move {
   const text = src.trim();
-  if (/^\(.*\)$/.test(text)) return { kind: "note", text: text.slice(1, -1).trim() };
+  if (/^\(.*\)$/.test(text)) return noteOrDamage(text.slice(1, -1));
+  if (/^=/.test(text) && DAMAGE.test(text.slice(1))) return { kind: "damage", text: text.slice(1) };
   if (/^etc\.?$/i.test(text)) return { kind: "etc" };
 
   const words = text.split(" ").filter(Boolean);
@@ -204,10 +213,22 @@ function parseMove(src: string): Move {
  */
 function parsePart(part: string): Move[] {
   const lead = /^\(([^)]*)\)\s+(.+)$/.exec(part);
-  if (lead) return [{ kind: "note", text: lead[1].trim() }, ...parsePart(lead[2])];
+  if (lead) return [noteOrDamage(lead[1]), ...parsePart(lead[2])];
   const trail = /^(.+?)\s+\(([^)]*)\)$/.exec(part);
-  if (trail) return [...parsePart(trail[1]), { kind: "note", text: trail[2].trim() }];
+  if (trail) return [...parsePart(trail[1]), noteOrDamage(trail[2])];
+  // "236HP =1040": 끝에 붙인 데미지
+  const dmg = /^(.+?)\s+=(\S+)$/.exec(part);
+  if (dmg && DAMAGE.test(dmg[2])) return [...parsePart(dmg[1]), { kind: "damage", text: dmg[2] }];
   return [parseMove(part)];
+}
+
+/** 데미지 값: 1040, 범위 1040~1200 · 1040-1200 */
+const DAMAGE = /^\d{1,5}(?:[~-]\d{1,5})?$/;
+
+/** 괄호 메모. 숫자(3~5자리)만 들어 있으면 예전에 메모로 적은 데미지로 본다: "(1040)" */
+function noteOrDamage(raw: string): Move {
+  const text = raw.trim();
+  return /^\d{3,5}(?:[~-]\d{3,5})?$/.test(text) ? { kind: "damage", text } : { kind: "note", text };
 }
 
 /** 중괄호({})를 뺀 콤보 전체. 생략 가능 구간도 그대로 이어서 읽는다 */

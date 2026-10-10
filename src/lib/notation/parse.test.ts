@@ -308,3 +308,26 @@ describe("대괄호 묶음 [ :: ]", () => {
     expect(segments[2].combo[0][0].kind).toBe("branch");
   });
 });
+
+describe("데미지 =1040", () => {
+  it("= 뒤 숫자는 데미지 (띄어 써도, 범위도)", () => {
+    expect(parseNotation("236HP =1040")[0]).toEqual([
+      { kind: "input", modifiers: [], direction: "236", buttons: ["HP"] },
+      { kind: "damage", text: "1040" },
+    ]);
+    expect(parseNotation("236HP = 1040~1200")[0][1]).toEqual({ kind: "damage", text: "1040~1200" });
+    expect(parseNotation("2MP=980")[0][1]).toEqual({ kind: "damage", text: "980" });
+    expect(findUnknownTokens(parseNotation("2MP > [236MP =1040 :: MP..HP =1520]"))).toEqual([]);
+  });
+
+  it("숫자만 든 메모 (1040) 도 데미지, 글이 있는 메모와 타수는 그대로", () => {
+    expect(parseNotation("236MP (1040)")[0][1]).toEqual({ kind: "damage", text: "1040" });
+    expect(parseNotation("236MP (벽꽝)")[0][1]).toEqual({ kind: "note", text: "벽꽝" });
+    expect(parseNotation("5HP(2)")[0][0]).toEqual({ kind: "input", modifiers: [], direction: null, buttons: ["HP"], hits: 2 });
+    expect(parseNotation("5HP (12)")[0][1]).toEqual({ kind: "note", text: "12" });
+  });
+
+  it("텍스트는 236HP = 1040", () => {
+    expect(displayNotation("236hp =1040 > 2mp= 980")).toBe("236HP = 1040 → 2MP = 980");
+  });
+});

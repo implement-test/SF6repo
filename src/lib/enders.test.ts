@@ -89,3 +89,11 @@ describe("lastStepKey 와 대괄호 묶음", () => {
     expect(lastStepKey("[5HP :: 2HP] > 236HP")).toBe("236HP");
   });
 });
+
+describe("lastStepKey 와 데미지", () => {
+  it("끝에 붙인 데미지(=1040, (1040))는 빼고 비교한다", () => {
+    expect(lastStepKey("2MP > 623HP =2580")).toBe("623HP");
+    expect(lastStepKey("2MP > 623HP (2580)")).toBe("623HP");
+    expect(lastStepKey("2MP > [236MP =1040 :: 214MP]")).toBe("236MP");
+  });
+});

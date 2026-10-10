@@ -111,6 +111,16 @@ function MoveIcons({ move }: { move: Move }) {
       );
     case "note":
       return <span className="text-sm text-muted">({move.text})</span>;
+    case "damage":
+      // 데미지: 메모(회색 괄호) · 타수와 헷갈리지 않게 노란 숫자 칩
+      return (
+        <span className="notation-damage" title={`damage ${move.text}`}>
+          <span aria-hidden className="notation-damage-tag">
+            DMG
+          </span>
+          {move.text}
+        </span>
+      );
     case "etc":
       return <EtcBadge />;
     case "unknown":
@@ -144,8 +154,9 @@ function MoveIcons({ move }: { move: Move }) {
             <Icon key={`b${i}`} icon={BUTTON_ICONS[b]} />
           ))}
           {move.hits && (
-            <span className="self-end text-xs font-bold text-muted" title={`${move.hits} hit`}>
-              ({move.hits})
+            // 몇 번째 타격: 괄호 대신 작은 꼬리표 (메모 · 데미지와 구분)
+            <span className="notation-hits" title={`${move.hits} hit`}>
+              {move.hits}hit
             </span>
           )}
         </span>
@@ -192,6 +203,9 @@ function Steps({ combo }: { combo: Combo }) {
   );
 }
 
+/** 앞뒤에 타겟 콤보 구분점(..)을 찍지 않는 조각: 메모 · 데미지 */
+const LOOSE = new Set<Move["kind"]>(["note", "damage"]);
+
 /** 타겟 콤보(..)로 묶인 기술 묶음 */
 function Chain({ moves }: { moves: Move[] }) {
   return (
@@ -199,7 +213,7 @@ function Chain({ moves }: { moves: Move[] }) {
       {moves.map((move, j) => (
         <Fragment key={j}>
           {/* 타겟 콤보 구분점. 괄호 메모 앞뒤에는 찍지 않는다 */}
-          {j > 0 && move.kind !== "note" && moves[j - 1].kind !== "note" && <span className="font-bold text-muted">..</span>}
+          {j > 0 && !LOOSE.has(move.kind) && !LOOSE.has(moves[j - 1].kind) && <span className="font-bold text-muted">..</span>}
           <MoveIcons move={move} />
         </Fragment>
       ))}
