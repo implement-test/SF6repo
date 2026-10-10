@@ -7,7 +7,7 @@ import { pickLocalized } from "@/lib/i18n/localized";
 import { ROSTER, ROSTER_GROUPS, type RosterGroup } from "@/lib/roster";
 import { setVsGroup, setVsOpponent, useVsCounts, useVsGroup, useVsOpponent } from "@/lib/vs-store";
 
-const SELECT_CLASS = "min-w-0 flex-1 border border-border-strong bg-bg px-2 py-1.5 font-bold disabled:opacity-50 sm:max-w-56";
+const SELECT_CLASS = "min-w-0 flex-1 border border-border-strong bg-bg px-2 py-1 text-sm font-semibold disabled:opacity-50 sm:max-w-56";
 
 /**
  * Vs 가이드의 상대 캐릭터 선택. 캐릭터 레이아웃의 탭 아래에 두고, Vs 탭에서만 보인다.

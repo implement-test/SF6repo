@@ -16,6 +16,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-10-10",
     items: [
       {
+        kind: "changed",
+        text: {
+          ko: "Vs 가이드: 상대 캐릭터 드롭다운 글자 크기를 줄임",
+          en: "Vs guides: smaller text in the opponent dropdowns",
+          ja: "Vs ガイド：対戦相手ドロップダウンの文字を小さく",
+        },
+      },
+      {
         kind: "added",
         text: {
           ko: "콤보 표기: [ ] 로 묶은 '이 중 하나'는 선택지마다 → 로 여러 단계를 이어 쓸 수 있음",
