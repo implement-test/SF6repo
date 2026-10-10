@@ -1,6 +1,5 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getAuthorNames, getCharacter, getLatestPatchId, getPractices } from "@/lib/data";
+import { getAuthorNames, getLatestPatchId, getPractices } from "@/lib/data";
 import { hasLocale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { SetupCard } from "@/components/setup-card";
@@ -11,40 +10,28 @@ import { ReorderButton } from "@/components/admin/reorder-button";
 
 export const revalidate = 3600;
 
-/** 추천 연습: 셋업과 같은 구조 (이어지는 콤보 대신 상황을 글로) */
-export default async function PracticePage({ params }: PageProps<"/[lang]/[character]/practice">) {
-  const { lang, character: slug } = await params;
+/** 공통 공략 · 추천 연습: 캐릭터와 상관없는 연습 (practices 에서 character_id 가 비어 있는 행) */
+export default async function GuidePracticePage({ params }: PageProps<"/[lang]/guide/practice">) {
+  const { lang } = await params;
   if (!hasLocale(lang)) notFound();
-  const character = await getCharacter(slug);
-  if (!character) notFound();
-
   const dict = getDictionary(lang);
-  const [practices, latestPatchId, authors] = await Promise.all([
-    getPractices(character.id),
-    getLatestPatchId(),
-    getAuthorNames(),
-  ]);
+  const [practices, latestPatchId, authors] = await Promise.all([getPractices(null), getLatestPatchId(), getAuthorNames()]);
 
-  // 관리자 버튼: 목록 위와 아래에 같은 것을 둔다 (방문자에게는 비어서 숨는다)
   const adminActions = (
     <div className="flex justify-end gap-2 empty:hidden">
-      <ReorderButton table="practices" characterId={character.id} label="추천 연습" />
-      <AddButton entity="practice" label="추천 연습 추가" scope={character.id} defaults={{ character_id: character.id }} />
+      <ReorderButton table="practices" characterId={null} label="공통 추천 연습" />
+      <AddButton entity="practice" label="공통 추천 연습 추가" defaults={{ character_id: null }} />
     </div>
   );
 
   return (
     <div className="flex flex-col gap-4">
       {adminActions}
-      {/* 모든 캐릭터에 통용되는 것은 공통 공략에 */}
-      <Link href="/guide/practice" className="self-end text-sm font-semibold text-muted transition-colors hover:text-accent">
-        {dict.guide.seeCommon.practice} →
-      </Link>
-      <DraftItems table="practices" entity="practice" characterId={character.id} label="추천 연습" />
+      <DraftItems table="practices" entity="practice" characterId={null} label="공통 추천 연습" />
       <SetupFilters
         kind="practice"
         dict={dict}
-        characterId={character.id}
+        characterId={null}
         situations={[]}
         items={practices
           .filter((p) => p.is_published)
@@ -62,7 +49,7 @@ export default async function PracticePage({ params }: PageProps<"/[lang]/[chara
                 linkedEnders={[]}
                 latestPatchId={latestPatchId}
                 authors={authors}
-                characterSlug={slug}
+                characterSlug=""
               />
             ),
           }))}

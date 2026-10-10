@@ -3,6 +3,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type {
   Character,
   CharacterOverview,
+  CommonGuide,
   Combo,
   ComboGroup,
   Move,
@@ -19,9 +20,12 @@ import { normalizeOptions, normalizePractice } from "@/lib/setup";
 import { normalizeStarterGroups } from "@/lib/starters";
 import { normalizeVsPatterns } from "@/lib/vs-patterns";
 import { linkedEndersFor, type LinkedEnder } from "@/lib/setup-links";
+// 캐릭터의 항목, 또는 공통 공략(character_id 가 비어 있는 행, 0028)
+import { scoped } from "@/lib/admin/scope";
 import {
   sampleCharacters,
   sampleCombos,
+  sampleCommonGuides,
   samplePatches,
   sampleEnders,
   sampleSetupEnders,
@@ -109,14 +113,11 @@ export async function getComboGroups(characterId: number): Promise<ComboGroup[]>
   return (data ?? []) as ComboGroup[];
 }
 
-/** 추천 연습 (0022). 표가 아직 없으면 빈 목록 */
-export async function getPractices(characterId: number): Promise<Practice[]> {
+/** 추천 연습 (0022). characterId 가 null 이면 공통 공략의 추천 연습. 표가 아직 없으면 빈 목록 */
+export async function getPractices(characterId: number | null): Promise<Practice[]> {
   const c = db();
   if (!c) return [];
-  const { data, error } = await c
-    .from("practices")
-    .select("*")
-    .eq("character_id", characterId)
+  const { data, error } = await scoped(c.from("practices").select("*"), "practices", characterId)
     .order("sort_order")
     .order("id");
   if (error) return [];
@@ -260,10 +261,19 @@ export async function getMoves(characterId: number): Promise<Move[]> {
   return (data ?? []) as Move[];
 }
 
-/** 추천 영상. 표가 아직 없으면(0020 실행 전) 빈 목록 */
-export async function getVideos(characterId: number): Promise<Video[]> {
+/** 추천 영상. characterId 가 null 이면 공통 공략의 추천 영상. 표가 아직 없으면(0020 실행 전) 빈 목록 */
+export async function getVideos(characterId: number | null): Promise<Video[]> {
   const c = db();
   if (!c) return sampleVideos.filter((v) => v.character_id === characterId);
-  const { data } = await c.from("videos").select("*").eq("character_id", characterId).order("sort_order").order("id");
+  const { data } = await scoped(c.from("videos").select("*"), "videos", characterId).order("sort_order").order("id");
   return (data ?? []) as Video[];
+}
+
+/** 공통 공략의 시스템 글 (0028). 표가 아직 없으면 빈 목록 */
+export async function getCommonGuides(): Promise<CommonGuide[]> {
+  const c = db();
+  if (!c) return sampleCommonGuides;
+  const { data, error } = await c.from("common_guides").select("*").order("sort_order").order("id");
+  if (error) return [];
+  return (data ?? []) as CommonGuide[];
 }

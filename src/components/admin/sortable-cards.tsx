@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { TargetLevel } from "@/lib/types";
 import { useHiddenLevels } from "../use-hidden-levels";
 import { useAdmin } from "./admin-context";
+import { editScope, scoped, type ListTable } from "@/lib/admin/scope";
 
 type Item = { id: number; level: TargetLevel; card: ReactNode };
 type Status = { kind: "saving" | "saved" | "error"; message?: string } | null;
@@ -25,8 +26,9 @@ export function SortableCards({
   levelFilter = true,
   inlineReorder = true,
 }: {
-  table: "combos" | "setups" | "practices" | "vs_guides" | "moves" | "videos";
-  characterId: number;
+  table: ListTable;
+  /** null = 공통 공략 */
+  characterId: number | null;
   /** 공개 항목 전체 (지금 순서대로) */
   items: Item[];
   /** 필터를 통과한 항목 */
@@ -39,7 +41,7 @@ export function SortableCards({
 }) {
   const { canEdit } = useAdmin();
   const router = useRouter();
-  const editable = inlineReorder && canEdit(characterId);
+  const editable = inlineReorder && canEdit(editScope(characterId));
   const [order, setOrder] = useState<number[] | null>(null);
   const [armed, setArmed] = useState<number | null>(null);
   const [dragId, setDragId] = useState<number | null>(null);
@@ -95,10 +97,7 @@ export function SortableCards({
   async function persist(next: number[]) {
     const { supabaseBrowser, revalidateSite, describeError } = await import("@/lib/supabase/browser");
     const sb = supabaseBrowser();
-    const { data, error } = await sb
-      .from(table)
-      .select("id,sort_order")
-      .eq("character_id", characterId)
+    const { data, error } = await scoped(sb.from(table).select("id,sort_order"), table, characterId)
       .order("sort_order")
       .order("id");
     if (error || !data) return setStatus({ kind: "error", message: error ? describeError(error) : undefined });

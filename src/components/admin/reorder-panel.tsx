@@ -6,6 +6,7 @@ import { describeError, revalidateSite, supabaseBrowser } from "@/lib/supabase/b
 import { useAdmin } from "./admin-context";
 import { NotationText } from "../notation";
 import { listColumns } from "./drafts";
+import { scoped, type ListTable } from "@/lib/admin/scope";
 
 type Item = {
   id: number;
@@ -25,8 +26,9 @@ export default function ReorderPanel({
   label,
   onClose,
 }: {
-  table: "combos" | "setups" | "practices" | "vs_guides" | "moves" | "videos";
-  characterId: number;
+  table: ListTable;
+  /** null = 공통 공략 */
+  characterId: number | null;
   label: string;
   onClose: () => void;
 }) {
@@ -40,9 +42,7 @@ export default function ReorderPanel({
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    sb.from(table)
-      .select(`${listColumns(table)},is_published,sort_order` as string)
-      .eq("character_id", characterId)
+    scoped(sb.from(table).select(`${listColumns(table)},is_published,sort_order` as string), table, characterId)
       .order("sort_order")
       .order("id")
       .then(({ data, error }) => {

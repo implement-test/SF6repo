@@ -1,4 +1,4 @@
-import type { Character, CharacterOverview, Move, Video, VsPattern, Combo, Patch, Setup, SetupSituation, VsGuide, ComboEnder, SetupEnderLink } from "@/lib/types";
+import type { Character, CharacterOverview, CommonGuide, Move, Video, VsPattern, Combo, Patch, Setup, SetupSituation, VsGuide, ComboEnder, SetupEnderLink } from "@/lib/types";
 import { ROSTER } from "@/lib/roster";
 
 /**
@@ -344,5 +344,25 @@ export const sampleVideos: Video[] = [
     sort_order: 2,
     is_published: true,
     created_date: "2026-09-26",
+  },
+];
+
+/** 공통 공략의 시스템 글 (0028) */
+export const sampleCommonGuides: CommonGuide[] = [
+  {
+    id: 1,
+    topic: "system",
+    title: { ko: "[예시] 드라이브 러시 기본" },
+    body: { ko: "드라이브 게이지 1칸으로 앞으로 달려 들어간다.\n캔슬 드라이브 러시(DRC)는 3칸을 쓴다." },
+    notation_classic: "2MP → DRC 5HP → 236HP",
+    notation_modern: null,
+    media_url: null,
+    youtube_url: null,
+    youtube_start: null,
+    target_level: "beginner",
+    patch_id: 1,
+    sort_order: 1,
+    is_published: true,
+    created_date: "2026-10-10",
   },
 ];

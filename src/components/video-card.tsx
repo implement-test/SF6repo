@@ -5,6 +5,7 @@ import { pickLocalized } from "@/lib/i18n/localized";
 import { formatClock } from "@/lib/youtube";
 import { LevelBadge, NotTranslatedBadge, OutdatedBadge } from "./badges";
 import { EditButton } from "./admin/admin-context";
+import { editScope } from "@/lib/admin/scope";
 import { VideoPlayer } from "./video-player";
 
 /** 추천 영상 카드: 썸네일(누르면 재생) → [대상 수준] 제목 · 채널 · 언어 · 구간 → 설명 */
@@ -48,7 +49,7 @@ export function VideoCard({
           <h2 className="min-w-0 flex-1 font-bold leading-snug">
             {title.text} {!title.translated && <NotTranslatedBadge label={dict.notTranslated} />}
           </h2>
-          <EditButton entity="video" id={video.id} scope={video.character_id} />
+          <EditButton entity="video" id={video.id} scope={editScope(video.character_id)} />
         </header>
         <p className="flex flex-wrap items-center gap-1.5 text-xs text-muted">
           <LevelBadge level={video.target_level} label={dict.level[video.target_level]} />

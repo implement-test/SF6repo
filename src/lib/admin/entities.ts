@@ -41,7 +41,7 @@ export type Field = { key: string; label: string; help?: string; required?: bool
 
 export type FieldGroup = { title: string; fields: Field[] };
 
-export type EntityType = "combo" | "patch" | "setup" | "practice" | "vs" | "overview" | "move" | "video";
+export type EntityType = "combo" | "patch" | "setup" | "practice" | "vs" | "overview" | "move" | "video" | "guide";
 
 export type Entity = {
   table: string;
@@ -100,6 +100,14 @@ const VS_TOPICS: Option[] = [
   { value: "pressure_gap", label: "끼어들기" },
   { value: "cheese", label: "패턴 대응" },
   { value: "setup", label: "주요 셋업" },
+];
+
+/** 공통 공략 시스템 글의 주제 */
+const GUIDE_TOPICS: Option[] = [
+  { value: "system", label: "시스템" },
+  { value: "offense", label: "공격 · 운영" },
+  { value: "defense", label: "수비" },
+  { value: "other", label: "기타" },
 ];
 
 const HIT_STATES: Option[] = [
@@ -387,6 +395,32 @@ export const ENTITIES: Record<EntityType, Entity> = {
       META_GROUP,
     ],
     defaults: () => ({ ...metaDefaults(), language: "ko", youtube_loop: false }),
+  },
+
+  guide: {
+    table: "common_guides",
+    label: "시스템 글",
+    groups: [
+      {
+        title: "시스템 글 (공통 공략)",
+        fields: [
+          { key: "topic", label: "주제", type: "select", options: GUIDE_TOPICS },
+          { key: "title", label: "제목", type: "localized", required: true, help: "목록에서는 카드가 접혀 제목만 보입니다." },
+          {
+            key: "body",
+            label: "내용",
+            type: "localized",
+            multiline: true,
+            help: "모든 캐릭터에 통용되는 설명. 줄바꿈은 그대로 보입니다.",
+          },
+          { key: "notation_classic", label: "예시 표기 (클래식)", type: "notation", wide: true, help: "예시로 보여 줄 입력이 있으면 (없으면 비움)" },
+          { key: "notation_modern", label: "예시 표기 (모던)", type: "notation", wide: true },
+        ],
+      },
+      MEDIA_GROUP,
+      META_GROUP,
+    ],
+    defaults: () => ({ ...metaDefaults(), topic: "system" }),
   },
 
   vs: {

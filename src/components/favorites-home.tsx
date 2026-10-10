@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
-import type { Character, Combo, ComboEnder, Localized, Practice, Setup, SetupEnderLink, VsGuide } from "@/lib/types";
+import type { Character, Combo, CommonGuide, ComboEnder, Localized, Practice, Setup, SetupEnderLink, VsGuide } from "@/lib/types";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { pickLocalized } from "@/lib/i18n/localized";
@@ -15,6 +15,7 @@ import { linkedEndersFor, type LinkedEnder } from "@/lib/setup-links";
 import { ComboCard } from "./combo-card";
 import { SetupCard } from "./setup-card";
 import { VsGuideCard } from "./vs-guide-card";
+import { CommonGuideCard } from "./common-guide-card";
 import { ExpandAllButton } from "./card-controls";
 
 type Loaded = {
@@ -28,13 +29,17 @@ type Loaded = {
   enders: ComboEnder[];
   practices: Practice[];
   vs: VsGuide[];
+  guides: CommonGuide[];
 };
 
 /** 탭(페이지) 이름: 카드가 원래 있는 곳 */
-const PAGE: Record<FavoriteKind, string> = { combo: "combos", setup: "setups", practice: "practice", vs: "vs" };
+const PAGE: Record<FavoriteKind, string> = { combo: "combos", setup: "setups", practice: "practice", vs: "vs", guide: "" };
+/** 공통 공략의 항목이 있는 곳 (character_id 가 없는 항목) */
+const COMMON_PAGE: Partial<Record<FavoriteKind, string>> = { practice: "/guide/practice", guide: "/guide" };
 
 /**
- * 개인 홈: 이 브라우저에 저장된 즐겨찾기(콤보 · 셋업 · 추천 연습 · Vs 가이드)를 모아 보여 준다.
+ * 개인 홈: 이 브라우저에 저장된 즐겨찾기(콤보 · 셋업 · 추천 연습 · Vs 가이드 · 공통 공략의 시스템 글)를 모아 보여 준다.
+ * 공통 공략의 항목(시스템 글, 공통 추천 연습)은 모아 보기(/favorites)에만 나오고 캐릭터의 즐겨찾기 탭에는 나오지 않는다.
  * 페이지는 정적이고, 즐겨찾기 id 로 공개 항목만 브라우저에서 직접 불러온다 (anon 키, 로그인 없음).
  */
 export function FavoritesHome({
@@ -68,11 +73,15 @@ export function FavoritesHome({
   if (!favorites || !data) return <p className="text-muted">{t.loading}</p>;
 
   // 즐겨찾기에 담은 순서대로. 지워졌거나 비공개가 된 항목, 비공개 캐릭터의 항목은 빠진다
-  const ordered = <T extends { id: number; character_id: number }>(kind: FavoriteKind, rows: T[]) => {
+  const ordered = <T extends { id: number; character_id?: number | null }>(kind: FavoriteKind, rows: T[]) => {
     const byId = new Map(
       rows
-        .filter((r) => data.characters.has(r.character_id))
-        .filter((r) => !characterSlug || data.characters.get(r.character_id)?.slug === characterSlug)
+        .filter((r) =>
+          r.character_id == null
+            ? !characterSlug
+            : data.characters.has(r.character_id) &&
+              (!characterSlug || data.characters.get(r.character_id)?.slug === characterSlug),
+        )
         .map((r) => [r.id, r]),
     );
     return favorites[kind].map((id) => byId.get(id)).filter((r) => r !== undefined);
@@ -82,6 +91,7 @@ export function FavoritesHome({
     setup: ordered("setup", data.setups),
     practice: ordered("practice", data.practices),
     vs: ordered("vs", data.vs),
+    guide: ordered("guide", data.guides),
   };
   const total = FAVORITE_KINDS.reduce((sum, k) => sum + sections[k].length, 0);
   // 캐릭터 탭에서는 모든 캐릭터 모아보기로 가는 링크
@@ -98,7 +108,19 @@ export function FavoritesHome({
       </div>
     );
 
-  const origin = (kind: FavoriteKind, item: { id: number; character_id: number; opponent?: string }) => {
+  const origin = (kind: FavoriteKind, item: { id: number; character_id?: number | null; opponent?: string }) => {
+    if (item.character_id == null) {
+      return (
+        <Link
+          href={`${COMMON_PAGE[kind] ?? "/guide"}#${kind}-${item.id}`}
+          className="flex items-center gap-1.5 self-start text-xs font-semibold text-muted hover:text-accent"
+        >
+          <span className="text-fg">{dict.guide.title}</span>
+          <span>· {t.kinds[kind]}</span>
+          <span aria-hidden>→</span>
+        </Link>
+      );
+    }
     const character = data.characters.get(item.character_id);
     if (!character) return null;
     const query = kind === "vs" && item.opponent ? `?vs=${item.opponent}` : "";
@@ -132,7 +154,7 @@ export function FavoritesHome({
             <ul className="flex flex-col gap-3">
               {items.map((item) => (
                 <li key={item.id} className="flex flex-col gap-1">
-                  {origin(kind, item as { id: number; character_id: number; opponent?: string })}
+                  {origin(kind, item as { id: number; character_id?: number | null; opponent?: string })}
                   {renderCard(kind, item, data, locale, dict)}
                 </li>
               ))}
@@ -145,7 +167,7 @@ export function FavoritesHome({
 }
 
 function renderCard(kind: FavoriteKind, item: unknown, data: Loaded, locale: Locale, dict: Dictionary) {
-  const slugOf = (characterId: number) => data.characters.get(characterId)?.slug ?? "";
+  const slugOf = (characterId: number | null) => (characterId === null ? "" : (data.characters.get(characterId)?.slug ?? ""));
   switch (kind) {
     case "combo": {
       const combo = item as Combo;
@@ -178,6 +200,16 @@ function renderCard(kind: FavoriteKind, item: unknown, data: Loaded, locale: Loc
         />
       );
     }
+    case "guide":
+      return (
+        <CommonGuideCard
+          guide={item as CommonGuide}
+          locale={locale}
+          dict={dict}
+          latestPatchId={data.latestPatchId}
+          authors={data.authors}
+        />
+      );
     case "vs":
       return (
         <VsGuideCard
@@ -202,7 +234,7 @@ async function load(favorites: Record<FavoriteKind, number[]>): Promise<Loaded> 
     return (data ?? []) as T[];
   };
 
-  const [characters, patches, authors, situations, combos, setups, practices, vs] = await Promise.all([
+  const [characters, patches, authors, situations, combos, setups, practices, vs, guides] = await Promise.all([
     sb.from("characters").select("*"),
     sb.from("patches").select("id").order("released_on", { ascending: false }).limit(1),
     sb.from("author_names").select("*"),
@@ -211,6 +243,7 @@ async function load(favorites: Record<FavoriteKind, number[]>): Promise<Loaded> 
     pick<Setup>("setups", favorites.setup),
     pick<Practice>("practices", favorites.practice),
     pick<VsGuide>("vs_guides", favorites.vs),
+    pick<CommonGuide>("common_guides", favorites.guide),
   ]);
 
   // 엔더(콤보 카드의 후상황 기본값, 셋업 카드의 이어지는 엔더): 즐겨찾기한 콤보 · 셋업의 캐릭터만
@@ -263,5 +296,6 @@ async function load(favorites: Record<FavoriteKind, number[]>): Promise<Loaded> 
     enders,
     practices: practices.map((p) => ({ ...p, options: normalizeOptions(p.options), practice: normalizePractice(p.practice) })),
     vs: vs.map((g) => ({ ...g, patterns: normalizeVsPatterns(g.patterns) })),
+    guides,
   };
 }

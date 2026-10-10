@@ -16,6 +16,23 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-10-10",
     items: [
       {
+        kind: "added",
+        text: {
+          ko: "공통 공략 메뉴 추가: 모든 캐릭터에 통용되는 시스템 글 · 추천 연습 · 추천 영상",
+          en: "Added the General guide menu: system guides, practice drills and videos that apply to every character",
+          ja: "共通攻略メニューを追加：全キャラ共通のシステム解説・おすすめ練習・おすすめ動画",
+        },
+      },
+      {
+        kind: "added",
+        adminOnly: true,
+        text: {
+          ko: "공통 공략 편집(최고/부 관리자): 추가 · 순서 변경 · 비공개 목록 · 확인 필요 · 삭제 복구 지원",
+          en: "General guide editing (super/sub admins): add, reorder, drafts, review and restore",
+          ja: "共通攻略の編集（最高/副管理者）：追加・並べ替え・非公開一覧・要確認・削除の復元",
+        },
+      },
+      {
         kind: "changed",
         text: {
           ko: "Vs 가이드: 상대 선택을 2단계 드롭다운으로 (초기 로스터 · 시즌을 고른 뒤 캐릭터)",

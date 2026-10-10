@@ -21,13 +21,21 @@ const KINDS = [
   { table: "vs_guides", entity: "vs", label: "Vs 가이드" },
   { table: "character_overviews", entity: "overview", label: "개요" },
   { table: "videos", entity: "video", label: "추천 영상" },
+  { table: "common_guides", entity: "guide", label: "시스템 글" },
 ] as const;
 
 type Kind = (typeof KINDS)[number];
-type Row = Record<string, unknown> & { id: number; character_id: number; patch_id: number | null; is_published: boolean };
+/** character_id 가 null(또는 칸이 없음)이면 공통 공략 항목 (0028) */
+type Row = Record<string, unknown> & { id: number; character_id: number | null; patch_id: number | null; is_published: boolean };
 type Item = { row: Row; kind: Kind; key: string; missing: { en: number; ja: number } };
 type CharacterRow = { id: number; slug: string; name: Localized };
 type Tab = "patch" | "translation" | "unpublished";
+/** 캐릭터 거르기: 캐릭터 id 또는 공통 공략 */
+type CharacterFilter = number | "common" | "all";
+
+/** 공통 공략 묶음 (캐릭터 목록 맨 앞) */
+const COMMON_GROUP: CharacterRow = { id: -1, slug: "guide", name: { ko: "공통 공략" } };
+const groupId = (row: Row) => row.character_id ?? COMMON_GROUP.id;
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "patch", label: "이전 패치" },
@@ -38,6 +46,12 @@ const TABS: { id: Tab; label: string }[] = [
 /** 이 항목이 보이는 페이지 (바로가기) */
 function hrefFor(item: Item, slug: string): string {
   const { id, opponent } = item.row as Row & { opponent?: string };
+  // 공통 공략: /guide (시스템 글) · /guide/practice · /guide/videos
+  if (item.row.character_id === null || item.row.character_id === undefined) {
+    if (item.kind.table === "practices") return `/guide/practice#practice-${id}`;
+    if (item.kind.table === "videos") return `/guide/videos#video-${id}`;
+    return `/guide#guide-${id}`;
+  }
   switch (item.kind.table) {
     case "combos":
       return `/${slug}/combos#combo-${id}`;
@@ -84,7 +98,7 @@ export function ReviewCenter() {
   const [patchNames, setPatchNames] = useState<Map<number, string>>(new Map());
   const [characters, setCharacters] = useState<CharacterRow[]>([]);
   const [items, setItems] = useState<Item[] | null>(null);
-  const [characterFilter, setCharacterFilter] = useState<number | "all">("all");
+  const [characterFilter, setCharacterFilter] = useState<CharacterFilter>("all");
   const [kindFilter, setKindFilter] = useState<string>("all");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
@@ -96,7 +110,12 @@ export function ReviewCenter() {
       const [{ data: patches }, { data: chars }, ...tables] = await Promise.all([
         sb.from("patches").select("*").order("released_on", { ascending: false }),
         sb.from("characters").select("id,slug,name").order("sort_order"),
-        ...KINDS.map((kind) => sb.from(kind.table).select("*").order("character_id").order("id")),
+        // 시스템 글(common_guides)에는 character_id 칸이 없다
+        ...KINDS.map((kind) =>
+          kind.table === "common_guides"
+            ? sb.from(kind.table).select("*").order("id")
+            : sb.from(kind.table).select("*").order("character_id").order("id"),
+        ),
       ]);
       if (cancelled) return;
       setLatest(((patches ?? [])[0] as Patch | undefined) ?? null);
@@ -105,7 +124,7 @@ export function ReviewCenter() {
       setItems(
         KINDS.flatMap((kind, k) =>
           ((tables[k].data ?? []) as Row[]).map((row) => ({
-            row,
+            row: { ...row, character_id: row.character_id ?? null },
             kind,
             key: `${kind.table}:${row.id}`,
             missing: countMissing(row),
@@ -119,7 +138,7 @@ export function ReviewCenter() {
   }, [sb, dataVersion]);
 
   const charById = useMemo(() => new Map(characters.map((c) => [c.id, c])), [characters]);
-  const mine = useMemo(() => (items ?? []).filter((i) => canEdit(i.row.character_id)), [items, canEdit]);
+  const mine = useMemo(() => (items ?? []).filter((i) => canEdit(i.row.character_id ?? undefined)), [items, canEdit]);
   const inTab = useMemo(() => {
     const byTab: Record<Tab, Item[]> = {
       patch: latest ? mine.filter((i) => i.row.patch_id !== latest.id) : [],
@@ -131,11 +150,11 @@ export function ReviewCenter() {
   const current = inTab[tab];
   const visible = current.filter(
     (i) =>
-      (characterFilter === "all" || i.row.character_id === characterFilter) &&
+      (characterFilter === "all" || groupId(i.row) === (characterFilter === "common" ? COMMON_GROUP.id : characterFilter)) &&
       (kindFilter === "all" || i.kind.table === kindFilter),
   );
-  const groups = characters
-    .map((c) => ({ character: c, items: visible.filter((i) => i.row.character_id === c.id) }))
+  const groups = [COMMON_GROUP, ...characters]
+    .map((c) => ({ character: c, items: visible.filter((i) => groupId(i.row) === c.id) }))
     .filter((g) => g.items.length > 0);
   const selectedVisible = visible.filter((i) => selected.has(i.key));
   const bulk = tab === "patch" || tab === "unpublished";
@@ -225,11 +244,18 @@ export function ReviewCenter() {
           <div className="flex flex-wrap items-center gap-2">
             <select
               value={characterFilter}
-              onChange={(e) => setCharacterFilter(e.target.value === "all" ? "all" : Number(e.target.value))}
+              onChange={(e) =>
+                setCharacterFilter(e.target.value === "all" || e.target.value === "common" ? e.target.value : Number(e.target.value))
+              }
               className="border border-border-strong bg-inset px-2.5 py-1.5 text-sm"
               aria-label="캐릭터"
             >
               <option value="all">모든 캐릭터 ({current.length})</option>
+              {current.some((i) => i.row.character_id === null) && (
+                <option value="common">
+                  {COMMON_GROUP.name.ko} ({current.filter((i) => i.row.character_id === null).length})
+                </option>
+              )}
               {characters
                 .map((c) => ({ c, n: current.filter((i) => i.row.character_id === c.id).length }))
                 .filter(({ n }) => n > 0)
@@ -332,12 +358,12 @@ export function ReviewCenter() {
                             )}
                             <span className="flex items-center gap-1.5">
                               <Link
-                                href={hrefFor(item, charById.get(item.row.character_id)?.slug ?? "")}
+                                href={hrefFor(item, item.row.character_id === null ? "" : (charById.get(item.row.character_id)?.slug ?? ""))}
                                 className="border border-border-strong px-2 py-1 text-xs font-semibold text-muted hover:border-accent hover:text-accent"
                               >
                                 보기
                               </Link>
-                              <EditButton entity={item.kind.entity as EntityType} id={item.row.id} scope={item.row.character_id} />
+                              <EditButton entity={item.kind.entity as EntityType} id={item.row.id} scope={item.row.character_id ?? undefined} />
                               {bulk && (
                                 <button
                                   type="button"

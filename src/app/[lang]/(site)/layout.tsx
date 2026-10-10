@@ -26,6 +26,7 @@ export default async function SiteLayout({ children, params }: LayoutProps<"/[la
             <span className="display text-xl uppercase tracking-wide group-hover:text-accent">Repository</span>
           </Link>
           <nav className="order-last flex w-full gap-5 whitespace-nowrap sm:order-none sm:w-auto">
+            <HeaderLink href="/guide">{dict.nav.guide}</HeaderLink>
             <HeaderLink href="/notation">{dict.nav.notation}</HeaderLink>
             <HeaderLink href="/glossary">{dict.nav.glossary}</HeaderLink>
             <ChangelogButton

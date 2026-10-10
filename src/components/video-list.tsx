@@ -15,7 +15,8 @@ export function VideoList({
 }: {
   items: VideoListItem[];
   dict: Dictionary;
-  characterId: number;
+  /** null = 공통 공략 */
+  characterId: number | null;
 }) {
   const [languages, setLanguages] = useState<VideoLanguage[]>([]);
   const present = VIDEO_LANGUAGES.filter((l) => items.some((i) => i.language === l));

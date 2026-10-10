@@ -24,6 +24,7 @@ import { formatPatchVersion } from "@/lib/patch";
 import { History, useAuthorNames } from "./history";
 import { StarterGroupsInput, cleanStarterGroups, inputClass } from "./starters-input";
 import { ClockInput } from "./clock-input";
+import { scoped } from "@/lib/admin/scope";
 import {
   EnderLinksInput,
   OptionsInput,
@@ -227,11 +228,11 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
     if (isNew) {
       // 콤보·셋업은 새 항목을 목록 맨 아래에 둔다 (순서는 '순서 변경'에서 바꾼다)
       const order: Values = {};
-      if (typeof request.defaults?.character_id === "number" && ["combos", "setups", "practices", "vs_guides", "moves", "videos"].includes(entity.table)) {
-        const { data: last } = await sb
-          .from(entity.table)
-          .select("sort_order")
-          .eq("character_id", request.defaults.character_id)
+      // 캐릭터 항목은 그 캐릭터 안에서, 공통 공략(character_id 가 null · 시스템 글)은 공통 항목 안에서 맨 아래
+      const characterId = request.defaults?.character_id;
+      const listed = ["combos", "setups", "practices", "vs_guides", "moves", "videos"].includes(entity.table);
+      if ((listed && (typeof characterId === "number" || characterId === null)) || entity.table === "common_guides") {
+        const { data: last } = await scoped(sb.from(entity.table).select("sort_order"), entity.table, (characterId as number | null) ?? null)
           .order("sort_order", { ascending: false })
           .limit(1);
         order.sort_order = (last?.[0]?.sort_order ?? -1) + 1;
@@ -287,7 +288,10 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
     if (!values || request.id === undefined) return;
     openEditor({
       entity: request.entity,
-      defaults: typeof values.character_id === "number" ? { character_id: values.character_id } : undefined,
+      defaults:
+        typeof values.character_id === "number" || values.character_id === null
+          ? { character_id: values.character_id }
+          : undefined,
       initial: copyValues(request.entity, values, { markCopy: true }),
     });
   }
@@ -409,7 +413,7 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
                 삭제
               </button>
             )}
-            {!isNew && typeof values?.character_id === "number" && (
+            {!isNew && (typeof values?.character_id === "number" || values?.character_id === null || request.entity === "guide") && (
               <button
                 type="button"
                 onClick={duplicate}

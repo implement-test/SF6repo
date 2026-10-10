@@ -3,6 +3,7 @@
 import { Suspense, useState } from "react";
 import { lazyWithReload } from "./lazy-reload";
 import { useAdmin } from "./admin-context";
+import { editScope, type ListTable } from "@/lib/admin/scope";
 
 const ReorderPanel = lazyWithReload(() => import("./reorder-panel"));
 // 콤보는 그룹까지 함께 편집한다
@@ -14,13 +15,14 @@ export function ReorderButton({
   characterId,
   label,
 }: {
-  table: "combos" | "setups" | "practices" | "vs_guides" | "moves" | "videos";
-  characterId: number;
+  table: ListTable;
+  /** null = 공통 공략 */
+  characterId: number | null;
   label: string;
 }) {
   const { canEdit } = useAdmin();
   const [open, setOpen] = useState(false);
-  if (!canEdit(characterId)) return null;
+  if (!canEdit(editScope(characterId))) return null;
 
   return (
     <>
@@ -33,7 +35,7 @@ export function ReorderButton({
       </button>
       {open && (
         <Suspense>
-          {table === "combos" ? (
+          {table === "combos" && characterId !== null ? (
             <ComboReorderPanel characterId={characterId} onClose={() => setOpen(false)} />
           ) : (
             <ReorderPanel table={table} characterId={characterId} label={label} onClose={() => setOpen(false)} />

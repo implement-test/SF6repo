@@ -246,7 +246,8 @@ export type Setup = ContentBase &
 /** 추천 연습: 셋업과 같은 구조, 이어지는 콤보 대신 상황을 글로 */
 export type Practice = ContentBase &
   Media & {
-    character_id: number;
+    /** null = 공통 공략의 추천 연습 (0028) */
+    character_id: number | null;
     title: Localized;
     situation: Localized | null;
     notation_classic: string | null;
@@ -325,7 +326,8 @@ export const VIDEO_LANGUAGES: VideoLanguage[] = ["ko", "en", "ja", "other"];
 
 /** 캐릭터별 추천 영상 (YouTube) */
 export type Video = ContentBase & {
-  character_id: number;
+  /** null = 공통 공략의 추천 영상 (0028) */
+  character_id: number | null;
   title: Localized;
   description: Localized | null;
   youtube_url: string;
@@ -336,3 +338,19 @@ export type Video = ContentBase & {
   channel: string | null;
   language: VideoLanguage;
 };
+
+// ───────────────────────── 공통 공략 ─────────────────────────
+
+/** 시스템 글의 주제: 시스템 / 공격 · 운영 / 수비 / 기타 */
+export type GuideTopic = "system" | "offense" | "defense" | "other";
+export const GUIDE_TOPICS: GuideTopic[] = ["system", "offense", "defense", "other"];
+
+/** 공통 공략의 시스템 글 (0028). 특정 캐릭터가 아니라 모든 캐릭터에 통용된다 */
+export type CommonGuide = ContentBase &
+  Media & {
+    topic: GuideTopic;
+    title: Localized;
+    body: Localized | null;
+    notation_classic: string | null;
+    notation_modern: string | null;
+  };

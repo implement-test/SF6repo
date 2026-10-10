@@ -98,9 +98,12 @@ function FilterGroup({ label, sub, children }: { label: string; sub: string; chi
   );
 }
 
-/** 캐릭터 페이지 상단: 대상 수준 / 콤보 표시 / 조작 방식 */
-/** 콘텐츠 목록 탭(콤보·셋업)에서만 보인다. 개요(/{캐릭터})·커맨드 리스트·추천 영상·Vs 가이드에서는 숨긴다 */
-const HIDE_FILTERS_ON = [new RegExp(`^(/(${LOCALES.join("|")}))?/[^/]+/?$`), /\/(moves|videos|vs)\/?$/];
+/** 캐릭터 페이지 · 공통 공략 상단: 대상 수준 / 콤보 표시 / 조작 방식 */
+/**
+ * 콘텐츠 목록 탭(콤보·셋업·추천 연습, 공통 공략의 시스템 글)에서만 보인다.
+ * 개요(/{캐릭터})·커맨드 리스트·추천 영상·Vs 가이드에서는 숨긴다
+ */
+const HIDE_FILTERS_ON = [new RegExp(`^(/(${LOCALES.join("|")}))?/(?!guide/?$)[^/]+/?$`), /\/(moves|videos|vs)\/?$/];
 
 export function ContentFilters({ dict }: { dict: Dictionary }) {
   const [prefs, update] = usePrefs();

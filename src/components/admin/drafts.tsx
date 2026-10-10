@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { EntityType } from "@/lib/admin/entities";
 import { EditButton, useAdmin } from "./admin-context";
 import { NotationText } from "../notation";
+import { editScope, scoped } from "@/lib/admin/scope";
 
 /**
  * 관리자 목록(비공개 항목, 순서 변경)에 보여 줄 칸: 제목과 대표 표기.
@@ -31,12 +32,13 @@ export function DraftItems({
 }: {
   table: string;
   entity: EntityType;
-  characterId: number;
+  /** null = 공통 공략 */
+  characterId: number | null;
   label: string;
 }) {
   const { canEdit, dataVersion, bumpData } = useAdmin();
   const router = useRouter();
-  const isAdmin = canEdit(characterId);
+  const isAdmin = canEdit(editScope(characterId));
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,10 +66,7 @@ export function DraftItems({
   useEffect(() => {
     if (!isAdmin) return;
     import("@/lib/supabase/browser").then(({ supabaseBrowser }) =>
-      supabaseBrowser()
-        .from(table)
-        .select(listColumns(table))
-        .eq("character_id", characterId)
+      scoped(supabaseBrowser().from(table).select(listColumns(table)), table, characterId)
         .eq("is_published", false)
         .order("sort_order")
         // 칸 이름을 표마다 바꿔 읽어서 타입을 직접 맞춘다
@@ -111,7 +110,7 @@ export function DraftItems({
               >
                 공개
               </button>
-              <EditButton entity={entity} id={d.id} scope={characterId} />
+              <EditButton entity={entity} id={d.id} scope={editScope(characterId)} />
             </span>
           </li>
         ))}

@@ -12,6 +12,7 @@ import { PracticeView } from "./practice-view";
 import { Collapsible } from "./collapsible";
 import { CardShell } from "./card-shell";
 import { EditButton } from "./admin/admin-context";
+import { editScope } from "@/lib/admin/scope";
 import { ShareButton } from "./share-button";
 import { FavoriteButton } from "./favorite-button";
 
@@ -79,7 +80,7 @@ export function SetupCard({
           <>
             <FavoriteButton kind={kind} id={setup.id} labels={dict.favorite} />
             {kind === "setup" && <ShareButton kind="setup" id={setup.id} labels={dict.share} />}
-            <EditButton entity={entity} id={setup.id} scope={setup.character_id} />
+            <EditButton entity={entity} id={setup.id} scope={editScope(setup.character_id)} />
           </>
         )
       }

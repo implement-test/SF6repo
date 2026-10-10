@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCharacter, getLatestPatchId, getVideos } from "@/lib/data";
 import { hasLocale } from "@/lib/i18n/config";
@@ -31,6 +32,10 @@ export default async function VideosPage({ params }: PageProps<"/[lang]/[charact
   return (
     <div className="flex flex-col gap-4">
       {adminActions}
+      {/* 모든 캐릭터에 통용되는 것은 공통 공략에 */}
+      <Link href="/guide/videos" className="self-end text-sm font-semibold text-muted transition-colors hover:text-accent">
+        {dict.guide.seeCommon.videos} →
+      </Link>
       <DraftItems table="videos" entity="video" characterId={character.id} label="추천 영상" />
       <VideoList
         dict={dict}
