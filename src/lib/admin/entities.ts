@@ -94,6 +94,7 @@ const VS_TOPICS: Option[] = [
   { value: "pressure_gap", label: "끼어들기" },
   { value: "cheese", label: "패턴 대응" },
   { value: "setup", label: "주요 셋업" },
+  { value: "just_parry", label: "저스트 패리" },
 ];
 
 /** 공통 공략 시스템 글의 주제 */

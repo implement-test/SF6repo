@@ -28,6 +28,7 @@ const TOPIC_LABELS: Record<string, string> = {
   pressure_gap: "끼어들기",
   cheese: "패턴 대응",
   setup: "주요 셋업",
+  just_parry: "저스트 패리",
 };
 
 const text = (l: Localized | null | undefined) => [l?.ko, l?.en, l?.ja].filter(Boolean).join(" ");

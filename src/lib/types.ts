@@ -259,9 +259,9 @@ export type Practice = ContentBase &
 
 // ───────────────────────── Vs 가이드 ─────────────────────────
 
-/** 윕퍼 / 딜캐 / 끼어들기 / 패턴 대응 / 주요 셋업 */
-export type VsTopic = "whiff_punish" | "block_punish" | "pressure_gap" | "cheese" | "setup";
-export const VS_TOPICS: VsTopic[] = ["whiff_punish", "block_punish", "pressure_gap", "cheese", "setup"];
+/** 윕퍼 / 딜캐 / 끼어들기 / 패턴 대응 / 주요 셋업 / 저스트 패리 (0029) */
+export type VsTopic = "whiff_punish" | "block_punish" | "pressure_gap" | "cheese" | "setup" | "just_parry";
+export const VS_TOPICS: VsTopic[] = ["whiff_punish", "block_punish", "pressure_gap", "cheese", "setup", "just_parry"];
 
 /** 딜캐 구분: 확정 / 거리 한정 (관리자가 직접 고른다) */
 export type VsPunish = "confirmed" | "range";
