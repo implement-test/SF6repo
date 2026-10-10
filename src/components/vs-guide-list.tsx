@@ -10,7 +10,6 @@ import { AddButton } from "./admin/admin-context";
 import { ReorderButton } from "./admin/reorder-button";
 import { VsImportButton } from "./admin/vs-import-button";
 import { FavoriteFilter } from "./favorite-button";
-import { useHiddenLevels } from "./use-hidden-levels";
 
 export type VsListItem = { id: number; opponent: string; topic: VsTopic; level: TargetLevel; card: ReactNode };
 
@@ -34,7 +33,6 @@ export function VsGuideList({
   const [topics, setTopics] = useState<VsTopic[]>([]);
   const [favOnly, setFavOnly] = useState(false);
   const favorites = useFavorites("vs");
-  const isHidden = useHiddenLevels();
 
   // 상대 선택 칸의 숫자
   const countsKey = items.map((i) => i.opponent).join(",");
@@ -49,7 +47,8 @@ export function VsGuideList({
   const visible = forOpponent.filter(
     (i) => (topics.length === 0 || topics.includes(i.topic)) && (!favOnly || favorites.has(i.id)),
   );
-  const shownCount = visible.filter((i) => !isHidden(i.level)).length;
+  // Vs 탭에는 대상 수준 필터가 없다. 다른 탭에서 숨긴 수준도 여기서는 모두 보인다
+  const shownCount = visible.length;
 
   // 관리자 버튼: 새 항목은 지금 고른 상대로 시작한다
   const adminActions = (
@@ -105,6 +104,7 @@ export function VsGuideList({
           characterId={characterId}
           items={items}
           visibleIds={new Set(visible.map((i) => i.id))}
+          levelFilter={false}
           className="flex flex-col gap-2"
         />
       )}

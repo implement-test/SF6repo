@@ -43,7 +43,6 @@ export function VsGuideCard({
   return (
     <article
       id={`vs-${guide.id}`}
-      data-level={guide.target_level}
       className="relative flex flex-col gap-3 border border-border bg-surface py-4 pr-4 pl-5 transition-colors hover:border-border-strong"
     >
       <span aria-hidden className="absolute inset-y-0 left-0 w-1" style={{ background: `var(--lv-${guide.target_level})` }} />

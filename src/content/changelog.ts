@@ -13,6 +13,19 @@ export type ChangelogEntry = { date: string; items: ChangelogItem[] };
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    date: "2026-10-10",
+    items: [
+      {
+        kind: "changed",
+        text: {
+          ko: "Vs 가이드: 상단 필터(대상 · 콤보 표시 · 조작) 제거, 상대 캐릭터는 이름 드롭다운으로 바로 선택",
+          en: "Vs guides: removed the top filters (level / display / controls); pick the opponent from a name dropdown",
+          ja: "Vs ガイド：上部フィルター（対象・コンボ表示・操作）を削除、対戦相手は名前のドロップダウンで選択",
+        },
+      },
+    ],
+  },
+  {
     date: "2026-10-09",
     items: [
       {
