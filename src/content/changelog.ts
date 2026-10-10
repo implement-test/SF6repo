@@ -16,6 +16,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-10-10",
     items: [
       {
+        kind: "changed",
+        text: {
+          ko: "대상 수준 이름을 초급 / 숙련에서 기본 / 고급으로 변경",
+          en: "Renamed the levels from Beginner / Skilled to Basic / Advanced",
+          ja: "対象レベルの名前を初級 / 熟練から基本 / 上級に変更",
+        },
+      },
+      {
         kind: "added",
         text: {
           ko: "콤보 표기에 점프 공격 추가: j.HP(점프) · nj.HP(제자리 점프) · bj.HP(뒤 점프), 궤적 화살표 아이콘",

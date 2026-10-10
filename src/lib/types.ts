@@ -2,7 +2,7 @@
 
 export type Localized = { ko: string; en?: string; ja?: string };
 
-/** 초급 / 숙련 (0021 에서 중급·상급을 숙련으로 합쳤다) */
+/** 기본 / 고급 (화면 이름. 값은 beginner / advanced. 0021 에서 중급·상급을 advanced 로 합쳤다) */
 export type TargetLevel = "beginner" | "advanced";
 export type Difficulty = "easy" | "normal" | "hard";
 /** 거리 무관 / 필드 / 코너 근처 / 코너 / 기타 */

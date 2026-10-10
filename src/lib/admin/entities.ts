@@ -58,8 +58,8 @@ export function today(): string {
 }
 
 const LEVELS: Option[] = [
-  { value: "beginner", label: "초급" },
-  { value: "advanced", label: "숙련" },
+  { value: "beginner", label: "기본" },
+  { value: "advanced", label: "고급" },
 ];
 
 const POSITIONS: Option[] = [
