@@ -12,6 +12,7 @@
  *   sa1 / sa2 / sa3       슈퍼 아츠 1 · 2 · 3
  *   parry / j.parry       패리 / 저스트 패리
  *   f.throw / b.throw     앞잡기 / 뒤잡기
+ *   j.HP / nj.HP / bj.HP  점프 / 제자리 점프 / 뒤 점프 공격 (air 는 상대가 공중인 히트 상황이라 다르다)
  *   L M H SP A            모던 버튼 (A = AUTO)
  *   (텍스트)              괄호 안은 그대로 메모로 표시
  *   236HP → etc           etc = 이후 자유롭게 이어 간다 (콤보가 열려 있음)
@@ -32,11 +33,13 @@ export type SystemValue = "DR" | "DRC" | "DI" | "PARRY" | "JPARRY" | "SA1" | "SA
 
 export type ClassicButton = "LP" | "MP" | "HP" | "LK" | "MK" | "HK" | "P" | "K";
 export type ModernButton = "L" | "M" | "H" | "SP" | "A" | "ANY";
+/** 점프 공격: j = 점프(앞 · 뒤 상관없음), nj = 제자리 점프, bj = 뒤 점프 */
+export type Jump = "j" | "nj" | "bj";
 export type Button = ClassicButton | ModernButton;
 
 export type Move =
-  /** hits: "5HP(2)" 처럼 몇 번째 타격인지 */
-  | { kind: "input"; modifiers: Modifier[]; direction: string | null; buttons: Button[]; hits?: number }
+  /** hits: "5HP(2)" 처럼 몇 번째 타격인지. jump: "j.HP" 처럼 점프 공격 */
+  | { kind: "input"; modifiers: Modifier[]; direction: string | null; buttons: Button[]; hits?: number; jump?: Jump }
   | { kind: "system"; modifiers: Modifier[]; value: SystemValue }
   /** 잡기: f.throw = 앞잡기, b.throw = 뒤잡기, throw = 방향 없음 */
   | { kind: "throw"; modifiers: Modifier[]; direction: "f" | "b" | null }
@@ -121,6 +124,8 @@ export function displayNotation(src: string): string {
               /\b(\d*)((?:lp|mp|hp|lk|mk|hk|pp|kk|sp|p|k|l|m|h)+|parry|drc|dr|di|sa[123])\b/gi,
               (_, digits: string, buttons: string) => digits + buttons.toUpperCase(),
             )
+            // 점프 접두어는 소문자로 (J.HP → j.HP). 저스트 패리는 그다음에 J.Parry 로
+            .replace(/\b(n|b)?j\.(?=\w)/gi, (m) => m.toLowerCase())
             .replace(/\bj\.parry\b/gi, "J.Parry")
             .replace(/·/g, "..")
             .replace(/ :: /g, " / "),
@@ -164,6 +169,16 @@ function parseMove(src: string): Move {
   const alone = MODIFIERS[word.toLowerCase()];
   if (alone && isSituation(alone)) {
     return { kind: "input", modifiers: [...modifiers, alone], direction: null, buttons: [] };
+  }
+
+  // "j.HP" / "nj.HP" / "bj.HP" = 점프 공격. 나머지는 지상 기술과 같이 읽는다 (j.2MK, j.HP(2) 도 가능)
+  const jumpMatch = /^(j|nj|bj)\.(.+)$/i.exec(word);
+  if (jumpMatch) {
+    const rest = parseMove(jumpMatch[2]);
+    if (rest.kind === "input" && rest.buttons.length > 0) {
+      return { ...rest, modifiers: [...modifiers, ...rest.modifiers], jump: jumpMatch[1].toLowerCase() as Jump };
+    }
+    return { kind: "unknown", text };
   }
 
   // "5HP(2)" = 5HP 의 2타째

@@ -127,24 +127,28 @@ function normalByName(name) {
   const stance = m[1].toLowerCase();
   const btn = buttons(m[2]);
   if (!btn) return null;
-  // 점프 공격은 우리 표기의 앞쪽 메모로: "(점프) HP"
-  const prefix = stance === "standing" ? "5" : stance === "crouching" ? "2" : `(${KO_STANCE[stance]}) `;
+  // 점프 공격은 우리 표기의 점프 접두어로: "j.HP", 제자리 점프는 "nj.HP"
+  const prefix = { standing: "5", crouching: "2", jumping: "j.", "neutral jumping": "nj." }[stance];
   const ko = KO_BUTTON[btn] ? `${KO_STANCE[stance]} ${KO_BUTTON[btn]}` : null;
   return { notation: prefix + btn, ko };
 }
 
+/** "Neutral Jump" 이면 제자리 점프(nj), 그 밖의 점프는 j */
+const jumpKind = (text) => (/^\(?neutral jump\b/i.test(text.trim()) ? "nj" : "j");
+
 /**
  * 입력 한 단계: "Forward + Heavy Punch" / "Crouching Medium Kick" / "Back Charge, Forward + LP" / "Jump, Down, Down-Back, Back + K"
- * 모으기와 점프는 앞쪽 메모로 쓴다: "(4 모으기) 6LP", "(점프) 214K"
+ * 점프는 점프 접두어로, 모으기는 앞쪽 메모로 쓴다: "j.214K", "(4 모으기) j.6P"
+ *   jumpBefore: 앞 단계에서 점프했으면 "j" / "nj"
  */
-function oneInput(text, jumpBefore = false) {
+function oneInput(text, jumpBefore = null) {
   let s = clean(text);
   let jump = jumpBefore;
   const jm =
     s.match(/^\((?:forward |neutral )?jump only\)\s*/i) ??
     s.match(/^(?:neutral or forward jump|forward jump|neutral jump|jump)\s*,\s*/i);
   if (jm) {
-    jump = true;
+    jump = jumpKind(jm[0]);
     s = s.slice(jm[0].length);
   }
   let charge = null;
@@ -153,10 +157,10 @@ function oneInput(text, jumpBefore = false) {
     charge = DIRS[cm[1].toLowerCase()];
     s = s.slice(cm[0].length);
   }
-  const core = normalByName(s)?.notation ?? inputSequence(s);
+  let core = normalByName(s)?.notation ?? inputSequence(s);
   if (!core) return null;
-  const notes = [jump && "점프", charge && `${charge} 모으기`].filter(Boolean);
-  return (notes.length && !core.startsWith("(") ? `(${notes.join(", ")}) ` : "") + core;
+  if (jump && !/^(?:n|b)?j\./.test(core)) core = `${jump}.${core}`;
+  return (charge ? `(${charge} 모으기) ` : "") + core;
 }
 
 /** 입력 전체: 파생기(">")와 쉼표로 이은 버튼 목록까지. 모르는 말이 있으면 null */
@@ -164,16 +168,17 @@ function sequence(text) {
   const t = clean(text).replace(/\s*\((?:or |chargeless|early|after )[^)]*\)/gi, "");
   const steps = t.includes("+") ? t.split(/\s*>\s*/) : t.split(/\s*[,>]\s*/);
   const out = [];
-  let jump = false;
+  // 한 번 점프하면 뒤 단계(공중 타겟 콤보 "Jump, LP, MK")도 공중이다
+  let jump = null;
   for (const step of steps) {
     if (/^(?:neutral |forward )?jump$/i.test(step.trim())) {
-      jump = true;
+      jump = jumpKind(step);
       continue;
     }
     const n = oneInput(step, jump);
     if (!n) return null;
     out.push(n);
-    jump = false;
+    jump = /^(n|b)?j\./.exec(n.replace(/^\([^)]*\)\s*/, ""))?.[0].slice(0, -1) ?? jump;
   }
   return out.length ? out.join(" → ") : null;
 }

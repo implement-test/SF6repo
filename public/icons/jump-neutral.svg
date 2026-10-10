@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" width="36" height="36">
+  <!-- 제자리 점프 공격(nj.). 바닥선 + 곧게 위로 -->
+  <defs>
+    <linearGradient id="arrow" x1="0" y1="32" x2="0" y2="3" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#c8321c"/>
+      <stop offset="0.55" stop-color="#ff8a00"/>
+      <stop offset="1" stop-color="#ffc21a"/>
+    </linearGradient>
+  </defs>
+  <path d="M3.5 32.5h29" stroke="#8a8a8a" stroke-width="2" stroke-linecap="round"/>
+  <path d="M18 29.5V12" stroke="#5a1800" stroke-width="6.4" stroke-linecap="round"/>
+  <path d="M18 29.5V12" stroke="url(#arrow)" stroke-width="4.4" stroke-linecap="round"/>
+  <path d="M18 2.6L11.6 12.6h12.8z" fill="url(#arrow)" stroke="#5a1800" stroke-width="0.9" stroke-linejoin="round"/>
+</svg>

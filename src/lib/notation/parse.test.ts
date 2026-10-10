@@ -245,6 +245,37 @@ describe("etc", () => {
   });
 });
 
+describe("점프 공격 j. / nj. / bj.", () => {
+  it("버튼 앞의 j. nj. bj. 는 점프 공격", () => {
+    expect(parseNotation("j.HP")[0][0]).toEqual({ kind: "input", modifiers: [], direction: null, buttons: ["HP"], jump: "j" });
+    expect(parseNotation("NJ.mk")[0][0]).toEqual({ kind: "input", modifiers: [], direction: null, buttons: ["MK"], jump: "nj" });
+    expect(parseNotation("bj.H")[0][0]).toEqual({ kind: "input", modifiers: [], direction: null, buttons: ["H"], jump: "bj" });
+  });
+
+  it("방향 · 타격 수 · 수식어 · 타겟 콤보와 함께 쓴다", () => {
+    expect(parseNotation("counter j.2MK(2)")[0][0]).toEqual({
+      kind: "input",
+      modifiers: ["counter"],
+      direction: "2",
+      buttons: ["MK"],
+      hits: 2,
+      jump: "j",
+    });
+    const chain = parseNotation("j.MP..HP")[0];
+    expect(chain).toHaveLength(2);
+    expect(findUnknownTokens(parseNotation("j.HP (크로스업) > 2MK"))).toEqual([]);
+  });
+
+  it("j.parry 는 그대로 저스트 패리, 버튼이 없으면 해석하지 못한 조각", () => {
+    expect(parseNotation("j.parry")[0][0]).toEqual({ kind: "system", modifiers: [], value: "JPARRY" });
+    expect(findUnknownTokens(parseNotation("j.66"))).toEqual(["j.66"]);
+  });
+
+  it("텍스트는 접두어 소문자 + 버튼 대문자", () => {
+    expect(displayNotation("J.hp > nj.mk > bj.l > j.parry")).toBe("j.HP → nj.MK → bj.L → J.Parry");
+  });
+});
+
 describe("대괄호 묶음 [ :: ]", () => {
   it("선택지마다 → 로 여러 단계를 이어 쓴다", () => {
     const combo = parseNotation("2MP > [ 236MP :: MP..HP :: DR MP > 236HK > 623HP ]");

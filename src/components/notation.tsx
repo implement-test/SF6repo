@@ -8,7 +8,7 @@ import {
   type Move,
   type Situation,
 } from "@/lib/notation/parse";
-import { BUTTON_ICONS, SYSTEM_ICONS, directionIcons, type IconRef } from "@/lib/notation/icons";
+import { BUTTON_ICONS, JUMP_ICONS, SYSTEM_ICONS, directionIcons, type IconRef } from "@/lib/notation/icons";
 
 function Icon({ icon }: { icon: IconRef }) {
   if (icon.overlay) {
@@ -138,6 +138,7 @@ function MoveIcons({ move }: { move: Move }) {
       return (
         <span className="inline-flex items-center gap-0.5">
           <Modifiers modifiers={move.modifiers} />
+          {move.jump && <Icon icon={JUMP_ICONS[move.jump]} />}
           {move.direction && directionIcons(move.direction).map((icon, i) => <Icon key={`d${i}`} icon={icon} />)}
           {move.buttons.map((b, i) => (
             <Icon key={`b${i}`} icon={BUTTON_ICONS[b]} />

@@ -16,6 +16,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-10-10",
     items: [
       {
+        kind: "added",
+        text: {
+          ko: "콤보 표기에 점프 공격 추가: j.HP(점프) · nj.HP(제자리 점프) · bj.HP(뒤 점프), 궤적 화살표 아이콘",
+          en: "Added jump attacks to combo notation: j.HP (jump), nj.HP (neutral jump), bj.HP (back jump) with arc-arrow icons",
+          ja: "コンボ表記にジャンプ攻撃を追加：j.HP（ジャンプ）・nj.HP（垂直）・bj.HP（バックジャンプ）、軌道の矢印アイコン",
+        },
+      },
+      {
         kind: "changed",
         text: {
           ko: "Vs 가이드: 상대 캐릭터 드롭다운 글자 크기를 줄임",

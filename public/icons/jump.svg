@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" width="36" height="36">
+  <!-- 점프 공격(j.). 방향키(십자 판)와 헷갈리지 않게 판 없이 바닥선 + 앞으로 휘는 궤적 화살표. 뒤 점프(bj.)는 좌우 반전 -->
+  <defs>
+    <linearGradient id="arrow" x1="6" y1="32" x2="32" y2="6" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#c8321c"/>
+      <stop offset="0.55" stop-color="#ff8a00"/>
+      <stop offset="1" stop-color="#ffc21a"/>
+    </linearGradient>
+  </defs>
+  <path d="M3.5 32.5h29" stroke="#8a8a8a" stroke-width="2" stroke-linecap="round"/>
+  <path d="M7 30C8.5 17 14.5 9.5 25 8.6" fill="none" stroke="#5a1800" stroke-width="6.4" stroke-linecap="round"/>
+  <path d="M7 30C8.5 17 14.5 9.5 25 8.6" fill="none" stroke="url(#arrow)" stroke-width="4.4" stroke-linecap="round"/>
+  <path d="M33.4 8.4L23.6 2.6v11.6z" fill="url(#arrow)" stroke="#5a1800" stroke-width="0.9" stroke-linejoin="round"/>
+</svg>

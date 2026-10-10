@@ -1,4 +1,4 @@
-import type { Button, SystemValue } from "./parse";
+import type { Button, Jump, SystemValue } from "./parse";
 
 /**
  * 아이콘 파일은 모두 public/icons 에 있다.
@@ -54,6 +54,13 @@ export function directionIcons(direction: string): IconRef[] {
   }
   return out;
 }
+
+/** 점프 공격: 방향키와 구분되는 궤적 화살표. 뒤 점프는 앞 점프를 좌우 반전 */
+export const JUMP_ICONS: Record<Jump, IconRef> = {
+  j: { src: "/icons/jump.svg", alt: "j." },
+  nj: { src: "/icons/jump-neutral.svg", alt: "nj." },
+  bj: { src: "/icons/jump.svg", flip: "x", alt: "bj." },
+};
 
 export const BUTTON_ICONS: Record<Button, IconRef> = {
   LP: { src: "/icons/btn-lp.webp", alt: "LP" },

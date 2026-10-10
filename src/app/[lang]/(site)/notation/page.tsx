@@ -19,6 +19,12 @@ const LEGEND: { notation: string; ko: string; en: string; ja: string }[] = [
     ja: "状況（コマンドの前）：counter カウンター / punish パニッシュカウンター / air 空中 / guard ガードさせる",
   },
   { notation: "delay 5HP", ko: "delay 딜레이 입력", en: "delay = delayed input", ja: "delay ディレイ入力" },
+  {
+    notation: "j.HP → nj.MK → bj.LP",
+    ko: "j. 점프 / nj. 제자리 점프 / bj. 뒤 점프 공격 (air 는 상대가 공중인 상황)",
+    en: "j. jump / nj. neutral jump / bj. back jump attack (air = opponent airborne)",
+    ja: "j. ジャンプ / nj. 垂直ジャンプ / bj. バックジャンプ攻撃 (air は相手が空中の状況)",
+  },
   { notation: "66 → 44", ko: "앞대쉬 / 뒷대쉬", en: "Forward dash / back dash", ja: "前ステップ / バックステップ" },
   { notation: "f.throw → b.throw", ko: "앞잡기 / 뒤잡기", en: "Forward throw / back throw", ja: "前投げ / 後ろ投げ" },
   { notation: "DR → DRC → DI", ko: "생 드라이브 러시 / 캔슬 드라이브 러시 / 드라이브 임팩트", en: "Raw Drive Rush / Drive Rush cancel / Drive Impact", ja: "生ドライブラッシュ / キャンセルラッシュ / ドライブインパクト" },
