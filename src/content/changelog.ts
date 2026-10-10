@@ -18,6 +18,14 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         kind: "added",
         text: {
+          ko: "콤보 표기에 j.parry(저스트 패리) 추가 — 패리(parry)와 구분되는 J.Parry 아이콘",
+          en: "Added j.parry (Perfect Parry) to combo notation, with a J.Parry icon distinct from parry",
+          ja: "コンボ表記に j.parry（ジャストパリィ）を追加、パリィ(parry)と区別できる J.Parry アイコン",
+        },
+      },
+      {
+        kind: "added",
+        text: {
           ko: "공통 공략 메뉴 추가: 모든 캐릭터에 통용되는 시스템 글 · 추천 연습 · 추천 영상",
           en: "Added the General guide menu: system guides, practice drills and videos that apply to every character",
           ja: "共通攻略メニューを追加：全キャラ共通のシステム解説・おすすめ練習・おすすめ動画",

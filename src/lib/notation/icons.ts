@@ -77,6 +77,8 @@ export const SYSTEM_ICONS: Record<SystemValue, IconRef> = {
   DRC: { src: "/icons/drc.svg", wide: true, alt: "DRC" },
   DI: { src: "/icons/di.png", wide: true, alt: "DI" },
   PARRY: { src: "/icons/parry.svg", wide: true, alt: "PARRY" },
+  // 저스트 패리: 패리와 같은 크기, 흰 판 + 초록 테두리 · 글자로 구분
+  JPARRY: { src: "/icons/jparry.svg", wide: true, alt: "J.Parry" },
   // 슈퍼 아츠: 드라이브(파랑)와 구분되게 주황
   SA1: { src: "/icons/sa1.svg", wide: true, alt: "SA1" },
   SA2: { src: "/icons/sa2.svg", wide: true, alt: "SA2" },

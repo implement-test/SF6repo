@@ -216,7 +216,14 @@ describe("displayNotation", () => {
 });
 
 describe("parry", () => {
-  it("parry 는 저스트 패리 시스템 기호", () => {
+  it("j.parry 는 저스트 패리 (parry 와 다른 기호)", () => {
+    expect(parseNotation("j.parry → 5HP")[0][0]).toEqual({ kind: "system", modifiers: [], value: "JPARRY" });
+    expect(parseNotation("J.Parry")[0][0]).toEqual({ kind: "system", modifiers: [], value: "JPARRY" });
+    expect(findUnknownTokens(parseNotation("punish j.parry → 2MP"))).toEqual([]);
+    expect(displayNotation("j.parry > parry > 5hp")).toBe("J.Parry → PARRY → 5HP");
+  });
+
+  it("parry 는 패리 시스템 기호", () => {
     expect(parseNotation("parry → 5HP")[0][0]).toEqual({ kind: "system", modifiers: [], value: "PARRY" });
     expect(findUnknownTokens(parseNotation("punish parry → 2MP"))).toEqual([]);
   });
