@@ -47,6 +47,7 @@ export function normalizeFinishes(raw: unknown): ComboFinish[] {
         damage: numberOrNull(f.damage),
         frame_after: textOrNull(f.frame_after),
         ender_id: numberOrNull(f.ender_id),
+        note: toLocalized(f.note),
       };
     })
     .filter((f) => f.classic);
@@ -71,7 +72,7 @@ export function normalizeExtraRoutes(raw: unknown): ComboRoute[] {
     .filter((r) => r.classic);
 }
 
-export const emptyFinish = (): ComboFinish => ({ classic: "", modern: null, damage: null, frame_after: null, ender_id: null });
+export const emptyFinish = (): ComboFinish => ({ classic: "", modern: null, damage: null, frame_after: null, ender_id: null, note: null });
 
 export const emptyRoute = (): ComboRoute => ({
   classic: "",
@@ -94,7 +95,7 @@ export function cleanNote(note: Partial<Localized> | null | undefined): Localize
   return out.ko ? (out as Localized) : "missing-ko";
 }
 
-function cleanFinishes(finishes: ComboFinish[] | undefined): ComboFinish[] {
+function cleanFinishes(finishes: ComboFinish[] | undefined) {
   return (finishes ?? [])
     .map((f) => ({
       classic: f.classic.trim(),
@@ -102,6 +103,7 @@ function cleanFinishes(finishes: ComboFinish[] | undefined): ComboFinish[] {
       damage: typeof f.damage === "number" ? f.damage : null,
       frame_after: f.frame_after?.trim() || null,
       ender_id: typeof f.ender_id === "number" ? f.ender_id : null,
+      note: cleanNote(f.note),
     }))
     .filter((f) => f.classic);
 }
@@ -127,7 +129,7 @@ export function routesToColumns(routes: ComboRoute[]): Record<string, unknown> |
     })
     .filter((r) => r.classic);
   if (cleaned.length === 0) return "empty";
-  if (cleaned.some((r) => r.note === "missing-ko")) return "missing-ko";
+  if (cleaned.some((r) => r.note === "missing-ko" || r.finishes.some((f) => f.note === "missing-ko"))) return "missing-ko";
   const [first, ...rest] = cleaned as (Omit<ComboRoute, "note"> & { note: Localized | null })[];
   return {
     notation_classic: first.classic,

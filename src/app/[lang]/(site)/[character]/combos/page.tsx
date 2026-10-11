@@ -19,6 +19,7 @@ import { ComboFilters } from "@/components/combo-filters";
 import { AddButton } from "@/components/admin/admin-context";
 import { DraftItems } from "@/components/admin/drafts";
 import { ReorderButton } from "@/components/admin/reorder-button";
+import { RouteCleanupButton } from "@/components/admin/route-cleanup-button";
 import { EnderButton } from "@/components/admin/ender-button";
 
 export const revalidate = 3600;
@@ -44,6 +45,7 @@ export default async function CombosPage({ params }: PageProps<"/[lang]/[charact
   const adminActions = (
     <div className="flex justify-end gap-2 empty:hidden">
       <EnderButton characterId={character.id} />
+      <RouteCleanupButton characterId={character.id} />
       <ReorderButton table="combos" characterId={character.id} label="콤보" />
       <AddButton entity="combo" label="콤보 추가" scope={character.id} defaults={{ character_id: character.id }} />
     </div>

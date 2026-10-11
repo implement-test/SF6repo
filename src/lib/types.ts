@@ -97,6 +97,8 @@ export type ComboFinish = {
   frame_after: string | null;
   /** 자동으로 찾은 것과 다른 엔더를 쓸 때 (null = 마지막 기술로 자동) */
   ender_id: number | null;
+  /** 이 마무리만의 메모 (finishes jsonb 안에 저장, 예전 데이터에는 없다) */
+  note?: Localized | null;
 };
 
 /**

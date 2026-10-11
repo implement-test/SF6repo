@@ -5,6 +5,7 @@ import type { ComboEnder, ComboFinish, ComboRoute, Localized } from "@/lib/types
 import { emptyFinish, emptyRoute } from "@/lib/combo-routes";
 import { resolveEnder } from "@/lib/enders";
 import { displayNotation } from "@/lib/notation/parse";
+import { splitRoutes, type SplitResult } from "@/lib/route-split";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { NotationRow, inputClass } from "./starters-input";
 
@@ -13,6 +14,7 @@ import { NotationRow, inputClass } from "./starters-input";
  * 첫 번째 루트가 기본으로 보이고, 카드에서 다른 루트에 마우스를 올리면 그 루트의 수치로 바뀐다.
  * '마무리'를 켜면 루트 아래에 마무리 탭이 생기고, 데미지·후상황은 마무리마다 적는다.
  * 엔더(콤보를 끝낸 기술)는 마지막 기술로 자동으로 찾고, 다르면 직접 고른다. 후상황을 비우면 엔더의 후상황을 쓴다.
+ * '마무리로 나누기'는 같은 중간 루트를 반복해 적은 루트들을 공통 루트 + 마무리 여러 개로 묶는다 (미리 보고 적용).
  */
 export function RoutesInput({
   label,
@@ -29,6 +31,9 @@ export function RoutesInput({
 }) {
   const routes = value.length > 0 ? value : [emptyRoute()];
   const [enders, setEnders] = useState<ComboEnder[]>([]);
+  const [preview, setPreview] = useState<SplitResult | null>(null);
+  // 나눌 수 있는 루트가 있을 때만 버튼을 보인다
+  const splittable = routes.length > 1 && splitRoutes(routes).groups.length > 0;
   useEffect(() => {
     if (characterId === undefined) return;
     supabaseBrowser()
@@ -125,14 +130,89 @@ export function RoutesInput({
           </li>
         ))}
       </ol>
-      <button
-        type="button"
-        onClick={() => onChange([...routes, emptyRoute()])}
-        className="self-start border border-dashed border-border-strong px-3 py-1.5 text-sm font-semibold text-muted hover:border-accent hover:text-accent"
-      >
-        + 루트 추가
-      </button>
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => onChange([...routes, emptyRoute()])}
+          className="border border-dashed border-border-strong px-3 py-1.5 text-sm font-semibold text-muted hover:border-accent hover:text-accent"
+        >
+          + 루트 추가
+        </button>
+        {splittable && (
+          <button
+            type="button"
+            onClick={() => setPreview(splitRoutes(routes))}
+            title="같은 중간 루트를 반복해 적은 루트들을 공통 루트 + 마무리 여러 개로 묶습니다"
+            className="border border-highlight/60 px-3 py-1.5 text-sm font-semibold text-highlight-text hover:bg-highlight hover:text-highlight-fg"
+          >
+            마무리로 나누기
+          </button>
+        )}
+      </div>
+      {preview && (
+        <SplitPreview
+          result={preview}
+          onApply={() => {
+            onChange(preview.routes);
+            setPreview(null);
+          }}
+          onCancel={() => setPreview(null)}
+        />
+      )}
       {help && <span className="text-xs text-muted">{help}</span>}
+    </div>
+  );
+}
+
+/** '마무리로 나누기' 미리 보기: 어떤 루트가 어떻게 묶이는지, 묶지 못한 이유 */
+export function SplitPreview({
+  result,
+  onApply,
+  onCancel,
+}: {
+  result: SplitResult;
+  onApply?: () => void;
+  onCancel?: () => void;
+}) {
+  return (
+    <div className="flex flex-col gap-2 border border-highlight/60 bg-highlight/5 p-3 text-sm">
+      {result.groups.map((g, i) => (
+        <div key={i} className="flex flex-col gap-1">
+          <span className="text-xs text-muted">루트 {g.members.map((m) => m + 1).join(" · ")} →</span>
+          <span>
+            <span className="text-xs font-bold text-accent">루트 </span>
+            <span className="font-mono">{displayNotation(g.prefix)}</span>
+          </span>
+          <ol className="flex flex-col gap-0.5 pl-4">
+            {g.finishes.map((f, j) => (
+              <li key={j}>
+                <span className="notation-finish mr-1.5 scale-90">FINISH {j + 1}</span>
+                <span className="font-mono">{displayNotation(f)}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      ))}
+      {result.skipped.map((s, i) => (
+        <p key={i} className="text-xs text-warn">
+          루트 {s.members.map((m) => m + 1).join(" · ")} ({displayNotation(s.prefix)}): {s.reason}
+        </p>
+      ))}
+      <p className="text-xs text-muted">루트마다 적은 데미지 · 후상황 · 엔더 · 메모는 해당 마무리로 옮깁니다. 저장해야 반영됩니다.</p>
+      {(onApply || onCancel) && (
+        <div className="flex gap-2">
+          {onApply && result.groups.length > 0 && (
+            <button type="button" onClick={onApply} className="skew bg-highlight px-3 py-1 text-xs font-bold text-highlight-fg">
+              <span>적용</span>
+            </button>
+          )}
+          {onCancel && (
+            <button type="button" onClick={onCancel} className="px-3 py-1 text-xs font-semibold text-muted hover:text-fg">
+              취소
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -282,6 +362,28 @@ function FinishesInput({
             </button>
           </span>
         </div>
+        {/* 엔더 목록에서 바로 고르기: 지금 마무리가 비어 있으면 채우고, 아니면 새 마무리로 더한다 */}
+        {enders.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1">
+            <span className="mr-1 text-xs text-muted">엔더에서 고르기</span>
+            {enders.map((e) => (
+              <button
+                key={e.id}
+                type="button"
+                title={e.label?.ko ?? undefined}
+                onClick={() => {
+                  const picked = { classic: e.notation_classic, modern: e.notation_modern ?? null, ender_id: null };
+                  if (!finish.classic.trim()) return update(picked);
+                  onChange([...value, { ...emptyFinish(), ...picked }]);
+                  setTab(value.length);
+                }}
+                className="border border-border-strong px-2 py-0.5 font-mono text-xs text-muted hover:border-highlight hover:text-highlight-text"
+              >
+                {displayNotation(e.notation_classic)}
+              </button>
+            ))}
+          </div>
+        )}
         <NotationRow label="클래식" value={finish.classic} onChange={(classic) => update({ classic })} placeholder="예: 236HP, sa3" />
         <NotationRow
           label="모던"
@@ -297,6 +399,7 @@ function FinishesInput({
           enders={enders}
           onChange={update}
         />
+        <RouteNoteInput value={finish.note ?? null} onChange={(note) => update({ note })} label="이 마무리만의 메모" />
       </div>
     </div>
   );

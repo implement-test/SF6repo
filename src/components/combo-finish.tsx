@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { ComboFinish } from "@/lib/types";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
+import type { Locale } from "@/lib/i18n/config";
+import { pickLocalized } from "@/lib/i18n/localized";
 import type { LinkedSetup } from "@/lib/setup-links";
 import { ControlNotation } from "./notation";
 
@@ -15,12 +17,14 @@ export function FinishBadge({
   setups = [],
   characterSlug,
   dict,
+  locale,
 }: {
   finishes: ComboFinish[];
   /** 이 루트의 마무리에서 이어지는 셋업 (finishIndex 로 마무리를 고른다) */
   setups?: LinkedSetup[];
   characterSlug: string;
   dict: Dictionary;
+  locale: Locale;
 }) {
   if (finishes.length === 0) return null;
   const hasSetups = setups.some((s) => s.finishIndex !== null && s.finishIndex < finishes.length);
@@ -46,6 +50,8 @@ export function FinishBadge({
                   </span>
                   <FinishStats finish={f} dict={dict} />
                 </span>
+                {/* 이 마무리만의 메모 */}
+                {f.note && <span className="pl-7 text-xs whitespace-pre-line text-muted">{pickLocalized(f.note, locale).text}</span>}
                 {linked.length > 0 && (
                   <span className="pl-7">
                     <SetupChips setups={linked} characterSlug={characterSlug} dict={dict} />

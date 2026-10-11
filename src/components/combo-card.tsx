@@ -78,7 +78,7 @@ export function ComboCard({
     <div className="flex min-w-0 flex-col gap-1.5">
       <div className="flex min-w-0 flex-wrap items-center gap-2">
         <ControlNotation classic={route.classic} modern={route.modern} classicOnlyLabel={dict.combo.classicOnly} />
-        <FinishBadge finishes={route.finishes} setups={setupsByRoute[r]} characterSlug={characterSlug} dict={dict} />
+        <FinishBadge finishes={route.finishes} setups={setupsByRoute[r]} characterSlug={characterSlug} dict={dict} locale={locale} />
       </div>
       <SetupChips
         setups={setupsByRoute[r].filter((s) => s.finishIndex === null)}
@@ -206,23 +206,38 @@ export function ComboCard({
                 {notes.text} {!notes.translated && <NotTranslatedBadge label={dict.notTranslated} />}
               </p>
             )}
-            {/* 루트별 메모: 지금 고른 루트의 것만 (루트 수치와 함께 바뀐다) */}
-            {routes.some((r) => r.note) && (
+            {/* 루트별 메모 · 마무리별 메모: 지금 고른 루트의 것만 (루트 수치와 함께 바뀐다) */}
+            {routes.some((r) => r.note || r.finishes.some((f) => f.note)) && (
               <RoutePanels
                 panels={routes.map((route, r) => {
-                  if (!route.note) return null;
-                  const note = pickLocalized(route.note, locale);
+                  const lines = [
+                    ...(route.note ? [{ label: multiRoute ? `${dict.combo.route} ${r + 1}` : null, note: route.note, finish: false }] : []),
+                    ...route.finishes.flatMap((f, i) => (f.note ? [{ label: `FINISH ${i + 1}`, note: f.note, finish: true }] : [])),
+                  ];
+                  if (lines.length === 0) return null;
                   return (
-                    // 라벨과 본문을 나눠, 여러 줄이어도 본문 들여쓰기가 맞고 라벨은 본문 높이의 가운데에 온다
-                    <div key={r} className="flex items-center gap-2 border-l-2 border-accent pl-2 text-sm text-muted">
-                      {multiRoute && (
-                        <span className="shrink-0 text-xs font-bold whitespace-nowrap text-accent">
-                          {dict.combo.route} {r + 1}
-                        </span>
-                      )}
-                      <p className="min-w-0 whitespace-pre-line">
-                        {note.text} {!note.translated && <NotTranslatedBadge label={dict.notTranslated} />}
-                      </p>
+                    <div key={r} className="flex flex-col gap-1.5">
+                      {lines.map((line, k) => {
+                        const note = pickLocalized(line.note, locale);
+                        return (
+                          // 라벨과 본문을 나눠, 여러 줄이어도 본문 들여쓰기가 맞고 라벨은 본문 높이의 가운데에 온다
+                          <div
+                            key={k}
+                            className={`flex items-center gap-2 border-l-2 pl-2 text-sm text-muted ${line.finish ? "border-highlight" : "border-accent"}`}
+                          >
+                            {line.label && (
+                              <span
+                                className={`shrink-0 text-xs font-bold whitespace-nowrap ${line.finish ? "text-highlight-text" : "text-accent"}`}
+                              >
+                                {line.label}
+                              </span>
+                            )}
+                            <p className="min-w-0 whitespace-pre-line">
+                              {note.text} {!note.translated && <NotTranslatedBadge label={dict.notTranslated} />}
+                            </p>
+                          </div>
+                        );
+                      })}
                     </div>
                   );
                 })}

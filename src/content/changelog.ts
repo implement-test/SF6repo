@@ -13,6 +13,28 @@ export type ChangelogEntry = { date: string; items: ChangelogItem[] };
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    date: "2026-10-11",
+    items: [
+      {
+        kind: "added",
+        text: {
+          ko: "콤보의 마무리마다 메모를 보여 줌 (메모 칸의 FINISH 라벨, FINISH 팝업)",
+          en: "Combos can show a memo per finisher (FINISH label in the memo area and in the FINISH popup)",
+          ja: "コンボの締めごとにメモを表示（メモ欄の FINISH ラベル、FINISH ポップアップ）",
+        },
+      },
+      {
+        kind: "added",
+        adminOnly: true,
+        text: {
+          ko: "콤보 편집: 같은 중간 루트의 루트들을 '마무리로 나누기', 마무리를 엔더 목록에서 고르기, 콤보 탭의 '루트 정리'로 한꺼번에 정리",
+          en: "Combo editing: split repeated mid-routes into finishers, pick finishers from the ender list, bulk 'route cleanup' on the combos tab",
+          ja: "コンボ編集：同じ中間ルートを「締めに分ける」、締めをエンダー一覧から選択、コンボタブの「ルート整理」で一括整理",
+        },
+      },
+    ],
+  },
+  {
     date: "2026-10-10",
     items: [
       {
