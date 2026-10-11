@@ -34,8 +34,8 @@ describe("comboRoutes", () => {
       finishes: [{ classic: "SA3", damage: 4200, frame_after: "다운 +20" }, { classic: "" }],
       extra_routes: [{ classic: "5MP", finishes: [{ classic: "236HP", modern: "" }] }],
     });
-    expect(routes[0].finishes).toEqual([{ classic: "SA3", modern: null, damage: 4200, frame_after: "다운 +20", ender_id: null }]);
-    expect(routes[1].finishes).toEqual([{ classic: "236HP", modern: null, damage: null, frame_after: null, ender_id: null }]);
+    expect(routes[0].finishes).toEqual([{ classic: "SA3", modern: null, damage: 4200, frame_after: "다운 +20", ender_id: null, note: null }]);
+    expect(routes[1].finishes).toEqual([{ classic: "236HP", modern: null, damage: null, frame_after: null, ender_id: null, note: null }]);
   });
 });
 
