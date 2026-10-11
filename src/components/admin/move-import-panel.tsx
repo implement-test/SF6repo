@@ -120,7 +120,7 @@ export default function MoveImportPanel({
       setError(error ? describeError(error) : "이 캐릭터의 커맨드를 추가할 권한이 없습니다.");
       return;
     }
-    await revalidateSite(sb);
+    await revalidateSite(sb, { characters: [characterId] });
     bumpData();
     router.refresh();
     onClose();

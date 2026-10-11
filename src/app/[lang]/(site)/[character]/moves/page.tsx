@@ -10,7 +10,8 @@ import { ReorderButton } from "@/components/admin/reorder-button";
 import { MoveImportButton } from "@/components/admin/move-import-button";
 import { pickLocalized } from "@/lib/i18n/localized";
 
-export const revalidate = 3600;
+// 시간이 지나도 다시 만들지 않는다. 관리자가 저장할 때만 /api/revalidate 로 갱신 (CPU · R2 절약)
+export const revalidate = false;
 
 /**
  * 커맨드 리스트: 분류(기본기 → 특수기 → 타겟 콤보 → 잡기 → 드라이브 → 필살기 → 슈퍼 아츠)별 기술 카드.

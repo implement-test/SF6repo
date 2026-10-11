@@ -57,7 +57,7 @@ export function DraftItems({
       setError(error ? describeError(error) : "공개할 권한이 없습니다.");
       return;
     }
-    await revalidateSite(sb);
+    await revalidateSite(sb, { characters: [characterId] });
     setBusy(false);
     bumpData();
     router.refresh();

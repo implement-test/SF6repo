@@ -8,7 +8,8 @@ import { AddButton } from "@/components/admin/admin-context";
 import { DraftItems } from "@/components/admin/drafts";
 import { ReorderButton } from "@/components/admin/reorder-button";
 
-export const revalidate = 3600;
+// 시간이 지나도 다시 만들지 않는다. 관리자가 저장할 때만 /api/revalidate 로 갱신 (CPU · R2 절약)
+export const revalidate = false;
 
 /** 공통 공략 · 시스템 글: 드라이브 시스템 · 공격 · 수비처럼 모든 캐릭터에 통용되는 글 */
 export default async function GuidePage({ params }: PageProps<"/[lang]/guide">) {

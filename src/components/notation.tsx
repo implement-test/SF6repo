@@ -31,7 +31,6 @@ function Icon({ icon }: { icon: IconRef }) {
       data-flip={icon.flip}
       data-wide={icon.wide ? "" : undefined}
       loading="lazy"
-      decoding="async"
     />
   );
 }
@@ -103,7 +102,7 @@ function MoveIcons({ move }: { move: Move }) {
       return (
         <OrGroup
           options={move.options.map((option, i) => (
-            <span key={i} className="inline-flex flex-wrap items-center gap-x-1.5 gap-y-2">
+            <span key={i} className="nt">
               <Steps combo={option} />
             </span>
           ))}
@@ -127,7 +126,7 @@ function MoveIcons({ move }: { move: Move }) {
       return <span className="rounded bg-warn/15 px-1 font-mono text-sm text-warn">{move.text}</span>;
     case "system":
       return (
-        <span className="inline-flex items-center gap-1">
+        <span className="nt-chain">
           <Modifiers modifiers={move.modifiers} />
           <Icon icon={SYSTEM_ICONS[move.value]} />
         </span>
@@ -135,7 +134,7 @@ function MoveIcons({ move }: { move: Move }) {
     case "throw": {
       const label = move.direction === "f" ? "f.throw" : move.direction === "b" ? "b.throw" : "throw";
       return (
-        <span className="inline-flex items-center gap-0.5" title={label}>
+        <span className="nt-move" title={label}>
           <Modifiers modifiers={move.modifiers} />
           {move.direction && <Icon icon={directionIcons(move.direction === "f" ? "6" : "4")[0]} />}
           <span className="notation-throw" aria-label={label}>
@@ -146,7 +145,7 @@ function MoveIcons({ move }: { move: Move }) {
     }
     case "input":
       return (
-        <span className="inline-flex items-center gap-0.5">
+        <span className="nt-move">
           <Modifiers modifiers={move.modifiers} />
           {move.jump && <Icon icon={JUMP_ICONS[move.jump]} />}
           {move.direction && directionIcons(move.direction).map((icon, i) => <Icon key={`d${i}`} icon={icon} />)}
@@ -168,7 +167,7 @@ function MoveIcons({ move }: { move: Move }) {
 export function NotationImage({ notation }: { notation: string }) {
   const segments = parseNotationSegments(notation);
   return (
-    <span className="inline-flex flex-wrap items-center gap-x-1.5 gap-y-2">
+    <span className="nt">
       {segments.map((segment, i) => (
         <Fragment key={i}>
           {i > 0 && <span className="text-muted" aria-label="then">→</span>}
@@ -209,7 +208,7 @@ const LOOSE = new Set<Move["kind"]>(["note", "damage"]);
 /** 타겟 콤보(..)로 묶인 기술 묶음 */
 function Chain({ moves }: { moves: Move[] }) {
   return (
-    <span className="inline-flex items-center gap-1">
+    <span className="nt-chain">
       {moves.map((move, j) => (
         <Fragment key={j}>
           {/* 타겟 콤보 구분점. 괄호 메모 앞뒤에는 찍지 않는다 */}
@@ -236,7 +235,7 @@ function OrGroup({ options }: { options: ReactNode[] }) {
 }
 
 export function NotationText({ notation }: { notation: string }) {
-  return <span className="font-mono text-[0.95rem] leading-relaxed break-words">{displayNotation(notation)}</span>;
+  return <span className="nt-text">{displayNotation(notation)}</span>;
 }
 
 /** 방문자 설정(텍스트/이미지)에 따라 둘 중 하나가 보인다. */
@@ -269,7 +268,7 @@ export function ControlNotation({
   if (!modern) {
     return (
       <div className="flex flex-col items-start gap-1.5">
-        <span className="show-if-modern border border-border-strong px-1.5 py-0.5 text-[0.7rem] font-semibold uppercase tracking-wide text-muted">
+        <span className="show-if-modern nt-classic-only">
           {classicOnlyLabel}
         </span>
         <Notation notation={classic} />

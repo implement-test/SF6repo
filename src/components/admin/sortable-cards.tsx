@@ -122,7 +122,7 @@ export function SortableCards({
         message: failed.error ? describeError(failed.error) : "순서를 바꿀 권한이 없습니다.",
       });
     }
-    await revalidateSite(sb);
+    await revalidateSite(sb, { characters: [characterId] });
     router.refresh();
     setStatus({ kind: "saved" });
   }

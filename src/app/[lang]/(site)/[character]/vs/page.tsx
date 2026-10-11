@@ -6,7 +6,8 @@ import { VsGuideCard } from "@/components/vs-guide-card";
 import { VsGuideList } from "@/components/vs-guide-list";
 import { DraftItems } from "@/components/admin/drafts";
 
-export const revalidate = 3600;
+// 시간이 지나도 다시 만들지 않는다. 관리자가 저장할 때만 /api/revalidate 로 갱신 (CPU · R2 절약)
+export const revalidate = false;
 
 /** Vs 가이드. 상대 선택 칸은 캐릭터 레이아웃(필터 바 위)에 있다 */
 export default async function VsPage({ params }: PageProps<"/[lang]/[character]/vs">) {

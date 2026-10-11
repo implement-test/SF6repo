@@ -9,7 +9,8 @@ import { AddButton } from "@/components/admin/admin-context";
 import { DraftItems } from "@/components/admin/drafts";
 import { ReorderButton } from "@/components/admin/reorder-button";
 
-export const revalidate = 3600;
+// 시간이 지나도 다시 만들지 않는다. 관리자가 저장할 때만 /api/revalidate 로 갱신 (CPU · R2 절약)
+export const revalidate = false;
 
 /** 추천 영상: 캐릭터별 YouTube 영상 모음 (썸네일을 누르면 그 자리에서 재생) */
 export default async function VideosPage({ params }: PageProps<"/[lang]/[character]/videos">) {

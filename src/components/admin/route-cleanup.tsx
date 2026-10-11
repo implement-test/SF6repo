@@ -70,7 +70,7 @@ export default function RouteCleanup({ characterId, onClose }: { characterId: nu
       else if (!data?.length) failed.push(`${title} (그사이 고쳐졌거나 권한 없음)`);
       else done++;
     }
-    if (done > 0) await revalidateSite(sb);
+    if (done > 0) await revalidateSite(sb, { characters: [characterId] });
     setBusy(false);
     setMessage(`${done}개를 나눴습니다.${failed.length ? ` 실패: ${failed.join(", ")}` : ""}`);
     bumpData();

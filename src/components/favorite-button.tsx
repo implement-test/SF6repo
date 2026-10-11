@@ -48,7 +48,7 @@ export function FavoriteButton({
       onClick={() => toggleFavorite(kind, id)}
       title={label}
       aria-label={label}
-      className="inline-grid size-7 place-items-center border border-border-strong text-base leading-none text-muted transition-colors hover:border-highlight hover:text-highlight-text aria-pressed:border-highlight aria-pressed:text-highlight-text"
+      className="fav-btn"
     >
       {on ? "★" : "☆"}
     </button>

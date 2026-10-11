@@ -193,7 +193,8 @@ export function ReviewCenter() {
       if (error) errors.push(describeError(error));
       done += data?.length ?? 0;
     }
-    await revalidateSite(sb);
+    // 처리한 항목들의 캐릭터 페이지만 (공통 공략 항목은 공통 페이지)
+    await revalidateSite(sb, { characters: [...new Set(targets.map((t) => t.row.character_id ?? null))] });
     setSelected(new Set());
     setBusy(false);
     setMessage(errors.length ? `일부 실패: ${errors.join(", ")}` : `${done}개 항목을 처리했습니다.`);

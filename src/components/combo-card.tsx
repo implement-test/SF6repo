@@ -174,9 +174,9 @@ export function ComboCard({
                       <RouteRow
                         key={r}
                         index={r}
-                        className="group/route -mx-2 flex cursor-default items-start gap-2.5 border-l-2 border-transparent px-2 py-1 transition-colors data-[active=true]:border-accent data-[active=true]:bg-surface-2"
+                        className="route-row"
                       >
-                        <span className="display w-4 pt-1 text-right text-base text-muted group-data-[active=true]/route:text-accent">
+                        <span className="display route-num">
                           {r + 1}
                         </span>
                         {starters.length > 0 && <span className="pt-1 text-muted">→</span>}

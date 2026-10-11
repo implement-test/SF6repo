@@ -78,6 +78,10 @@ npm run lint
 ### 처음 한 번
 1. `npx wrangler login` (PowerShell 에서는 `npx.cmd`)
 2. R2 버킷: `npx wrangler r2 bucket create sf6-repository-opennext-cache` (ISR 캐시)
+   - **수명 주기 규칙(필수)**: R2 → `sf6-repository-opennext-cache` → Settings → Object lifecycle rules → Add rule
+     - 이름 예: `old-builds`, Prefix: `incremental-cache/`, Action: **Delete objects**, **3일** 뒤
+     - 캐시는 `incremental-cache/{빌드 ID}/…` 에 저장되어 배포할 때마다 새 폴더가 생기고 예전 것은 지워지지 않는다. 이 규칙이 없으면 배포할수록 용량이 계속 늘어난다
+     - 지금 빌드의 캐시도 3일이 지나면 지워지지만, 다음 방문 때 다시 만들어진다 (페이지당 한 번)
    - 영상(움짤)은 별도 버킷 `sf6-media` (공개 접근 허용)
 3. D1(태그 캐시): `npx wrangler d1 create sf6-repository-tag-cache` → 나온 database_id 를 `wrangler.jsonc` 의 `d1_databases` 에 넣는다
    - 없으면 관리자가 저장해도(revalidatePath) 배포된 사이트에 반영되지 않는다. 표(`revalidations`)는 배포할 때 자동으로 만들어진다
@@ -98,5 +102,7 @@ npm run deploy
 
 ### 설정 메모
 - 언어 rewrite(`next.config.ts`)는 첫 단계/나머지 단계를 나눠 받는다. 여러 단계를 한 칸에 담으면 OpenNext 라우터에서 500 오류
-- `open-next.config.ts`: R2 증분 캐시 + D1 태그 캐시 + 메모리 큐(자기 참조 서비스 바인딩)
+- `open-next.config.ts`: R2 증분 캐시 + 앞단 regional cache(데이터센터별 Cache API, 하루 보관, 적중 때 R2 를 다시 읽지 않음) + D1 태그 캐시 + 메모리 큐(자기 참조 서비스 바인딩)
+- 페이지는 `revalidate = false`: 시간이 지나도 다시 만들지 않고, 관리자가 저장할 때만 `/api/revalidate` 로 그 캐릭터(또는 공통 공략) 페이지를 갱신한다
+- Worker 진입점은 `worker.mjs`: OpenNext 워커에 Cron(`wrangler.jsonc` 의 `triggers`, 하루 한 번 UTC 18:17)을 덧붙여 `/api/ping` 으로 Supabase 를 깨운다 (무료 프로젝트 7일 일시정지 방지). Cron 실행 기록은 Workers → sf6-repository → Settings → Triggers
 - AI 크롤러: `public/robots.txt` 로 거부를 알리고, 실제 차단은 Cloudflare → Security → Bots 의 Block AI bots

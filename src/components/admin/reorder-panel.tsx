@@ -89,7 +89,7 @@ export default function ReorderPanel({
       setError(failed.error ? describeError(failed.error) : "순서를 바꿀 권한이 없습니다.");
       return;
     }
-    await revalidateSite(sb);
+    await revalidateSite(sb, { characters: [characterId] });
     bumpData();
     router.refresh();
     onClose();

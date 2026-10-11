@@ -55,19 +55,47 @@ export async function getAdminInfo(sb: SupabaseClient): Promise<AdminInfo | null
 }
 
 /**
+ * 무엇을 다시 만들지: "all" = 사이트 전체 (패치 · 캐릭터 공개처럼 모든 페이지에 걸친 것),
+ * characters = 그 캐릭터들의 페이지만 (null 은 공통 공략 페이지). 범위를 좁히면 저장 뒤 다시 만드는 페이지가 줄어 CPU 를 아낀다.
+ */
+export type RevalidateScope = "all" | { characters: (number | null)[] };
+
+/** 콘텐츠 표의 행 하나가 바뀌었을 때의 범위: character_id 칸이 있으면 그 캐릭터(없으면 공통), 아니면 전체 */
+export function scopeOfRow(table: string, row: Record<string, unknown> | null | undefined): RevalidateScope {
+  if (table === "common_guides") return { characters: [null] };
+  if (!row || !("character_id" in row)) return "all";
+  const id = row.character_id;
+  return { characters: [typeof id === "number" ? id : null] };
+}
+
+function mergeScopes(a: RevalidateScope | null, b: RevalidateScope): RevalidateScope {
+  if (!a) return b;
+  if (a === "all" || b === "all") return "all";
+  return { characters: [...new Set([...a.characters, ...b.characters])] };
+}
+
+async function postRevalidate(token: string, scope: RevalidateScope) {
+  return fetch("/api/revalidate", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(scope === "all" ? { all: true } : { characters: scope.characters }),
+  });
+}
+
+/**
  * 저장 후 정적 페이지를 다시 만들도록 서버에 알린다.
  * 서버(Route Handler)는 무효화 기록을 응답을 보낸 직후에 남기므로, 바로 이어지는 router.refresh() 가
  * 예전 페이지를 받지 않도록 잠깐 기다린다. 실패해도 저장은 끝난 것이라 예외를 던지지 않는다
  * (Server Action 으로 바꿔 봤지만 Cloudflare 에서 저장이 멈춰서 되돌렸다).
  */
-export async function revalidateSite(sb: SupabaseClient) {
+export async function revalidateSite(sb: SupabaseClient, scope: RevalidateScope = "all") {
   try {
     const { data } = await sb.auth.getSession();
     const token = data.session?.access_token;
     if (!token) return;
-    const res = await fetch("/api/revalidate", { method: "POST", headers: { Authorization: `Bearer ${token}` } });
+    const res = await postRevalidate(token, scope);
     if (!res.ok) console.error("revalidate failed:", res.status);
-    scheduleSecondRevalidate(token);
+    scheduleSecondRevalidate(token, scope);
     await new Promise((resolve) => setTimeout(resolve, 1200));
   } catch (e) {
     console.error("revalidate failed:", e);
@@ -75,17 +103,21 @@ export async function revalidateSite(sb: SupabaseClient) {
 }
 
 let secondPass: ReturnType<typeof setTimeout> | null = null;
+let secondScope: RevalidateScope | null = null;
 
 /**
  * 20초 뒤에 한 번 더 무효화한다. 페이지를 새로 만드는 데 길게는 15초쯤 걸려서,
  * 저장 전에 만들기 시작한 페이지가 무효화보다 늦게 완성되면 예전 내용이 최신으로 남는다 (콤보 추가 직후 그룹 지정 등).
- * 연달아 저장하면 마지막 저장 기준으로 한 번만 보낸다.
+ * 연달아 저장하면 마지막 저장 기준으로 한 번만 보낸다 (그사이 저장한 범위는 모두 합친다).
  */
-function scheduleSecondRevalidate(token: string) {
+function scheduleSecondRevalidate(token: string, scope: RevalidateScope) {
   if (secondPass) clearTimeout(secondPass);
+  secondScope = mergeScopes(secondScope, scope);
   secondPass = setTimeout(() => {
+    const merged = secondScope ?? "all";
     secondPass = null;
-    fetch("/api/revalidate", { method: "POST", headers: { Authorization: `Bearer ${token}` } }).catch(() => {});
+    secondScope = null;
+    postRevalidate(token, merged).catch(() => {});
   }, 20_000);
 }
 

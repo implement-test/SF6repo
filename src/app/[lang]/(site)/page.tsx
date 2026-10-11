@@ -7,7 +7,8 @@ import { pickLocalized } from "@/lib/i18n/localized";
 import { SectionTitle } from "@/components/headings";
 import { rosterImage } from "@/lib/roster";
 
-export const revalidate = 3600;
+// 시간이 지나도 다시 만들지 않는다. 관리자가 저장할 때만 /api/revalidate 로 갱신 (CPU · R2 절약)
+export const revalidate = false;
 
 export default async function Home({ params }: PageProps<"/[lang]">) {
   const { lang } = await params;

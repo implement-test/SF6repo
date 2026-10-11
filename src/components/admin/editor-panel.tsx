@@ -6,7 +6,7 @@ import { ENTITIES, type Field } from "@/lib/admin/entities";
 import { copyValues } from "@/lib/admin/copy";
 import { VsCopyTo } from "./vs-copy";
 import { findUnknownTokens, parseNotation } from "@/lib/notation/parse";
-import { describeError, revalidateSite, supabaseBrowser } from "@/lib/supabase/browser";
+import { describeError, revalidateSite, scopeOfRow, supabaseBrowser } from "@/lib/supabase/browser";
 import type { ComboRoute, Localized, Patch, PracticeConfig, SetupOption, StarterGroup, VsPattern } from "@/lib/types";
 import { isVideoLink, parseXPost, parseYouTube } from "@/lib/youtube";
 import { normalizeOptions, normalizePractice } from "@/lib/setup";
@@ -206,7 +206,8 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
     // 저장·삭제했으면 기억해 둔 내용은 필요 없다
     saved.current = true;
     if (key) clearDraft(key);
-    await revalidateSite(sb);
+    // 이 항목의 캐릭터 페이지만 (공통 공략은 공통 페이지, 패치처럼 캐릭터가 없는 것은 전체)
+    await revalidateSite(sb, scopeOfRow(entity.table, values));
     bumpData();
     router.refresh();
     onClose();

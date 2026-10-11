@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { describeError, revalidateSite, supabaseBrowser } from "@/lib/supabase/browser";
+import { describeError, revalidateSite, scopeOfRow, supabaseBrowser } from "@/lib/supabase/browser";
 import { useAdmin } from "./admin-context";
 import { AdminSection } from "./admin-section";
 import { useAuthorNames, type ChangeEntry } from "./history";
@@ -73,7 +73,7 @@ export function DeletedItems() {
       setMessage(error.code === "23505" ? "이미 복구된 항목입니다." : describeError(error));
       return;
     }
-    await revalidateSite(sb);
+    await revalidateSite(sb, scopeOfRow(entry.table_name, entry.old_data));
     setMessage(`'${summarize(entry.old_data)}'을(를) 복구했습니다.`);
     bumpData();
     router.refresh();

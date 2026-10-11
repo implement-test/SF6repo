@@ -171,7 +171,7 @@ export default function EnderManager({ characterId, onClose }: { characterId: nu
         if (error) return fail(describeError(error));
       }
     }
-    await revalidateSite(sb);
+    await revalidateSite(sb, { characters: [characterId] });
     bumpData();
     router.refresh();
     onClose();

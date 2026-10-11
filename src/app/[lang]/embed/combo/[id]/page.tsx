@@ -9,7 +9,8 @@ import { linkedSetupsFor } from "@/lib/setup-links";
 import { ComboCard } from "@/components/combo-card";
 import { EmbedFooter } from "@/components/embed-footer";
 
-export const revalidate = 3600;
+// 시간이 지나도 다시 만들지 않는다. 관리자가 저장할 때만 /api/revalidate 로 갱신 (CPU · R2 절약)
+export const revalidate = false;
 
 async function load(lang: string, idText: string) {
   const id = Number(idText);

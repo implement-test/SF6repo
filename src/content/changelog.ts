@@ -16,6 +16,15 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-10-11",
     items: [
       {
+        kind: "changed",
+        adminOnly: true,
+        text: {
+          ko: "서버 리소스 절약: 1시간마다 다시 만들지 않고 저장할 때만 갱신(저장한 캐릭터 페이지만), 캐시 앞단 추가, 콤보 페이지 크기 약 10% 감소, 하루 한 번 DB 핑",
+          en: "Lower server usage: pages refresh only on save (just the saved character's pages), added a front cache, combo pages ~10% smaller, daily DB ping",
+          ja: "サーバー負荷の削減：1時間ごとの再生成をやめ保存時のみ更新（保存したキャラのページだけ）、前段キャッシュ追加、コンボページ約10%軽量化、1日1回のDB ping",
+        },
+      },
+      {
         kind: "added",
         text: {
           ko: "콤보의 마무리마다 메모를 보여 줌 (메모 칸의 FINISH 라벨, FINISH 팝업)",

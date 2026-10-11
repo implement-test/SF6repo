@@ -8,7 +8,8 @@ import { AddButton } from "@/components/admin/admin-context";
 import { DraftItems } from "@/components/admin/drafts";
 import { ReorderButton } from "@/components/admin/reorder-button";
 
-export const revalidate = 3600;
+// 시간이 지나도 다시 만들지 않는다. 관리자가 저장할 때만 /api/revalidate 로 갱신 (CPU · R2 절약)
+export const revalidate = false;
 
 /** 공통 공략 · 추천 연습: 캐릭터와 상관없는 연습 (practices 에서 character_id 가 비어 있는 행) */
 export default async function GuidePracticePage({ params }: PageProps<"/[lang]/guide/practice">) {

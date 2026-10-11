@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "main": ".open-next/worker.js",
+  // OpenNext 워커에 Cron(scheduled)을 덧붙인 진입점
+  "main": "worker.mjs",
   "name": "sf6-repository",
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
@@ -20,6 +21,8 @@
       "service": "sf6-repository"
     }
   ],
+  // 하루 한 번 Supabase 핑 (무료 프로젝트 7일 일시정지 방지). 시각은 UTC
+  "triggers": { "crons": ["17 18 * * *"] },
   "r2_buckets": [
     {
       // ISR 캐시용 버킷

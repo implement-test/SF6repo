@@ -20,7 +20,8 @@ import { DraftItems } from "@/components/admin/drafts";
 import { ReorderButton } from "@/components/admin/reorder-button";
 import { EnderButton } from "@/components/admin/ender-button";
 
-export const revalidate = 3600;
+// 시간이 지나도 다시 만들지 않는다. 관리자가 저장할 때만 /api/revalidate 로 갱신 (CPU · R2 절약)
+export const revalidate = false;
 
 export default async function SetupsPage({ params }: PageProps<"/[lang]/[character]/setups">) {
   const { lang, character: slug } = await params;

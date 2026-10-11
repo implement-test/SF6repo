@@ -197,7 +197,7 @@ export default function ComboReorderPanel({ characterId, onClose }: { characterI
     const failed = results.find((r) => r && (r.error || !r.data?.length));
     if (failed) return fail(failed.error ? describeError(failed.error) : "순서를 바꿀 권한이 없습니다.");
 
-    await revalidateSite(sb);
+    await revalidateSite(sb, { characters: [characterId] });
     bumpData();
     router.refresh();
     onClose();
