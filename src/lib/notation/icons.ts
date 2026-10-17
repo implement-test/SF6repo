@@ -31,6 +31,9 @@ const DIRECTION_ICONS: Record<string, IconRef> = {
   "236": { src: "/icons/dir-236.webp", alt: "236" },
   "214": { src: "/icons/dir-214.webp", alt: "214" },
   "623": { src: "/icons/dir-623.webp", alt: "623" },
+  // 반원(41236 / 63214): 새로 그린 아이콘. 63214 는 41236 을 좌우 반전
+  "41236": { src: "/icons/dir-41236.svg", alt: "41236" },
+  "63214": { src: "/icons/dir-41236.svg", flip: "x", alt: "63214" },
 };
 
 const MOTIONS_BY_LENGTH = Object.keys(DIRECTION_ICONS).sort((a, b) => b.length - a.length);

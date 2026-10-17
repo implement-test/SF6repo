@@ -183,13 +183,12 @@ describe("directionIcons", () => {
   it("전용 아이콘이 없는 모션은 나눠서 표시한다", () => {
     expect(directionIcons("236236").map((i) => i.alt)).toEqual(["236", "236"]);
     expect(directionIcons("22").map((i) => i.alt)).toEqual(["2", "2"]);
-    expect(directionIcons("41236").map((i) => i.alt)).toEqual(["4", "1", "236"]);
+    expect(directionIcons("421").map((i) => i.alt)).toEqual(["4", "2", "1"]);
   });
 
   it("66 / 44 는 대쉬 아이콘 하나로 그린다", () => {
     expect(directionIcons("66")).toEqual([{ src: "/icons/dir-66.svg", alt: "66" }]);
     expect(directionIcons("44")).toEqual([{ src: "/icons/dir-66.svg", flip: "x", alt: "44" }]);
-    expect(directionIcons("41236").map((i) => i.alt)).toEqual(["4", "1", "236"]);
     expect(parseNotation("66 → 5LP")[0][0]).toMatchObject({ kind: "input", direction: "66", buttons: [] });
   });
 
@@ -329,5 +328,13 @@ describe("데미지 =1040", () => {
 
   it("텍스트는 236HP = 1040", () => {
     expect(displayNotation("236hp =1040 > 2mp= 980")).toBe("236HP = 1040 → 2MP = 980");
+  });
+});
+
+describe("반원 아이콘 41236 / 63214", () => {
+  it("한 아이콘으로 그리고 63214 는 좌우 반전", () => {
+    expect(directionIcons("41236")).toEqual([{ src: "/icons/dir-41236.svg", alt: "41236" }]);
+    expect(directionIcons("63214")).toEqual([{ src: "/icons/dir-41236.svg", flip: "x", alt: "63214" }]);
+    expect(directionIcons("236236").map((i) => i.alt)).toEqual(["236", "236"]);
   });
 });

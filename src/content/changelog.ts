@@ -13,6 +13,19 @@ export type ChangelogEntry = { date: string; items: ChangelogItem[] };
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    date: "2026-10-17",
+    items: [
+      {
+        kind: "added",
+        text: {
+          ko: "콤보 표기: 반원 커맨드 41236 · 63214 전용 아이콘",
+          en: "Combo notation: dedicated icons for half-circle motions 41236 / 63214",
+          ja: "コンボ表記：半回転コマンド 41236・63214 専用アイコン",
+        },
+      },
+    ],
+  },
+  {
     date: "2026-10-11",
     items: [
       {
