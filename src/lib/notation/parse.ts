@@ -10,6 +10,7 @@
  *   DR / DRC / DI         생 드라이브 러시 / 캔슬 드라이브 러시 / 드라이브 임팩트
  *   DRC 5HP               DR · DRC 는 delay 처럼 기술 앞에 붙여 한 묶음으로도 쓴다 (단독도 가능)
  *   sa1 / sa2 / sa3       슈퍼 아츠 1 · 2 · 3
+ *   ca                    크리티컬 아츠 (체력이 적을 때 SA3 대신)
  *   parry / j.parry       패리 / 저스트 패리
  *   f.throw / b.throw     앞잡기 / 뒤잡기
  *   j.HP / nj.HP / bj.HP  점프 / 제자리 점프 / 뒤 점프 공격 (air 는 상대가 공중인 히트 상황이라 다르다)
@@ -30,7 +31,7 @@ export type Modifier = Situation | "delay" | "DR" | "DRC";
 export const SITUATIONS: Situation[] = ["air", "counter", "punish", "guard"];
 export const isSituation = (m: Modifier): m is Situation => (SITUATIONS as string[]).includes(m);
 
-export type SystemValue = "DR" | "DRC" | "DI" | "PARRY" | "JPARRY" | "SA1" | "SA2" | "SA3";
+export type SystemValue = "DR" | "DRC" | "DI" | "PARRY" | "JPARRY" | "SA1" | "SA2" | "SA3" | "CA";
 
 export type ClassicButton = "LP" | "MP" | "HP" | "LK" | "MK" | "HK" | "P" | "K";
 export type ModernButton = "L" | "M" | "H" | "SP" | "A" | "ANY";
@@ -69,7 +70,7 @@ const MODIFIERS: Record<string, Modifier> = {
   dr: "DR",
   drc: "DRC",
 };
-const SYSTEM = new Set<string>(["DR", "DRC", "DI", "PARRY", "SA1", "SA2", "SA3"]);
+const SYSTEM = new Set<string>(["DR", "DRC", "DI", "PARRY", "SA1", "SA2", "SA3", "CA"]);
 /** 점이 들어간 시스템 기호 (j.parry = 저스트 패리) */
 const DOTTED_SYSTEM: Record<string, SystemValue> = { "J.PARRY": "JPARRY" };
 
@@ -127,7 +128,7 @@ export function displayNotation(src: string): string {
         ? part
         : part
             .replace(
-              /\b(\d*)((?:lp|mp|hp|lk|mk|hk|pp|kk|sp|p|k|l|m|h)+|parry|drc|dr|di|sa[123])\b/gi,
+              /\b(\d*)((?:lp|mp|hp|lk|mk|hk|pp|kk|sp|p|k|l|m|h)+|parry|drc|dr|di|sa[123]|ca)\b/gi,
               (_, digits: string, buttons: string) => digits + buttons.toUpperCase(),
             )
             // 점프 접두어는 소문자로 (J.HP → j.HP). 저스트 패리는 그다음에 J.Parry 로

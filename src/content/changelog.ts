@@ -13,6 +13,19 @@ export type ChangelogEntry = { date: string; items: ChangelogItem[] };
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    date: "2026-10-18",
+    items: [
+      {
+        kind: "added",
+        text: {
+          ko: "콤보 표기에 ca(크리티컬 아츠) 아이콘 추가",
+          en: "Added a ca (Critical Art) icon to combo notation",
+          ja: "コンボ表記に ca（クリティカルアーツ）アイコンを追加",
+        },
+      },
+    ],
+  },
+  {
     date: "2026-10-17",
     items: [
       {

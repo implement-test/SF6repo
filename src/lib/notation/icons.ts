@@ -93,4 +93,6 @@ export const SYSTEM_ICONS: Record<SystemValue, IconRef> = {
   SA1: { src: "/icons/sa1.svg", wide: true, alt: "SA1" },
   SA2: { src: "/icons/sa2.svg", wide: true, alt: "SA2" },
   SA3: { src: "/icons/sa3.svg", wide: true, alt: "SA3" },
+  // 크리티컬 아츠: SA 와 같은 판에 진한 빨강 + 금색 테두리
+  CA: { src: "/icons/ca.svg", wide: true, alt: "CA" },
 };

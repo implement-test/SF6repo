@@ -338,3 +338,11 @@ describe("반원 아이콘 41236 / 63214", () => {
     expect(directionIcons("236236").map((i) => i.alt)).toEqual(["236", "236"]);
   });
 });
+
+describe("ca (크리티컬 아츠)", () => {
+  it("ca 는 시스템 기호 CA, 텍스트는 대문자", () => {
+    expect(parseNotation("2MP > ca")[1][0]).toEqual({ kind: "system", modifiers: [], value: "CA" });
+    expect(findUnknownTokens(parseNotation("DRC 5HP > 236HP > sa3 :: ca"))).toEqual([]);
+    expect(displayNotation("236hp > ca")).toBe("236HP → CA");
+  });
+});
