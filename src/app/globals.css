@@ -317,6 +317,13 @@ article[id] {
   color: var(--muted);
   border-color: var(--border-strong);
 }
+/* 조건(직접 입력): 관리자가 적은 조건 이름이라 길 수 있다. 액센트 색 실선 */
+.option-result[data-result="custom"] {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  white-space: normal;
+}
 /* 기타: 헛침(회색 실선)과 구분되게 점선 */
 .option-result[data-result="other"] {
   color: var(--fg);

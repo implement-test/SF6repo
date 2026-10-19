@@ -28,6 +28,7 @@ import { scoped } from "@/lib/admin/scope";
 import { OpponentInput } from "./opponent-input";
 import {
   EnderLinksInput,
+  MoveLinksInput,
   OptionsInput,
   PracticeInput,
   SituationsInput,
@@ -232,7 +233,7 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
       const order: Values = {};
       // 캐릭터 항목은 그 캐릭터 안에서, 공통 공략(character_id 가 null · 시스템 글)은 공통 항목 안에서 맨 아래
       const characterId = request.defaults?.character_id;
-      const listed = ["combos", "setups", "practices", "vs_guides", "moves", "videos"].includes(entity.table);
+      const listed = ["combos", "setups", "practices", "tips", "vs_guides", "moves", "videos"].includes(entity.table);
       if ((listed && (typeof characterId === "number" || characterId === null)) || entity.table === "common_guides") {
         const { data: last } = await scoped(sb.from(entity.table).select("sort_order"), entity.table, (characterId as number | null) ?? null)
           .order("sort_order", { ascending: false })
@@ -608,6 +609,17 @@ function FieldInput({
     case "setupOptions":
       return <OptionsInput value={(value as SetupOption[] | null) ?? []} onChange={onChange} />;
 
+    case "moveLinks":
+      return (
+        <MoveLinksInput
+          label={field.label}
+          help={field.help}
+          characterId={characterId}
+          value={Array.isArray(value) ? (value as number[]).filter((v) => typeof v === "number") : []}
+          onChange={onChange}
+        />
+      );
+
     case "practice":
       return <PracticeInput value={(value as PracticeConfig | null) ?? null} onChange={onChange} />;
 
@@ -823,6 +835,9 @@ function buildPayload(fields: Field[], values: Values): { payload: Values; probl
         break;
       case "situations":
         payload[field.key] = (raw as string[] | null) ?? [];
+        break;
+      case "moveLinks":
+        payload[field.key] = Array.isArray(raw) ? (raw as unknown[]).filter((v): v is number => typeof v === "number") : [];
         break;
       case "checkbox":
         // 한 번도 누르지 않은 체크박스도 false 로 (DB 칼럼이 not null)

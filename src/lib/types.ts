@@ -170,12 +170,14 @@ export type Combo = ContentBase &
 
 export type SetupSituation = { slug: string; name: Localized; sort_order: number };
 
-/** 옵션의 결과별 분기: 히트 / 가드 / 헛침 / 기타 */
-export type OptionResult = "hit" | "guard" | "whiff" | "other";
-export const OPTION_RESULTS: OptionResult[] = ["hit", "guard", "whiff", "other"];
+/** 옵션의 결과별 분기: 히트 / 가드 / 헛침 / 기타 / 조건(직접 입력, label 에 적는다) */
+export type OptionResult = "hit" | "guard" | "whiff" | "other" | "custom";
+export const OPTION_RESULTS: OptionResult[] = ["hit", "guard", "whiff", "other", "custom"];
 
 export type OptionBranch = {
   result: OptionResult;
+  /** result 가 custom 일 때의 조건 이름 ("상대가 점프하면") */
+  label?: Localized | null;
   /** 이어지는 루트 (콤보 표기) */
   classic: string;
   modern: string | null;
@@ -258,6 +260,20 @@ export type Practice = ContentBase &
     options: SetupOption[];
     practice: PracticeConfig | null;
   };
+
+// ───────────────────────── 플레이 팁 ─────────────────────────
+
+/** 플레이 팁의 주제: 히트 확인 / 주요 기본기 / 공통 대처 / 운영 / 기타 */
+export type TipTopic = "hit_confirm" | "key_moves" | "defense" | "gameplan" | "other";
+export const TIP_TOPICS: TipTopic[] = ["hit_confirm", "key_moves", "defense", "gameplan", "other"];
+
+/** 플레이 팁 (0030): 추천 연습과 같은 구조 + 주제 + 커맨드 리스트 기술 연결 */
+export type Tip = Omit<Practice, "character_id"> & {
+  character_id: number;
+  topic: TipTopic;
+  /** 연결한 커맨드 리스트의 기술 (카드에 프레임을 함께 보여 준다) */
+  move_ids: number[];
+};
 
 // ───────────────────────── Vs 가이드 ─────────────────────────
 

@@ -9,7 +9,8 @@ import { ItemMedia } from "./media";
 import { EditButton } from "./admin/admin-context";
 
 /** 프레임 값 색: + 는 유리(초록), - 는 불리(주황) */
-function frameTone(value: string | null) {
+/** 프레임 값의 색: + 는 초록(드라이브 색), − 는 주황. 플레이 팁 카드의 연결 기술 표도 같이 쓴다 */
+export function frameTone(value: string | null) {
   if (!value) return undefined;
   if (/^\s*\+/.test(value)) return "var(--drive)";
   if (/^\s*[-−]/.test(value)) return "var(--warn)";

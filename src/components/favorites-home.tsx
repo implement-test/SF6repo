@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
-import type { Character, Combo, CommonGuide, ComboEnder, Localized, Practice, Setup, SetupEnderLink, VsGuide } from "@/lib/types";
+import type { Character, Combo, CommonGuide, ComboEnder, Localized, Move, Practice, Setup, SetupEnderLink, Tip, VsGuide } from "@/lib/types";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { pickLocalized } from "@/lib/i18n/localized";
@@ -30,10 +30,13 @@ type Loaded = {
   practices: Practice[];
   vs: VsGuide[];
   guides: CommonGuide[];
+  tips: Tip[];
+  /** 즐겨찾기한 플레이 팁에 연결된 기술 (프레임 표) */
+  tipMoves: Move[];
 };
 
 /** 탭(페이지) 이름: 카드가 원래 있는 곳 */
-const PAGE: Record<FavoriteKind, string> = { combo: "combos", setup: "setups", practice: "practice", vs: "vs", guide: "" };
+const PAGE: Record<FavoriteKind, string> = { combo: "combos", setup: "setups", tip: "tips", practice: "practice", vs: "vs", guide: "" };
 /** 공통 공략의 항목이 있는 곳 (character_id 가 없는 항목) */
 const COMMON_PAGE: Partial<Record<FavoriteKind, string>> = { practice: "/guide/practice", guide: "/guide" };
 
@@ -92,6 +95,7 @@ export function FavoritesHome({
     practice: ordered("practice", data.practices),
     vs: ordered("vs", data.vs),
     guide: ordered("guide", data.guides),
+    tip: ordered("tip", data.tips),
   };
   const total = FAVORITE_KINDS.reduce((sum, k) => sum + sections[k].length, 0);
   // 캐릭터 탭에서는 모든 캐릭터 모아보기로 가는 링크
@@ -200,6 +204,23 @@ function renderCard(kind: FavoriteKind, item: unknown, data: Loaded, locale: Loc
         />
       );
     }
+    case "tip": {
+      const tip = item as Tip;
+      return (
+        <SetupCard
+          kind="tip"
+          setup={tip}
+          locale={locale}
+          dict={dict}
+          situationNames={{}}
+          linkedEnders={[]}
+          latestPatchId={data.latestPatchId}
+          authors={data.authors}
+          characterSlug={slugOf(tip.character_id)}
+          moves={data.tipMoves}
+        />
+      );
+    }
     case "guide":
       return (
         <CommonGuideCard
@@ -234,7 +255,7 @@ async function load(favorites: Record<FavoriteKind, number[]>): Promise<Loaded> 
     return (data ?? []) as T[];
   };
 
-  const [characters, patches, authors, situations, combos, setups, practices, vs, guides] = await Promise.all([
+  const [characters, patches, authors, situations, combos, setups, practices, vs, guides, tips] = await Promise.all([
     sb.from("characters").select("*"),
     sb.from("patches").select("id").order("released_on", { ascending: false }).limit(1),
     sb.from("author_names").select("*"),
@@ -244,7 +265,14 @@ async function load(favorites: Record<FavoriteKind, number[]>): Promise<Loaded> 
     pick<Practice>("practices", favorites.practice),
     pick<VsGuide>("vs_guides", favorites.vs),
     pick<CommonGuide>("common_guides", favorites.guide),
+    pick<Tip>("tips", favorites.tip),
   ]);
+  // 플레이 팁에 연결된 기술 (공개된 것만)
+  const tipMoveIds = [...new Set(tips.flatMap((t) => (Array.isArray(t.move_ids) ? t.move_ids : [])))];
+  const tipMoves =
+    tipMoveIds.length === 0
+      ? []
+      : (((await sb.from("moves").select("*").in("id", tipMoveIds).eq("is_published", true)).data ?? []) as Move[]);
 
   // 엔더(콤보 카드의 후상황 기본값, 셋업 카드의 이어지는 엔더): 즐겨찾기한 콤보 · 셋업의 캐릭터만
   const characterIds = [...new Set([...combos, ...setups].map((x) => x.character_id))];
@@ -297,5 +325,12 @@ async function load(favorites: Record<FavoriteKind, number[]>): Promise<Loaded> 
     practices: practices.map((p) => ({ ...p, options: normalizeOptions(p.options), practice: normalizePractice(p.practice) })),
     vs: vs.map((g) => ({ ...g, patterns: normalizeVsPatterns(g.patterns) })),
     guides,
+    tips: tips.map((t) => ({
+      ...t,
+      options: normalizeOptions(t.options),
+      practice: normalizePractice(t.practice),
+      move_ids: Array.isArray(t.move_ids) ? t.move_ids : [],
+    })),
+    tipMoves,
   };
 }

@@ -91,6 +91,7 @@ export function normalizeOptions(raw: unknown): SetupOption[] {
     description: o.description ?? null,
     branches: (o.branches ?? []).map((b: Partial<OptionBranch>) => ({
       result: b.result ?? "hit",
+      label: b.result === "custom" ? (b.label ?? null) : null,
       classic: b.classic ?? "",
       modern: b.modern ?? null,
       note: b.note ?? null,

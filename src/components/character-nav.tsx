@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 
 // 즐겨찾기(이 캐릭터의 항목만)는 개요 왼쪽
-const SECTIONS = ["favorites", "overview", "moves", "combos", "setups", "practice", "vs", "videos"] as const;
+const SECTIONS = ["favorites", "overview", "moves", "combos", "setups", "tips", "practice", "vs", "videos"] as const;
 
 /** SF6 메뉴처럼 기울어진 탭. 선택된 탭은 마젠타로 채운다. */
 export function CharacterNav({ slug, labels }: { slug: string; labels: Dictionary["nav"] }) {

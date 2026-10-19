@@ -15,6 +15,7 @@ const TABLE_LABELS: Record<string, string> = {
   combos: "콤보",
   setups: "셋업",
   practices: "추천 연습",
+  tips: "플레이 팁",
   combo_groups: "콤보 그룹",
   combo_enders: "엔더",
   practice_settings: "프랙티스 세팅",

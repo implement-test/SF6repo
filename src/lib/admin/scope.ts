@@ -4,7 +4,7 @@
  *   - practices / videos 는 character_id 가 비어 있는 행
  *   - common_guides(시스템 글)는 표 전체 (character_id 칸이 없다)
  */
-export type ListTable = "combos" | "setups" | "practices" | "vs_guides" | "moves" | "videos" | "common_guides";
+export type ListTable = "combos" | "setups" | "practices" | "tips" | "vs_guides" | "moves" | "videos" | "common_guides";
 
 /** character_id 칸이 없는 공통 공략 표 */
 const COMMON_ONLY = new Set<string>(["common_guides"]);

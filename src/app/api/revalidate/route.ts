@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { LOCALES } from "@/lib/i18n/config";
 
 /** 캐릭터 한 명의 페이지 (캐릭터 탭과 같은 목록, "" 는 개요) */
-const CHARACTER_PAGES = ["", "/favorites", "/moves", "/combos", "/setups", "/practice", "/vs", "/videos"];
+const CHARACTER_PAGES = ["", "/favorites", "/moves", "/combos", "/setups", "/tips", "/practice", "/vs", "/videos"];
 /** 공통 공략 페이지 */
 const GUIDE_PAGES = ["/guide", "/guide/practice", "/guide/videos"];
 

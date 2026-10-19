@@ -76,3 +76,19 @@ describe("normalizeDriveReversal", () => {
     expect(normalizeDriveReversal("unknown")).toBeNull();
   });
 });
+describe("옵션 분기: 조건(직접 입력)", () => {
+  it("custom 결과는 조건 이름(label)을 남기고, 다른 결과는 label 을 버린다", () => {
+    const [o] = normalizeOptions([
+      {
+        label: "옵션 1",
+        classic: "2MK",
+        branches: [
+          { result: "custom", label: { ko: "상대가 점프하면" }, classic: "623HP" },
+          { result: "hit", label: { ko: "무시" }, classic: "236HK" },
+        ],
+      },
+    ]);
+    expect(o.branches[0]).toMatchObject({ result: "custom", label: { ko: "상대가 점프하면" }, classic: "623HP" });
+    expect(o.branches[1].label).toBeNull();
+  });
+});

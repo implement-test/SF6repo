@@ -9,6 +9,7 @@ import type {
   Move,
   Patch,
   Practice,
+  Tip,
   Setup,
   ComboEnder,
   SetupEnderLink,
@@ -267,6 +268,20 @@ export async function getVideos(characterId: number | null): Promise<Video[]> {
   if (!c) return sampleVideos.filter((v) => v.character_id === characterId);
   const { data } = await scoped(c.from("videos").select("*"), "videos", characterId).order("sort_order").order("id");
   return (data ?? []) as Video[];
+}
+
+/** 플레이 팁 (0030). 표가 아직 없으면 빈 목록 */
+export async function getTips(characterId: number): Promise<Tip[]> {
+  const c = db();
+  if (!c) return [];
+  const { data, error } = await c.from("tips").select("*").eq("character_id", characterId).order("sort_order").order("id");
+  if (error) return [];
+  return ((data ?? []) as Tip[]).map((t) => ({
+    ...t,
+    options: normalizeOptions(t.options),
+    practice: normalizePractice(t.practice),
+    move_ids: Array.isArray(t.move_ids) ? t.move_ids : [],
+  }));
 }
 
 /** 공통 공략의 시스템 글 (0028). 표가 아직 없으면 빈 목록 */

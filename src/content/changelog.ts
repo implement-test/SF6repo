@@ -13,6 +13,27 @@ export type ChangelogEntry = { date: string; items: ChangelogItem[] };
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    date: "2026-10-19",
+    items: [
+      {
+        kind: "added",
+        text: {
+          ko: "캐릭터 '플레이 팁' 탭 추가: 히트 확인 · 주요 기본기 · 공통 대처 · 운영, 연결한 기술의 프레임 표",
+          en: "Added a Play tips tab per character: hit confirms, key normals, common answers, game plan, with frame data of linked moves",
+          ja: "キャラ別「プレイのコツ」タブを追加：ヒット確認・主要な通常技・共通の対処・立ち回り、関連する技のフレーム表",
+        },
+      },
+      {
+        kind: "added",
+        text: {
+          ko: "셋업 · 추천 연습 · 플레이 팁의 분기에 '조건' 추가 (예: 상대가 점프하면)",
+          en: "Setups, practice drills and play tips can branch on a custom condition (e.g. if they jump)",
+          ja: "セットプレイ・おすすめ練習・プレイのコツの分岐に「条件」を追加（例：相手が飛んだら）",
+        },
+      },
+    ],
+  },
+  {
     date: "2026-10-18",
     items: [
       {

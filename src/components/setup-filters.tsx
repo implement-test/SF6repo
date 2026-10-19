@@ -14,6 +14,7 @@ export type SetupFilterItem = { id: number; level: TargetLevel; situations: stri
 /**
  * 상황 태그 필터. 아무것도 고르지 않으면 전체를 보여 준다.
  * 추천 연습(kind="practice")도 같은 목록을 쓴다 (상황 태그 없음).
+ * 플레이 팁(kind="tip")은 상황 태그 자리에 주제(히트 확인 · 주요 기본기 …)를 넘겨 같은 방식으로 거른다.
  */
 export function SetupFilters({
   kind = "setup",
@@ -22,7 +23,7 @@ export function SetupFilters({
   dict,
   characterId,
 }: {
-  kind?: "setup" | "practice";
+  kind?: "setup" | "practice" | "tip";
   /** null = 공통 공략 */
   characterId: number | null;
   items: SetupFilterItem[];
@@ -32,7 +33,8 @@ export function SetupFilters({
   const [selected, setSelected] = useState<string[]>([]);
   const [favOnly, setFavOnly] = useState(false);
   const favorites = useFavorites(kind);
-  const texts = kind === "practice" ? dict.practice : dict.setup;
+  const texts = kind === "practice" ? dict.practice : kind === "tip" ? dict.tips : dict.setup;
+  const filterLabel = kind === "tip" ? dict.tips.topic : dict.setup.situation;
   const favCount = items.filter((i) => favorites.has(i.id)).length;
   // '거리 무관' 셋업은 어떤 위치를 골라도 함께 보여 준다.
   const visible = items.filter(
@@ -49,7 +51,7 @@ export function SetupFilters({
       <div className="flex flex-wrap items-end gap-x-8 gap-y-3">
         {situations.length > 0 && (
           <div className="flex flex-col gap-1.5">
-            <span className="eyebrow">{dict.setup.situation}</span>
+            <span className="eyebrow">{filterLabel}</span>
             <div className="flex flex-wrap gap-1">
               {situations.map((s) => {
                 const on = selected.includes(s.slug);
@@ -84,7 +86,7 @@ export function SetupFilters({
         </p>
       ) : (
         <SortableCards
-          table={kind === "practice" ? "practices" : "setups"}
+          table={kind === "practice" ? "practices" : kind === "tip" ? "tips" : "setups"}
           characterId={characterId}
           items={items}
           visibleIds={new Set(visible.map((i) => i.id))}

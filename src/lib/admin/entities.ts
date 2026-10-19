@@ -37,11 +37,13 @@ export type Field = { key: string; label: string; help?: string; required?: bool
   | { type: "practice" }
   /** 이 셋업으로 이어지는 엔더. 칼럼이 아니라 setup_enders 연결 표에 저장한다 */
   | { type: "enderLinks" }
+  /** 플레이 팁에 연결할 커맨드 리스트 기술 (move_ids) */
+  | { type: "moveLinks" }
 );
 
 export type FieldGroup = { title: string; fields: Field[] };
 
-export type EntityType = "combo" | "patch" | "setup" | "practice" | "vs" | "overview" | "move" | "video" | "guide";
+export type EntityType = "combo" | "patch" | "setup" | "practice" | "tip" | "vs" | "overview" | "move" | "video" | "guide";
 
 export type Entity = {
   table: string;
@@ -95,6 +97,15 @@ const VS_TOPICS: Option[] = [
   { value: "cheese", label: "패턴 대응" },
   { value: "setup", label: "주요 셋업" },
   { value: "just_parry", label: "저스트 패리" },
+];
+
+/** 플레이 팁의 주제 */
+const TIP_TOPICS: Option[] = [
+  { value: "hit_confirm", label: "히트 확인" },
+  { value: "key_moves", label: "주요 기본기" },
+  { value: "defense", label: "공통 대처" },
+  { value: "gameplan", label: "운영" },
+  { value: "other", label: "기타" },
 ];
 
 /** 공통 공략 시스템 글의 주제 */
@@ -300,6 +311,53 @@ export const ENTITIES: Record<EntityType, Entity> = {
       })),
       practice: null,
     }),
+  },
+
+  tip: {
+    table: "tips",
+    label: "플레이 팁",
+    groups: [
+      {
+        title: "플레이 팁",
+        fields: [
+          { key: "topic", label: "주제", type: "select", options: TIP_TOPICS },
+          { key: "title", label: "제목", type: "localized", required: true, help: "목록에서는 카드가 접혀 제목만 보입니다." },
+          {
+            key: "situation",
+            label: "상황",
+            type: "localized",
+            multiline: true,
+            help: "어떤 상황에서 쓰는 팁인지 글로 적습니다. 예: 2MK 를 히트 확인할 때",
+          },
+          { key: "notation_classic", label: "핵심 표기 (클래식)", type: "notation", wide: true, help: "옵션으로 갈라지기 전 공통 부분 (없으면 비움)" },
+          { key: "notation_modern", label: "핵심 표기 (모던)", type: "notation", wide: true },
+          { key: "description", label: "설명", type: "localized", multiline: true },
+          {
+            key: "move_ids",
+            label: "연결할 기술",
+            type: "moveLinks",
+            wide: true,
+            help: "커맨드 리스트의 기술을 고르면 카드에 발생 · 가드 시 · 히트 시 프레임이 함께 나옵니다 (고른 순서대로). 커맨드 리스트를 고치면 따라 바뀝니다.",
+          },
+        ],
+      },
+      {
+        title: "옵션 (상황별 행동)",
+        fields: [
+          {
+            key: "options",
+            label: "옵션 1 / 2 / …",
+            type: "setupOptions",
+            wide: true,
+            help: "결과에 '조건 (직접 입력)'을 고르면 '상대가 점프하면'처럼 조건을 직접 적을 수 있습니다.",
+          },
+        ],
+      },
+      { title: "프랙티스 설정 (필요할 때만)", fields: [{ key: "practice", label: "트레이닝 모드 더미 설정", type: "practice", wide: true }] },
+      MEDIA_GROUP,
+      META_GROUP,
+    ],
+    defaults: () => ({ ...metaDefaults(), topic: "hit_confirm", options: [], practice: null, move_ids: [] }),
   },
 
   overview: {

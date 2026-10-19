@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Practice, Setup } from "@/lib/types";
+import type { Move, Practice, Setup, Tip } from "@/lib/types";
 import type { LinkedEnder } from "@/lib/setup-links";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
@@ -15,10 +15,12 @@ import { EditButton } from "./admin/admin-context";
 import { editScope } from "@/lib/admin/scope";
 import { ShareButton } from "./share-button";
 import { FavoriteButton } from "./favorite-button";
+import { frameTone } from "./move-card";
 
 /**
- * 셋업 카드. 추천 연습(kind="practice")도 같은 카드를 쓰고,
+ * 셋업 카드. 추천 연습(kind="practice") · 플레이 팁(kind="tip")도 같은 카드를 쓰고,
  * 이어지는 콤보 · 상황 태그 대신 상황을 글로 보여 준다.
+ * 플레이 팁은 제목 줄에 주제 태그, 본문 위에 연결한 커맨드 리스트 기술의 프레임(발생 · 가드 시 · 히트 시)을 보여 준다.
  */
 export function SetupCard({
   setup,
@@ -31,9 +33,10 @@ export function SetupCard({
   authors,
   characterSlug,
   embedded = false,
+  moves = [],
 }: {
-  setup: Setup | Practice;
-  kind?: "setup" | "practice";
+  setup: Setup | Practice | Tip;
+  kind?: "setup" | "practice" | "tip";
   locale: Locale;
   dict: Dictionary;
   situationNames: Record<string, string>;
@@ -44,6 +47,8 @@ export function SetupCard({
   characterSlug: string;
   /** 다른 사이트에 퍼간 화면: 퍼가기·수정 버튼을 빼고, 방문자의 대상 수준 숨김 설정도 무시한다 */
   embedded?: boolean;
+  /** 플레이 팁에 연결한 커맨드 리스트 기술 (이 캐릭터의 기술 목록, move_ids 순서대로 고른다) */
+  moves?: Move[];
 }) {
   const t = dict.setup;
   const title = pickLocalized(setup.title, locale);
@@ -54,7 +59,10 @@ export function SetupCard({
   const hasMedia = !!setup.media_url || isVideoLink(setup.youtube_url);
   const situations = "situations" in setup ? setup.situations : [];
   const situationText = "situation" in setup && setup.situation ? pickLocalized(setup.situation, locale) : null;
-  const entity = kind === "practice" ? "practice" : "setup";
+  const entity = kind;
+  const topic = "topic" in setup ? setup.topic : null;
+  const byId = new Map(moves.map((m) => [m.id, m]));
+  const linkedMoves = "move_ids" in setup ? setup.move_ids.map((id) => byId.get(id)).filter((m) => m !== undefined) : [];
 
   return (
     <CardShell
@@ -65,6 +73,7 @@ export function SetupCard({
       header={
         <>
           <LevelBadge level={setup.target_level} label={dict.level[setup.target_level]} />
+          {topic && <Tag tone="accent">{dict.tips.topics[topic] ?? topic}</Tag>}
           <h2 className="text-lg font-bold">{title.text}</h2>
           {!title.translated && <NotTranslatedBadge label={dict.notTranslated} />}
           {outdated && <OutdatedBadge label={dict.patch.outdated} />}
@@ -133,11 +142,49 @@ export function SetupCard({
           </section>
         )}
 
+        {/* 플레이 팁: 연결한 커맨드 리스트 기술의 프레임 */}
+        {linkedMoves.length > 0 && (
+          <section className="flex flex-col gap-1.5">
+            <p className="eyebrow">{dict.tips.moves}</p>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[28rem] text-sm">
+                <thead>
+                  <tr className="border-b border-border text-left text-xs text-muted">
+                    <th className="py-1 pr-3 font-semibold">{dict.tips.move}</th>
+                    <th className="py-1 pr-3 font-semibold">{dict.moves.startup}</th>
+                    <th className="py-1 pr-3 font-semibold">{dict.moves.onBlock}</th>
+                    <th className="py-1 font-semibold">{dict.moves.onHit}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {linkedMoves.map((m) => (
+                    <tr key={m.id} className="border-b border-border last:border-0">
+                      <td className="py-1.5 pr-3">
+                        <span className="flex flex-wrap items-center gap-2">
+                          <ControlNotation classic={m.input_classic} modern={m.input_modern} classicOnlyLabel={dict.combo.classicOnly} />
+                          <span className="text-xs text-muted">{pickLocalized(m.name, locale).text}</span>
+                        </span>
+                      </td>
+                      <td className="py-1.5 pr-3 display tabular-nums">{m.startup ?? "—"}</td>
+                      <td className="py-1.5 pr-3 display tabular-nums" style={{ color: frameTone(m.on_block) }}>
+                        {m.on_block ?? "—"}
+                      </td>
+                      <td className="py-1.5 display tabular-nums" style={{ color: frameTone(m.on_hit) }}>
+                        {m.on_hit ?? "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
+
         {(setup.notation_classic || description) && (
           <section className="flex flex-col gap-2">
             {setup.notation_classic && (
               <div className="grid gap-x-4 gap-y-2 border-l-2 border-accent bg-inset px-3 py-3 sm:grid-cols-[max-content_1fr]">
-                <span className="eyebrow whitespace-nowrap pt-1.5">{t.input}</span>
+                <span className="eyebrow whitespace-nowrap pt-1.5">{kind === "tip" ? dict.tips.input : t.input}</span>
                 <ControlNotation
                   classic={setup.notation_classic}
                   modern={setup.notation_modern}
@@ -196,7 +243,7 @@ export function SetupCard({
                             className="option-branch relative grid gap-2 py-2 pl-5 pr-3 md:col-span-3 md:grid-cols-subgrid md:items-center md:gap-x-4"
                           >
                             <span className="option-result justify-self-start" data-result={b.result}>
-                              {t.result[b.result]}
+                              {b.result === "custom" ? (b.label ? pickLocalized(b.label, locale).text : t.result.custom) : t.result[b.result]}
                             </span>
                             <div className="min-w-0">
                               {b.classic && (
@@ -261,3 +308,4 @@ export function SetupCard({
     </CardShell>
   );
 }
+

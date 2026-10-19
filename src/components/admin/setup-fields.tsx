@@ -6,6 +6,7 @@ import {
   DRIVE_REVERSAL_OPTIONS,
   GUARD_SETTINGS,
   GUARD_SWITCHES,
+  MOVE_CATEGORIES,
   OPTION_RESULTS,
   type DriveReversalWeights,
   type GuardSetting,
@@ -18,13 +19,15 @@ import {
   type SetupOption,
   type SetupSituation,
   type ComboEnder,
+  type Move,
+  type MoveCategory,
 } from "@/lib/types";
 import { normalizeDriveReversal } from "@/lib/setup";
 import { NotationImage } from "../notation";
 import { inputClass, NotationRow } from "./starters-input";
 import { ClockInput } from "./clock-input";
 
-const RESULT_LABELS: Record<OptionResult, string> = { hit: "히트", guard: "가드", whiff: "헛침", other: "기타" };
+const RESULT_LABELS: Record<OptionResult, string> = { hit: "히트", guard: "가드", whiff: "헛침", other: "기타", custom: "조건 (직접 입력)" };
 
 const iconButton =
   "grid size-7 place-items-center border border-border-strong text-sm text-muted hover:text-fg disabled:opacity-30";
@@ -155,6 +158,115 @@ export function EnderLinksInput({
   );
 }
 
+// ───────────────────────── 플레이 팁: 연결할 커맨드 리스트 기술 ─────────────────────────
+
+/**
+ * 플레이 팁에 붙일 이 캐릭터의 기술 (move_ids). 고른 순서대로 카드의 프레임 표에 나온다.
+ * 기술이 많아 분류별로 묶고 이름 · 커맨드로 거를 수 있게 한다.
+ */
+export function MoveLinksInput({
+  label,
+  help,
+  characterId,
+  value,
+  onChange,
+}: {
+  label: string;
+  help?: string;
+  characterId?: number;
+  value: number[];
+  onChange: (v: number[]) => void;
+}) {
+  const [moves, setMoves] = useState<Move[] | null>(null);
+  const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    if (characterId === undefined) return;
+    supabaseBrowser()
+      .from("moves")
+      .select("*")
+      .eq("character_id", characterId)
+      .order("sort_order")
+      .order("id")
+      .then(({ data }) => setMoves((data ?? []) as Move[]));
+  }, [characterId]);
+
+  const q = query.trim().toLowerCase();
+  const match = (m: Move) =>
+    !q || [m.name.ko, m.name.en, m.name.ja, m.input_classic, m.input_modern].some((t) => t?.toLowerCase().includes(q));
+  const byId = new Map((moves ?? []).map((m) => [m.id, m]));
+  const toggle = (id: number) => onChange(value.includes(id) ? value.filter((x) => x !== id) : [...value, id]);
+
+  return (
+    <div className="flex flex-col gap-2">
+      <Heading label={label} help={help} />
+      {/* 고른 기술 (이 순서로 카드에 나온다) */}
+      {value.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {value.map((id) => {
+            const m = byId.get(id);
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => toggle(id)}
+                title="빼기"
+                className="flex items-center gap-1.5 border border-accent bg-accent/10 px-2 py-1 text-xs font-semibold"
+              >
+                {m ? `${m.name.ko} · ${m.input_classic}` : `#${id} (지워진 기술)`}
+                <span aria-hidden className="text-muted">×</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+      {moves === null ? (
+        <p className="text-xs text-muted">불러오는 중…</p>
+      ) : moves.length === 0 ? (
+        <p className="text-xs text-muted">아직 커맨드 리스트가 없습니다.</p>
+      ) : (
+        <>
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="기술 이름 · 커맨드로 찾기 (예: 2MK, 대공)"
+            className={inputClass}
+          />
+          <div className="flex max-h-64 flex-col gap-2 overflow-y-auto border border-border p-2">
+            {MOVE_CATEGORIES.map((cat) => {
+              const list = moves.filter((m) => m.category === cat && match(m));
+              if (list.length === 0) return null;
+              return (
+                <div key={cat} className="flex flex-col gap-1">
+                  <span className="text-[0.7rem] font-bold text-muted">{MOVE_CATEGORY_LABELS[cat]}</span>
+                  <div className="flex flex-wrap gap-1">
+                    {list.map((m) => (
+                      <Chip key={m.id} on={value.includes(m.id)} onClick={() => toggle(m.id)}>
+                        {m.name.ko} <span className="font-mono text-[0.7rem] opacity-70">{m.input_classic}</span>
+                        {!m.is_published && <span className="text-[0.65rem] text-accent"> 비공개</span>}
+                      </Chip>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+const MOVE_CATEGORY_LABELS: Record<MoveCategory, string> = {
+  normal: "기본기",
+  unique: "특수기",
+  target_combo: "타겟 콤보",
+  throw: "잡기",
+  drive: "드라이브 시스템",
+  special: "필살기",
+  super: "슈퍼 아츠",
+};
+
 // ───────────────────────── 다국어 한 줄 입력 ─────────────────────────
 
 const LANGS = ["ko", "en", "ja"] as const;
@@ -252,7 +364,7 @@ const addButton =
 // ───────────────────────── 옵션 1/2/... ─────────────────────────
 
 const nextLabel = (list: SetupOption[]) => `옵션 ${list.length + 1}`;
-const emptyBranch = (result: OptionResult = "hit"): OptionBranch => ({ result, classic: "", modern: null, note: null });
+const emptyBranch = (result: OptionResult = "hit"): OptionBranch => ({ result, label: null, classic: "", modern: null, note: null });
 
 export function OptionsInput({ value, onChange }: { value: SetupOption[]; onChange: (v: SetupOption[]) => void }) {
   const update = (i: number, patch: Partial<SetupOption>) => onChange(value.map((o, j) => (j === i ? { ...o, ...patch } : o)));
@@ -306,7 +418,7 @@ export function OptionsInput({ value, onChange }: { value: SetupOption[]; onChan
                     <select
                       value={b.result}
                       onChange={(e) => setBranch({ result: e.target.value as OptionResult })}
-                      className={`${inputClass} w-24!`}
+                      className={`${inputClass} w-36!`}
                       aria-label="결과"
                     >
                       {OPTION_RESULTS.map((r) => (
@@ -324,6 +436,13 @@ export function OptionsInput({ value, onChange }: { value: SetupOption[]; onChan
                       />
                     </span>
                   </div>
+                  {/* 조건(직접 입력): 카드에 결과 대신 이 조건 이름이 보인다 */}
+                  {b.result === "custom" && (
+                    <div className="grid grid-cols-[3.2rem_1fr] items-start gap-2">
+                      <span className="pt-1.5 text-xs font-bold text-accent">조건</span>
+                      <LocalizedLine value={b.label ?? null} onChange={(label) => setBranch({ label })} placeholder="예: 상대가 점프하면" />
+                    </div>
+                  )}
                   <NotationRow label="루트" value={b.classic} onChange={(classic) => setBranch({ classic })} placeholder="예: 5HP(2) → 2MP" />
                   <NotationRow label="모던" value={b.modern ?? ""} onChange={(modern) => setBranch({ modern })} placeholder="비우면 클래식 전용" />
                   <div className="grid grid-cols-[3.2rem_1fr] items-start gap-2">
@@ -642,8 +761,14 @@ export function cleanOptions(list: SetupOption[] | null | undefined): SetupOptio
       modern: o.modern?.trim() || null,
       description: cleanLocalized(o.description),
       branches: (o.branches ?? [])
-        .map((b) => ({ result: b.result, classic: b.classic.trim(), modern: b.modern?.trim() || null, note: cleanLocalized(b.note) }))
-        .filter((b) => b.classic || b.note),
+        .map((b) => ({
+          result: b.result,
+          label: b.result === "custom" ? cleanLocalized(b.label) : null,
+          classic: b.classic.trim(),
+          modern: b.modern?.trim() || null,
+          note: cleanLocalized(b.note),
+        }))
+        .filter((b) => b.classic || b.note || b.label),
       youtube_url: o.youtube_url?.trim() || null,
       youtube_start: o.youtube_url?.trim() ? (o.youtube_start ?? null) : null,
       youtube_end: o.youtube_url?.trim() && o.youtube_end && o.youtube_end > (o.youtube_start ?? 0) ? o.youtube_end : null,
