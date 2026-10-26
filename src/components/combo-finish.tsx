@@ -3,7 +3,7 @@ import type { ComboFinish } from "@/lib/types";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
 import { pickLocalized } from "@/lib/i18n/localized";
-import type { LinkedSetup } from "@/lib/setup-links";
+import { setupAnchor, type LinkedSetup } from "@/lib/setup-links";
 import { ControlNotation } from "./notation";
 
 /**
@@ -103,8 +103,8 @@ export function SetupChips({
       <span className="eyebrow">{dict.setup.linked}</span>
       {setups.map((s) => (
         <Link
-          key={s.id}
-          href={`/${characterSlug}/setups#setup-${s.id}`}
+          key={`${s.id}-${s.variant}`}
+          href={`/${characterSlug}/setups#${setupAnchor(s.id, s.variant)}`}
           title={s.preview}
           className="skew border border-highlight/60 px-2 py-0.5 text-xs font-bold text-highlight-text transition-colors hover:bg-highlight hover:text-highlight-fg"
         >

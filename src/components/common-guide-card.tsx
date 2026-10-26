@@ -9,6 +9,8 @@ import { ItemMedia } from "./media";
 import { CardShell } from "./card-shell";
 import { EditButton } from "./admin/admin-context";
 import { FavoriteButton } from "./favorite-button";
+import { TitleText } from "./title-text";
+import { plainTitle } from "@/lib/title";
 
 /**
  * 공통 공략의 시스템 글 한 편: [대상 수준] [주제] 제목 → 내용 → 예시 표기 → 영상.
@@ -43,7 +45,7 @@ export function CommonGuideCard({
         <>
           <LevelBadge level={guide.target_level} label={dict.level[guide.target_level]} />
           <Tag tone="accent">{dict.guide.topics[guide.topic] ?? guide.topic}</Tag>
-          <h2 className="text-lg font-bold">{title.text}</h2>
+          <h2 className="text-lg font-bold"><TitleText text={title.text} /></h2>
           {!title.translated && <NotTranslatedBadge label={dict.notTranslated} />}
           {outdated && <OutdatedBadge label={dict.patch.outdated} />}
         </>
@@ -80,7 +82,7 @@ export function CommonGuideCard({
             youtubeEnd={guide.youtube_end}
             youtubeLoop={guide.youtube_loop}
             mediaUrl={guide.media_url}
-            title={title.text}
+            title={plainTitle(title.text)}
             labels={dict.video}
           />
         )}

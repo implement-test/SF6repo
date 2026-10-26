@@ -1,5 +1,7 @@
 import Link from "next/link";
-import type { Move, Practice, Setup, Tip } from "@/lib/types";
+import type { Move, Practice, Setup, SetupVariant, Tip } from "@/lib/types";
+import { setupVariants } from "@/lib/setup";
+import { SetupVariantTabs } from "./setup-variant-tabs";
 import type { LinkedEnder } from "@/lib/setup-links";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
@@ -16,6 +18,8 @@ import { editScope } from "@/lib/admin/scope";
 import { ShareButton } from "./share-button";
 import { FavoriteButton } from "./favorite-button";
 import { frameTone } from "./move-card";
+import { TitleText } from "./title-text";
+import { plainTitle } from "@/lib/title";
 
 /**
  * 셋업 카드. 추천 연습(kind="practice") · 플레이 팁(kind="tip")도 같은 카드를 쓰고,
@@ -63,6 +67,10 @@ export function SetupCard({
   const topic = "topic" in setup ? setup.topic : null;
   const byId = new Map(moves.map((m) => [m.id, m]));
   const linkedMoves = "move_ids" in setup ? setup.move_ids.map((id) => byId.get(id)).filter((m) => m !== undefined) : [];
+  // 셋업 포스트는 셋업 여러 개 (0031). 추천 연습 · 플레이 팁은 칼럼 그대로 하나
+  const variants = kind === "setup" ? setupVariants(setup as Setup) : [setupVariants({ ...setup, variants: undefined })[0]];
+  const variantDescription = (v: SetupVariant) => (v.description ? [pickLocalized(v.description, locale)] : []);
+  const bodyProps = { kind, locale, dict, characterSlug, title: plainTitle(title.text) };
 
   return (
     <CardShell
@@ -74,7 +82,7 @@ export function SetupCard({
         <>
           <LevelBadge level={setup.target_level} label={dict.level[setup.target_level]} />
           {topic && <Tag tone="accent">{dict.tips.topics[topic] ?? topic}</Tag>}
-          <h2 className="text-lg font-bold">{title.text}</h2>
+          <h2 className="text-lg font-bold"><TitleText text={title.text} /></h2>
           {!title.translated && <NotTranslatedBadge label={dict.notTranslated} />}
           {outdated && <OutdatedBadge label={dict.patch.outdated} />}
           {situations.map((sit) => (
@@ -101,44 +109,6 @@ export function SetupCard({
             <p className="text-sm whitespace-pre-line">
               {situationText.text} {!situationText.translated && <NotTranslatedBadge label={dict.notTranslated} />}
             </p>
-          </section>
-        )}
-
-        {linkedEnders.length > 0 && (
-          <section className="flex flex-col gap-2">
-            <p className="eyebrow">{t.combos}</p>
-            <ul className="flex flex-col divide-y divide-border border border-border bg-inset">
-              {linkedEnders.map(({ ender, comboCount }) => {
-                const label = ender.label ? pickLocalized(ender.label, locale).text : null;
-                return (
-                  <li key={ender.id}>
-                    {/* 줄 전체가 콤보 페이지로 가는 링크 (이 엔더로 끝나는 콤보만 거른다) */}
-                    <Link
-                      href={`/${characterSlug}/combos?ender=${ender.id}`}
-                      className="group grid gap-2 px-3 py-2.5 transition-colors hover:bg-surface-2 md:grid-cols-[1fr_auto] md:items-center"
-                    >
-                      <div className="flex min-w-0 flex-col gap-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <ControlNotation
-                            classic={ender.notation_classic}
-                            modern={ender.notation_modern}
-                            classicOnlyLabel={dict.combo.classicOnly}
-                          />
-                          {label && <span className="text-sm font-semibold">{label}</span>}
-                        </div>
-                        <span className="text-xs font-semibold text-muted group-hover:text-accent">
-                          {t.comboCount.replace("{n}", String(comboCount))} →
-                        </span>
-                      </div>
-                      <span className="flex items-center gap-1.5 text-sm">
-                        <span className="text-xs text-muted">{t.frameAfter}</span>
-                        <b className="display text-lg tabular-nums text-highlight-text">{ender.frame_after ?? "—"}</b>
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
           </section>
         )}
 
@@ -180,35 +150,167 @@ export function SetupCard({
           </section>
         )}
 
-        {(setup.notation_classic || description) && (
+        {variants.length === 1 ? (
+          <VariantBody
+            {...bodyProps}
+            variant={variants[0]}
+            enders={linkedEnders}
+            descriptions={[description, ...variantDescription(variants[0])]}
+          />
+        ) : (
+          <>
+            {description && <Description text={description} dict={dict} />}
+            <SetupVariantTabs
+              baseId={`${kind}-${setup.id}`}
+              labels={variants.map((v, i) => (
+                <TitleText key={i} text={v.name ? pickLocalized(v.name, locale).text : t.variant.replace("{n}", String(i + 1))} />
+              ))}
+            >
+              {variants.map((v, i) => (
+                <VariantBody
+                  key={i}
+                  {...bodyProps}
+                  variant={v}
+                  enders={linkedEnders.filter((l) => l.variant === i)}
+                  descriptions={variantDescription(v)}
+                />
+              ))}
+            </SetupVariantTabs>
+          </>
+        )}
+
+        {hasMedia && (
+          <ItemMedia
+            youtubeUrl={setup.youtube_url}
+            youtubeStart={setup.youtube_start}
+            youtubeEnd={setup.youtube_end}
+            youtubeLoop={setup.youtube_loop}
+            mediaUrl={setup.media_url}
+            title={plainTitle(title.text)}
+            labels={dict.video}
+          />
+        )}
+
+        <footer className="flex flex-wrap items-center gap-x-3 text-xs text-muted">
+          <span>{setup.created_date}</span>
+          {createdBy && (
+            <span>
+              {dict.author.created} <b className="font-semibold text-fg">{createdBy}</b>
+            </span>
+          )}
+          {updatedBy && updatedBy !== createdBy && (
+            <span>
+              {dict.author.updated} <b className="font-semibold text-fg">{updatedBy}</b>
+            </span>
+          )}
+        </footer>
+      </div>
+    </CardShell>
+  );
+}
+
+
+type Picked = ReturnType<typeof pickLocalized>;
+
+function Description({ text, dict }: { text: Picked; dict: Dictionary }) {
+  return (
+    <p className="text-sm whitespace-pre-line text-muted">
+      {text.text} {!text.translated && <NotTranslatedBadge label={dict.notTranslated} />}
+    </p>
+  );
+}
+
+/**
+ * 셋업 하나의 내용: 이어지는 엔더 → 공통 루트 · 설명 → 프랙티스 설정 → 옵션.
+ * 포스트에 셋업이 여러 개면 탭마다 하나씩 (추천 연습 · 플레이 팁은 항상 하나).
+ */
+function VariantBody({
+  variant,
+  enders,
+  descriptions,
+  kind,
+  locale,
+  dict,
+  characterSlug,
+  title,
+}: {
+  variant: SetupVariant;
+  enders: LinkedEnder[];
+  /** 공통 루트 아래에 보여 줄 설명 (셋업이 하나면 포스트의 설명도 여기에) */
+  descriptions: (Picked | null)[];
+  kind: "setup" | "practice" | "tip";
+  locale: Locale;
+  dict: Dictionary;
+  characterSlug: string;
+  /** 옵션 영상 제목에 붙일 포스트 제목 (글자) */
+  title: string;
+}) {
+  const t = dict.setup;
+  return (
+    <>
+        {enders.length > 0 && (
           <section className="flex flex-col gap-2">
-            {setup.notation_classic && (
+            <p className="eyebrow">{t.combos}</p>
+            <ul className="flex flex-col divide-y divide-border border border-border bg-inset">
+              {enders.map(({ ender, comboCount }) => {
+                const label = ender.label ? pickLocalized(ender.label, locale).text : null;
+                return (
+                  <li key={ender.id}>
+                    {/* 줄 전체가 콤보 페이지로 가는 링크 (이 엔더로 끝나는 콤보만 거른다) */}
+                    <Link
+                      href={`/${characterSlug}/combos?ender=${ender.id}`}
+                      className="group grid gap-2 px-3 py-2.5 transition-colors hover:bg-surface-2 md:grid-cols-[1fr_auto] md:items-center"
+                    >
+                      <div className="flex min-w-0 flex-col gap-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <ControlNotation
+                            classic={ender.notation_classic}
+                            modern={ender.notation_modern}
+                            classicOnlyLabel={dict.combo.classicOnly}
+                          />
+                          {label && <span className="text-sm font-semibold">{label}</span>}
+                        </div>
+                        <span className="text-xs font-semibold text-muted group-hover:text-accent">
+                          {t.comboCount.replace("{n}", String(comboCount))} →
+                        </span>
+                      </div>
+                      <span className="flex items-center gap-1.5 text-sm">
+                        <span className="text-xs text-muted">{t.frameAfter}</span>
+                        <b className="display text-lg tabular-nums text-highlight-text">{ender.frame_after ?? "—"}</b>
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        )}
+
+        {(variant.notation_classic || descriptions.some(Boolean)) && (
+          <section className="flex flex-col gap-2">
+            {variant.notation_classic && (
               <div className="grid gap-x-4 gap-y-2 border-l-2 border-accent bg-inset px-3 py-3 sm:grid-cols-[max-content_1fr]">
                 <span className="eyebrow whitespace-nowrap pt-1.5">{kind === "tip" ? dict.tips.input : t.input}</span>
                 <ControlNotation
-                  classic={setup.notation_classic}
-                  modern={setup.notation_modern}
+                  classic={variant.notation_classic}
+                  modern={variant.notation_modern}
                   classicOnlyLabel={dict.combo.classicOnly}
                 />
               </div>
             )}
-            {description && (
-              <p className="text-sm whitespace-pre-line text-muted">
-                {description.text} {!description.translated && <NotTranslatedBadge label={dict.notTranslated} />}
-              </p>
-            )}
+            {descriptions.map((d, i) => d && <Description key={i} text={d} dict={dict} />)}
           </section>
         )}
 
-        {setup.practice && (
+        {variant.practice && (
           <Collapsible showLabel={t.showPractice} hideLabel={t.hidePractice}>
-            <PracticeView config={setup.practice} locale={locale} dict={dict} />
+            <PracticeView config={variant.practice} locale={locale} dict={dict} />
           </Collapsible>
         )}
 
-        {setup.options.length > 0 && (
+        {variant.options.length > 0 && (
           <section className="flex flex-col gap-3">
-            {setup.options.map((option, i) => {
+            {variant.options.map((option, i) => {
               const desc = option.description ? pickLocalized(option.description, locale) : null;
               return (
                 <div key={i} className="flex flex-col border border-border bg-surface-2">
@@ -268,7 +370,7 @@ export function SetupCard({
                         youtubeEnd={option.youtube_end}
                         youtubeLoop={option.youtube_loop}
                         mediaUrl={null}
-                        title={`${title.text} ${option.label}`}
+                        title={`${title} ${option.label}`}
                         labels={dict.video}
                       />
                     </div>
@@ -279,33 +381,6 @@ export function SetupCard({
           </section>
         )}
 
-        {hasMedia && (
-          <ItemMedia
-            youtubeUrl={setup.youtube_url}
-            youtubeStart={setup.youtube_start}
-            youtubeEnd={setup.youtube_end}
-            youtubeLoop={setup.youtube_loop}
-            mediaUrl={setup.media_url}
-            title={title.text}
-            labels={dict.video}
-          />
-        )}
-
-        <footer className="flex flex-wrap items-center gap-x-3 text-xs text-muted">
-          <span>{setup.created_date}</span>
-          {createdBy && (
-            <span>
-              {dict.author.created} <b className="font-semibold text-fg">{createdBy}</b>
-            </span>
-          )}
-          {updatedBy && updatedBy !== createdBy && (
-            <span>
-              {dict.author.updated} <b className="font-semibold text-fg">{updatedBy}</b>
-            </span>
-          )}
-        </footer>
-      </div>
-    </CardShell>
+    </>
   );
 }
-

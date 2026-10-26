@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { normalizeDriveReversal, normalizeOptions, normalizePractice } from "./setup";
+import {
+  editableVariants,
+  normalizeDriveReversal,
+  normalizeOptions,
+  normalizePractice,
+  normalizeVariantLinks,
+  setupVariants,
+  variantLinks,
+} from "./setup";
 
 describe("normalizePractice", () => {
   it("초기 형식(표기 문자열 슬롯)을 표 형식으로 바꾼다", () => {
@@ -90,5 +98,48 @@ describe("옵션 분기: 조건(직접 입력)", () => {
     ]);
     expect(o.branches[0]).toMatchObject({ result: "custom", label: { ko: "상대가 점프하면" }, classic: "623HP" });
     expect(o.branches[1].label).toBeNull();
+  });
+});
+
+describe("셋업 포스트의 셋업 여러 개 (0031)", () => {
+  const legacy = {
+    notation_classic: "66 > 5MP",
+    notation_modern: null,
+    options: [{ label: "옵션 1", classic: "2LP", branches: [] }],
+    practice: null,
+  };
+
+  it("variants 가 비어 있으면 예전 칼럼이 셋업 하나", () => {
+    const list = setupVariants({ ...legacy, options: legacy.options as never, variants: [] });
+    expect(list).toHaveLength(1);
+    expect(list[0].notation_classic).toBe("66 > 5MP");
+    expect(list[0].options[0].classic).toBe("2LP");
+  });
+
+  it("variants 가 있으면 그것 (예전 칼럼은 무시)", () => {
+    const list = setupVariants({ ...legacy, options: [], variants: [{ name: { ko: "A" } }, { notation_classic: "2MK" }] });
+    expect(list.map((v) => v.name?.ko ?? null)).toEqual(["A", null]);
+    expect(list[1].notation_classic).toBe("2MK");
+    expect(list[1].options).toEqual([]);
+  });
+
+  it("편집 창: DB 의 연결을 셋업마다 나누고, 예전 형식(엔더 id 목록)은 첫 번째 셋업", () => {
+    const row = { ...legacy, variants: [{}, {}], ender_links: [{ ender_id: 1, variant: 0 }, { ender_id: 2, variant: 1 }, { ender_id: 3, variant: 5 }] };
+    expect(editableVariants(row).map((v) => v.ender_ids)).toEqual([[1], [2, 3]]);
+    expect(editableVariants({ ...legacy, ender_links: [4, 5] }).map((v) => v.ender_ids)).toEqual([[4, 5]]);
+    // 임시 내용처럼 셋업 안에 엔더가 들어 있으면 그대로
+    expect(editableVariants({ ...legacy, variants: [{ ender_ids: [7] }] })[0].ender_ids).toEqual([7]);
+  });
+
+  it("저장할 연결: 같은 엔더는 앞 셋업 하나에만", () => {
+    expect(variantLinks([{ ender_ids: [1, 2] }, { ender_ids: [2, 3] }])).toEqual([
+      { ender_id: 1, variant: 0 },
+      { ender_id: 2, variant: 0 },
+      { ender_id: 3, variant: 1 },
+    ]);
+    expect(normalizeVariantLinks([{ ender_id: 1 }, 2, "x"])).toEqual([
+      { ender_id: 1, variant: 0 },
+      { ender_id: 2, variant: 0 },
+    ]);
   });
 });

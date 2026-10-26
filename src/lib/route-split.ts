@@ -1,5 +1,5 @@
 import type { ComboFinish, ComboRoute, Localized } from "./types";
-import { normalizeNotation, splitTopLevel } from "./notation/parse";
+import { memoToInput, normalizeNotation, splitTopLevel } from "./notation/parse";
 
 /**
  * 마무리로 나누기: 같은 중간 루트를 반복해서 적은 루트들을 "공통 루트 + 마무리 여러 개"로 묶는다.
@@ -33,8 +33,8 @@ function steps(notation: string): string[] {
     .filter(Boolean);
 }
 const key = (step: string) => step.replace(/\s+/g, " ").toUpperCase();
-/** 저장할 표기: 단계를 → 로 잇고, 표준화로 바뀐 타겟 콤보 · 는 입력 표기 .. 로 되돌린다 */
-const join = (list: string[]) => list.join(" → ").replace(/·/g, "..");
+/** 저장할 표기: 단계를 → 로 잇고, 표준화로 바뀐 타겟 콤보 · 와 메모 ⟨⟩ 는 입력 표기 .. 와 <> 로 되돌린다 */
+const join = (list: string[]) => memoToInput(list.join(" → ").replace(/·/g, ".."));
 
 /** 두 단계 목록의 공통 앞부분 길이 */
 function commonLength(a: string[], b: string[]): number {

@@ -9,7 +9,14 @@ import { findUnknownTokens, parseNotation } from "@/lib/notation/parse";
 import { describeError, revalidateSite, scopeOfRow, supabaseBrowser } from "@/lib/supabase/browser";
 import type { ComboRoute, Localized, Patch, PracticeConfig, SetupOption, StarterGroup, VsPattern } from "@/lib/types";
 import { isVideoLink, parseXPost, parseYouTube } from "@/lib/youtube";
-import { normalizeOptions, normalizePractice } from "@/lib/setup";
+import {
+  editableVariants,
+  normalizeOptions,
+  normalizePractice,
+  normalizeVariantLinks,
+  variantLinks,
+  type EditVariant,
+} from "@/lib/setup";
 import { normalizeStarterGroups } from "@/lib/starters";
 import { comboRoutes, routesToColumns } from "@/lib/combo-routes";
 import { RoutesInput } from "./routes-input";
@@ -27,14 +34,14 @@ import { ClockInput } from "./clock-input";
 import { scoped } from "@/lib/admin/scope";
 import { OpponentInput } from "./opponent-input";
 import {
-  EnderLinksInput,
   MoveLinksInput,
   OptionsInput,
   PracticeInput,
+  SetupVariantsInput,
   SituationsInput,
   cleanOptions,
   cleanPractice,
-  normalizeEnderLinks,
+  cleanVariants,
 } from "./setup-fields";
 
 type Values = Record<string, unknown>;
@@ -51,8 +58,12 @@ function normalizeValues(v: Values): Values {
   if ("practice" in out) out.practice = normalizePractice(out.practice);
   if ("starters" in out) out.starters = normalizeStarterGroups(out.starters);
   if ("patterns" in out) out.patterns = editableVsPatterns(out.patterns);
-  // 셋업의 이어지는 엔더 (0025)
-  if ("ender_links" in out) out.ender_links = normalizeEnderLinks(out.ender_links);
+  // 셋업 포스트: 셋업 목록(0031, 예전 칼럼은 셋업 하나) + 셋업마다의 이어지는 엔더(0025).
+  // ender_links(DB 의 연결 · 예전 임시 내용)가 있으면 셋업마다 나눠 넣고 지운다
+  if ("situations" in out) {
+    out.variants = editableVariants(out);
+    delete out.ender_links;
+  }
   // 콤보: 칼럼(첫 번째 루트) + extra_routes 를 루트 목록 하나로
   if (!("routes" in out) && "extra_routes" in out) out.routes = comboRoutes(out as Parameters<typeof comboRoutes>[0]);
   // 0021 이전 임시 내용의 루트에는 마무리(finishes)가 없다. 작성 중인 빈 루트 · 마무리는 그대로 둔다
@@ -84,7 +95,7 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
   const sb = supabaseBrowser();
   const isNew = request.id === undefined;
   const usesPatch = entity.groups.some((g) => g.fields.some((f) => f.type === "patch"));
-  const usesEnderLinks = entity.groups.some((g) => g.fields.some((f) => f.type === "enderLinks"));
+  const usesEnderLinks = entity.groups.some((g) => g.fields.some((f) => f.type === "setupVariants"));
 
   const [values, setValues] = useState<Values | null>(null);
   /** 불러왔을 때 연결돼 있던 콤보 (셋업). 저장할 때 달라진 것만 반영한다. */
@@ -123,11 +134,11 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
         initial = data;
         if (usesEnderLinks) {
           const { data: links } = await sb
-            .from("setup_combos")
+            .from("setup_enders")
             .select("*")
             .eq("setup_id", request.id)
             .order("sort_order");
-          initial.ender_links = (links ?? []).map((l) => l.ender_id as number);
+          initial.ender_links = normalizeVariantLinks(links ?? []);
         }
       }
       if (cancelled) return;
@@ -138,7 +149,7 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
       const draft = key ? getDraft(key) : undefined;
       setRestored(!!draft);
       setValues(draft ? normalizeValues(draft.values) : normalized);
-      setInitialLinks(draft ? draft.initialLinks : normalizeEnderLinks(initial.ender_links));
+      setInitialLinks(draft ? draft.initialLinks : normalizeVariantLinks(initial.ender_links).map((l) => l.ender_id));
       setBaseUpdatedAt(draft ? draft.baseUpdatedAt : ((initial.updated_at as string | undefined) ?? null));
     })();
     return () => {
@@ -176,18 +187,18 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
     setReloadN((n) => n + 1);
   }
 
-  /** 셋업 ↔ 엔더 연결 맞추기: 빠진 것은 지우고, 나머지는 순서까지 저장 */
+  /** 셋업 ↔ 엔더 연결 맞추기: 빠진 것은 지우고, 나머지는 몇 번째 셋업인지 · 순서까지 저장 */
   async function syncEnderLinks(setupId: number): Promise<string | null> {
     if (!usesEnderLinks || !values) return null;
-    const wanted = normalizeEnderLinks(values.ender_links);
-    const removed = initialLinks.filter((id) => !wanted.includes(id));
+    const wanted = variantLinks((values.variants as EditVariant[] | undefined) ?? []);
+    const removed = initialLinks.filter((id) => !wanted.some((l) => l.ender_id === id));
     if (removed.length) {
       const { error } = await sb.from("setup_enders").delete().eq("setup_id", setupId).in("ender_id", removed);
       if (error) return describeError(error);
     }
     if (wanted.length) {
       const { error } = await sb.from("setup_enders").upsert(
-        wanted.map((ender_id, sort_order) => ({ setup_id: setupId, ender_id, sort_order })),
+        wanted.map(({ ender_id, variant }, sort_order) => ({ setup_id: setupId, ender_id, variant, sort_order })),
         { onConflict: "setup_id,ender_id" },
       );
       if (error) return describeError(error);
@@ -313,7 +324,12 @@ export default function EditorPanel({ request, onClose }: { request: EditorReque
   function loadVersion(snapshot: Values) {
     // 연결 콤보는 이력에 없는 따로 저장되는 값이라 지금 값을 유지한다.
     setValues((current) =>
-      normalizeValues({ ...upgradeRow(entity.table, snapshot), ender_links: current?.ender_links, updated_at: baseUpdatedAt }),
+      normalizeValues({
+        ...upgradeRow(entity.table, snapshot),
+        // 셋업의 엔더는 이력에 없으므로 지금 셋업마다 고른 엔더를 그대로 둔다
+        ...(usesEnderLinks ? { ender_links: variantLinks((current?.variants as EditVariant[] | undefined) ?? []) } : {}),
+        updated_at: baseUpdatedAt,
+      }),
     );
     setShowHistory(false);
     setError("과거 버전을 불러왔습니다. 확인 후 저장하면 되돌려집니다.");
@@ -595,16 +611,8 @@ function FieldInput({
     case "situations":
       return <SituationsInput label={field.label} value={(value as string[] | null) ?? []} onChange={onChange} />;
 
-    case "enderLinks":
-      return (
-        <EnderLinksInput
-          label={field.label}
-          help={field.help}
-          characterId={characterId}
-          value={normalizeEnderLinks(value)}
-          onChange={onChange}
-        />
-      );
+    case "setupVariants":
+      return <SetupVariantsInput value={(value as EditVariant[] | null) ?? []} onChange={onChange} characterId={characterId} />;
 
     case "setupOptions":
       return <OptionsInput value={(value as SetupOption[] | null) ?? []} onChange={onChange} />;
@@ -843,9 +851,14 @@ function buildPayload(fields: Field[], values: Values): { payload: Values; probl
         // 한 번도 누르지 않은 체크박스도 false 로 (DB 칼럼이 not null)
         payload[field.key] = raw === true;
         break;
-      case "enderLinks":
-        // 칼럼이 아니라 setup_enders 에 따로 저장한다 (syncEnderLinks)
+      case "setupVariants": {
+        // 셋업마다 고른 엔더는 칼럼이 아니라 setup_enders 에 따로 저장한다 (syncEnderLinks).
+        // 0031 이전의 칼럼(셋업 하나)은 variants 로 옮겼으므로 비운다
+        const variants = cleanVariants(raw as EditVariant[] | null);
+        if (variants.length === 0) return { payload, problem: "셋업을 하나 이상 추가하세요." };
+        Object.assign(payload, { variants, notation_classic: null, notation_modern: null, options: [], practice: null });
         break;
+      }
       case "date":
         // 비워 두면 보내지 않는다 (DB 기본값 = 오늘)
         if (raw) payload[field.key] = raw;

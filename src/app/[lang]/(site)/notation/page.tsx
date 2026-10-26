@@ -18,6 +18,12 @@ const LEGEND: { notation: string; ko: string; en: string; ja: string }[] = [
     en: "Situation before a command: counter / punish (punish counter) / air / guard (blocked)",
     ja: "状況（コマンドの前）：counter カウンター / punish パニッシュカウンター / air 空中 / guard ガードさせる",
   },
+  {
+    notation: "hit 2MK → guard 2MK → stun 5HP",
+    ko: "hit 히트시킴 / guard 가드시킴 / stun 스턴 (커맨드 앞에)",
+    en: "hit = landed / guard = blocked / stun = stunned (before a command)",
+    ja: "hit ヒットさせる / guard ガードさせる / stun スタン（コマンドの前）",
+  },
   { notation: "delay 5HP", ko: "delay 딜레이 입력", en: "delay = delayed input", ja: "delay ディレイ入力" },
   {
     notation: "j.HP → nj.MK → bj.LP",
@@ -41,6 +47,12 @@ const LEGEND: { notation: string; ko: string; en: string; ja: string }[] = [
     ko: "(2) 몇 번째 타격 / =1040 데미지 (숫자만 든 메모 (1040) 도 데미지)",
     en: "(2) = which hit / =1040 = damage (a number-only memo (1040) counts too)",
     ja: "(2) 何段目 / =1040 ダメージ (数字だけのメモ (1040) もダメージ)",
+  },
+  {
+    notation: "5HP <앞걷기 후> → 236HP",
+    ko: "< > 안은 메모 (보라색). ( ) 로 적은 예전 메모는 회색",
+    en: "< > = memo (purple). Older ( ) memos show in grey",
+    ja: "< > の中はメモ（紫）。( ) で書いた以前のメモは灰色",
   },
   { notation: "2MP → {DRC 5HP} → 236HP", ko: "{ } 안은 통째로 생략 가능", en: "{ } marks a part you can skip", ja: "{ } の中は省略可能" },
   { notation: "2MP → 236HP → etc", ko: "etc 이후는 자유롭게 이어 간다", en: "etc: continue however you like", ja: "etc 以降は自由につなぐ" },

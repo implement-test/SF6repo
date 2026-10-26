@@ -133,7 +133,8 @@ export type ComboEnder = {
   sort_order: number;
 };
 
-export type SetupEnderLink = { id: number; setup_id: number; ender_id: number; sort_order: number };
+/** variant: 포스트 안의 몇 번째 셋업으로 이어지는지 (0부터, 0031) */
+export type SetupEnderLink = { id: number; setup_id: number; ender_id: number; sort_order: number; variant?: number };
 
 /** 콤보 그룹. 그룹 없는 콤보는 목록 맨 위 */
 export type ComboGroup = { id: number; character_id: number; name: Localized; sort_order: number };
@@ -187,7 +188,7 @@ export type OptionBranch = {
 /** 옵션 1 / 2 / ... */
 export type SetupOption = {
   label: string;
-  /** 옵션의 행동 (콤보 표기. 글자는 괄호로: "(약간 끌어서) 5HP") */
+  /** 옵션의 행동 (콤보 표기. 글자는 메모로: "<약간 끌어서> 5HP") */
   classic: string;
   modern: string | null;
   description: Localized | null;
@@ -233,18 +234,38 @@ export type PracticeConfig = {
   notes: Localized | null;
 };
 
+/**
+ * 포스트 안의 셋업 하나 (0031). 셋업마다 이어지는 엔더(setup_enders.variant) · 공통 루트 · 설명 · 프랙티스 설정 · 옵션을 따로 가진다.
+ */
+export type SetupVariant = {
+  /** 탭 이름 (셋업이 하나면 비워도 된다) */
+  name: Localized | null;
+  /** 셋업 입력 (옵션으로 갈라지기 전 공통 부분) */
+  notation_classic: string | null;
+  notation_modern: string | null;
+  description: Localized | null;
+  practice: PracticeConfig | null;
+  options: SetupOption[];
+};
+
+/**
+ * 셋업 포스트. 제목 · 상황 태그 · 공통 설명(description) · 영상은 포스트에, 나머지는 셋업(variants)마다.
+ * 0031 이전 포스트는 variants 가 비어 있고 아래 칼럼들이 셋업 하나다 — setupVariants() 로 읽는다.
+ */
 export type Setup = ContentBase &
   Media & {
     character_id: number;
     title: Localized;
     situations: string[];
-    /** 셋업 입력 (옵션으로 갈라지기 전 공통 부분) */
+    /** 0031 이전의 셋업 입력 (variants 가 비었을 때만 쓴다) */
     notation_classic: string | null;
     notation_modern: string | null;
     description: Localized | null;
     difficulty: Difficulty;
+    /** 0031 이전의 옵션 · 프랙티스 설정 (variants 가 비었을 때만 쓴다) */
     options: SetupOption[];
     practice: PracticeConfig | null;
+    variants?: SetupVariant[];
   };
 
 /** 추천 연습: 셋업과 같은 구조, 이어지는 콤보 대신 상황을 글로 */

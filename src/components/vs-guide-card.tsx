@@ -10,6 +10,8 @@ import { LevelBadge, NotTranslatedBadge, OutdatedBadge, PositionBadge, Tag } fro
 import { ItemMedia } from "./media";
 import { EditButton } from "./admin/admin-context";
 import { FavoriteButton } from "./favorite-button";
+import { TitleText } from "./title-text";
+import { plainTitle } from "@/lib/title";
 
 /**
  * Vs 가이드 한 포스트: [대상 수준] [VS 상대] [주제] 제목 → 공용 내용 → 상대 패턴 여러 개 → 영상.
@@ -51,7 +53,7 @@ export function VsGuideCard({
         <LevelBadge level={guide.target_level} label={dict.level[guide.target_level]} />
         <PositionBadge label={`VS ${opponentName}`} />
         <Tag tone="accent">{dict.vs.topics[guide.topic] ?? guide.topic}</Tag>
-        {title && <h2 className="font-bold">{title.text}</h2>}
+        {title && <h2 className="font-bold"><TitleText text={title.text} /></h2>}
         {title && !title.translated && <NotTranslatedBadge label={dict.notTranslated} />}
         {outdated && <OutdatedBadge label={dict.patch.outdated} />}
         <span className="ml-auto flex items-center gap-1.5">
@@ -165,7 +167,7 @@ export function VsGuideCard({
           youtubeEnd={guide.youtube_end}
           youtubeLoop={guide.youtube_loop}
           mediaUrl={guide.media_url}
-          title={title?.text ?? opponentName}
+          title={title ? plainTitle(title.text) : opponentName}
           labels={dict.video}
         />
       )}

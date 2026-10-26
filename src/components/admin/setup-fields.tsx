@@ -22,7 +22,7 @@ import {
   type Move,
   type MoveCategory,
 } from "@/lib/types";
-import { normalizeDriveReversal } from "@/lib/setup";
+import { emptyVariant, normalizeDriveReversal, type EditVariant } from "@/lib/setup";
 import { NotationImage } from "../notation";
 import { inputClass, NotationRow } from "./starters-input";
 import { ClockInput } from "./clock-input";
@@ -84,13 +84,8 @@ export function SituationsInput({ label, value, onChange }: { label: string; val
 
 // ───────────────────────── 이어지는 엔더 ─────────────────────────
 
-/** 저장된 값(엔더 id 목록)을 읽는다. 예전 형식(콤보 연결)은 버린다 — 0025 에서 엔더 연결로 옮겼다 */
-export function normalizeEnderLinks(raw: unknown): number[] {
-  return Array.isArray(raw) ? raw.filter((v): v is number => typeof v === "number") : [];
-}
-
 /**
- * 이 셋업으로 이어지는 엔더 고르기. 엔더로 끝나는 콤보(루트 · 마무리)에는 이 셋업이 자동으로 붙는다.
+ * 셋업으로 이어지는 엔더 고르기. 엔더로 끝나는 콤보(루트 · 마무리)에는 이 셋업이 자동으로 붙는다.
  * 엔더 목록은 콤보 탭의 '엔더 관리'에서 만든다.
  */
 export function EnderLinksInput({
@@ -99,12 +94,15 @@ export function EnderLinksInput({
   characterId,
   value,
   onChange,
+  usedBy,
 }: {
   label: string;
   help?: string;
   characterId?: number;
   value: number[];
   onChange: (v: number[]) => void;
+  /** 같은 포스트의 다른 셋업이 쓰는 엔더 → 그 셋업 이름 (고르면 이 셋업으로 옮긴다) */
+  usedBy?: Map<number, string>;
 }) {
   const [enders, setEnders] = useState<ComboEnder[] | null>(null);
 
@@ -147,6 +145,7 @@ export function EnderLinksInput({
                       {e.label && <span className="text-xs font-semibold">{e.label.ko}</span>}
                     </span>
                     {e.frame_after && <span className="text-xs text-muted">후상황 {e.frame_after}</span>}
+                    {!on && usedBy?.has(e.id) && <span className="text-xs text-warn">{usedBy.get(e.id)}에서 사용 중 (고르면 옮김)</span>}
                   </span>
                 </label>
               </li>
@@ -394,7 +393,7 @@ export function OptionsInput({ value, onChange }: { value: SetupOption[]; onChan
             </span>
           </div>
 
-          <NotationRow label="행동" value={o.classic} onChange={(classic) => update(i, { classic })} placeholder="예: (약간 끌어서) 5HP" />
+          <NotationRow label="행동" value={o.classic} onChange={(classic) => update(i, { classic })} placeholder="예: <약간 끌어서> 5HP" />
           <NotationRow label="모던" value={o.modern ?? ""} onChange={(modern) => update(i, { modern })} placeholder="비우면 클래식 전용" />
           <div className="grid grid-cols-[3.2rem_1fr] items-start gap-2">
             <span className="pt-1.5 text-xs font-bold text-muted">설명</span>
@@ -741,9 +740,137 @@ function RowList({
   );
 }
 
+// ───────────────────────── 포스트 안의 셋업 여러 개 (0031) ─────────────────────────
+
+const variantLabel = (v: EditVariant, i: number) => v.name?.ko?.trim() || `셋업 ${i + 1}`;
+
+/**
+ * 셋업 포스트의 셋업 목록. 셋업마다 이름 · 이어지는 엔더 · 공통 루트 · 설명 · 프랙티스 설정 · 옵션.
+ * 셋업이 둘 이상이면 방문자 화면에서 탭으로 나뉜다. 엔더 하나는 포스트 안의 셋업 하나에만 이어진다.
+ */
+export function SetupVariantsInput({
+  value,
+  onChange,
+  characterId,
+}: {
+  value: EditVariant[];
+  onChange: (v: EditVariant[]) => void;
+  characterId?: number;
+}) {
+  const update = (i: number, patch: Partial<EditVariant>) => onChange(value.map((v, j) => (j === i ? { ...v, ...patch } : v)));
+  /** 엔더를 고르면 다른 셋업에서는 뺀다 */
+  const setEnders = (i: number, ids: number[]) =>
+    onChange(
+      value.map((v, j) => (j === i ? { ...v, ender_ids: ids } : { ...v, ender_ids: v.ender_ids.filter((id) => !ids.includes(id)) })),
+    );
+  const copy = (i: number) =>
+    onChange([
+      ...value.slice(0, i + 1),
+      // 복사본은 엔더 없이 (엔더는 셋업 하나에만)
+      { ...structuredClone(value[i]), name: null, ender_ids: [] },
+      ...value.slice(i + 1),
+    ]);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <Heading
+        label="셋업"
+        help="한 포스트에 셋업을 여러 개 넣으면 탭으로 나뉩니다. 셋업마다 이어지는 엔더 · 공통 루트 · 프랙티스 설정 · 옵션을 따로 적습니다. 셋업이 하나면 이름은 비워도 됩니다."
+      />
+      {value.map((v, i) => {
+        const usedBy = new Map(value.flatMap((other, j) => (j === i ? [] : other.ender_ids.map((id) => [id, variantLabel(other, j)] as const))));
+        return (
+          <details key={i} open className="group/variant border border-border-strong bg-surface">
+            <summary className="flex cursor-pointer items-center gap-2 border-b border-border bg-surface-2 px-3 py-2 select-none">
+              <span className="skew bg-accent px-2 py-0.5 text-accent-fg">
+                <span className="display text-sm">{variantLabel(v, i)}</span>
+              </span>
+              <span className="text-xs text-muted">엔더 {v.ender_ids.length}개 · 옵션 {v.options.length}개</span>
+              <span className="ml-auto flex gap-1" onClick={(e) => e.preventDefault()}>
+                <button type="button" className={`${iconButton} w-auto px-2 text-xs`} onClick={() => copy(i)}>
+                  복사
+                </button>
+                <RowButtons
+                  index={i}
+                  length={value.length}
+                  onMove={(dir) => onChange(moveItem(value, i, dir))}
+                  onRemove={() => {
+                    if (value.length === 1) return;
+                    if (confirm(`'${variantLabel(v, i)}'을(를) 지울까요? (저장해야 반영됩니다)`)) onChange(value.filter((_, j) => j !== i));
+                  }}
+                />
+              </span>
+            </summary>
+            <div className="flex flex-col gap-4 p-3">
+              <div className="grid grid-cols-[3.2rem_1fr] items-start gap-2">
+                <span className="pt-1.5 text-xs font-bold text-muted">이름</span>
+                <LocalizedLine
+                  value={v.name}
+                  onChange={(name) => update(i, { name })}
+                  placeholder={value.length > 1 ? "탭 이름 (예: `214MP` 후). 비우면 셋업 n" : "셋업이 하나면 비워도 됩니다"}
+                />
+              </div>
+              <EnderLinksInput
+                label="이 셋업으로 이어지는 엔더"
+                help="그 기술로 끝나는 콤보의 루트 · 마무리에 이 셋업(탭)이 자동으로 붙습니다. 엔더는 콤보 탭의 '엔더 관리'에서 만듭니다."
+                characterId={characterId}
+                value={v.ender_ids}
+                onChange={(ids) => setEnders(i, ids)}
+                usedBy={usedBy}
+              />
+              <div className="flex flex-col gap-1.5">
+                <Heading label="셋업 초반 공통 루트" help="옵션으로 갈라지기 전 공통 부분 (없으면 비움)" />
+                <NotationRow
+                  label="클래식"
+                  value={v.notation_classic ?? ""}
+                  onChange={(notation_classic) => update(i, { notation_classic })}
+                  placeholder="예: 66 → 5MP"
+                />
+                <NotationRow
+                  label="모던"
+                  value={v.notation_modern ?? ""}
+                  onChange={(notation_modern) => update(i, { notation_modern })}
+                  placeholder="비우면 클래식 전용"
+                />
+              </div>
+              <div className="grid grid-cols-[3.2rem_1fr] items-start gap-2">
+                <span className="pt-1.5 text-xs font-bold text-muted">설명</span>
+                <LocalizedLine multiline value={v.description} onChange={(description) => update(i, { description })} placeholder="이 셋업의 설명" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Heading label="셋업을 위한 프랙티스 설정" />
+                <PracticeInput value={v.practice} onChange={(practice) => update(i, { practice })} />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Heading label="옵션 1 / 2 / …" />
+                <OptionsInput value={v.options} onChange={(options) => update(i, { options })} />
+              </div>
+            </div>
+          </details>
+        );
+      })}
+      <button type="button" className={addButton} onClick={() => onChange([...value, emptyVariant()])}>
+        + 셋업 추가
+      </button>
+    </div>
+  );
+}
+
+/** 저장할 셋업 목록 (엔더는 setup_enders 로 따로 저장한다) */
+export function cleanVariants(list: EditVariant[] | null | undefined) {
+  return (list ?? []).map((v) => ({
+    name: cleanLocalized(v.name),
+    notation_classic: v.notation_classic?.trim() || null,
+    notation_modern: v.notation_modern?.trim() || null,
+    description: cleanLocalized(v.description),
+    practice: cleanPractice(v.practice),
+    options: cleanOptions(v.options),
+  }));
+}
+
 // ───────────────────────── 저장 전 정리 ─────────────────────────
 
-function cleanLocalized(v: Localized | null | undefined): Localized | null {
+export function cleanLocalized(v: Localized | null | undefined): Localized | null {
   if (!v) return null;
   const out: Partial<Localized> = {};
   for (const l of LANGS) {

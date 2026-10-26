@@ -346,3 +346,47 @@ describe("ca (크리티컬 아츠)", () => {
     expect(displayNotation("236hp > ca")).toBe("236HP → CA");
   });
 });
+
+describe("hit · stun 히트 상황", () => {
+  it("기술 앞의 hit · stun 은 히트 상황 수식어", () => {
+    expect(parseNotation("hit 2MK > stun 5HP")).toEqual([
+      [{ kind: "input", modifiers: ["hit"], direction: "2", buttons: ["MK"] }],
+      [{ kind: "input", modifiers: ["stun"], direction: null, buttons: ["HP"] }],
+    ]);
+    expect(parseNotation("stun > 5HP")[0][0]).toEqual({ kind: "input", modifiers: ["stun"], direction: null, buttons: [] });
+  });
+});
+
+describe("메모 <텍스트>", () => {
+  it("꺾쇠 안은 메모, > 와 섞여도 → 로 바뀌지 않는다", () => {
+    expect(parseNotation("5HP <앞걷기 후> > 236HP")).toEqual([
+      [
+        { kind: "input", modifiers: [], direction: null, buttons: ["HP"] },
+        { kind: "note", text: "앞걷기 후", memo: true },
+      ],
+      [{ kind: "input", modifiers: [], direction: "236", buttons: ["HP"] }],
+    ]);
+  });
+
+  it("붙여 써도 되고, 앞 · 단독 메모도 된다", () => {
+    expect(parseNotation("5HP<늦게>")[0][1]).toEqual({ kind: "note", text: "늦게", memo: true });
+    expect(parseNotation("<약간 끌어서> 5HP")[0][0]).toEqual({ kind: "note", text: "약간 끌어서", memo: true });
+    expect(parseNotation("2MP > <상황 봐서> > 236HP")[1]).toEqual([{ kind: "note", text: "상황 봐서", memo: true }]);
+  });
+
+  it("메모 안의 .. :: [ 는 표기로 읽지 않는다", () => {
+    const combo = parseNotation("5HP <a..b :: [c] d> > 2MK");
+    expect(combo).toHaveLength(2);
+    expect(combo[0][1]).toEqual({ kind: "note", text: "a..b :: [c] d", memo: true });
+    expect(findUnknownTokens(parseNotation("5HP <a..b :: c> > 2MK"))).toEqual([]);
+  });
+
+  it("텍스트는 <메모> 그대로, 버튼은 대문자", () => {
+    expect(displayNotation("5hp <lp 연타> > 236hp")).toBe("5HP <lp 연타> → 236HP");
+    expect(normalizeNotation("5HP  <  늦게 > > 2MK")).toBe("5HP ⟨늦게⟩ → 2MK");
+  });
+
+  it("예전 (메모) 는 그대로 회색 메모", () => {
+    expect(parseNotation("236MP (벽꽝)")[0][1]).toEqual({ kind: "note", text: "벽꽝" });
+  });
+});

@@ -5,7 +5,7 @@
  *   2MK → 5HP → 236HP    `→` 연결/캔슬 (입력 편의상 `->`, `>` 도 허용)
  *   MP..HP                `..` 타겟 콤보 (마침표 2개. 예전 표기 `·` `・` 도 허용, 화면에는 `..`)
  *   236PP / 236KK         약중강 구분 없는 버튼 2개
- *   air HP                히트 상황: 공중 (counter = 카운터, punish = 퍼니시 카운터, guard = 가드시킴)
+ *   air HP                히트 상황: 공중 (counter = 카운터, punish = 퍼니시 카운터, guard = 가드시킴, hit = 히트시킴, stun = 스턴)
  *   delay 5HP             딜레이 입력
  *   DR / DRC / DI         생 드라이브 러시 / 캔슬 드라이브 러시 / 드라이브 임팩트
  *   DRC 5HP               DR · DRC 는 delay 처럼 기술 앞에 붙여 한 묶음으로도 쓴다 (단독도 가능)
@@ -15,7 +15,8 @@
  *   f.throw / b.throw     앞잡기 / 뒤잡기
  *   j.HP / nj.HP / bj.HP  점프 / 제자리 점프 / 뒤 점프 공격 (air 는 상대가 공중인 히트 상황이라 다르다)
  *   L M H SP A            모던 버튼 (A = AUTO)
- *   (텍스트)              괄호 안은 그대로 메모로 표시
+ *   <텍스트>              꺾쇠 안은 메모 (색으로 구분). 안의 글자는 표기로 읽지 않는다
+ *   (텍스트)              괄호 안도 메모 (예전 방식, 회색 글자)
  *   236HP =1040           = 뒤 숫자는 데미지 (노란 숫자 칩). 숫자만 든 메모 (1040) 도 데미지로 본다
  *   236HP → etc           etc = 이후 자유롭게 이어 간다 (콤보가 열려 있음)
  *   2MP → {DRC 5HP} → 236HP   중괄호 안은 통째로 생략 가능 (이미지에서 점선 상자로 묶는다)
@@ -24,11 +25,11 @@
  */
 
 /** 커맨드가 아니라 히트 상황. 커맨드와 구분되는 배지로 그린다. */
-export type Situation = "air" | "counter" | "punish" | "guard";
+export type Situation = "air" | "counter" | "punish" | "guard" | "hit" | "stun";
 /** delay 와 DR · DRC 는 기술 앞에 붙는 수식어로도 쓴다 ("DRC 5HP") */
 export type Modifier = Situation | "delay" | "DR" | "DRC";
 
-export const SITUATIONS: Situation[] = ["air", "counter", "punish", "guard"];
+export const SITUATIONS: Situation[] = ["air", "counter", "punish", "guard", "hit", "stun"];
 export const isSituation = (m: Modifier): m is Situation => (SITUATIONS as string[]).includes(m);
 
 export type SystemValue = "DR" | "DRC" | "DI" | "PARRY" | "JPARRY" | "SA1" | "SA2" | "SA3" | "CA";
@@ -45,7 +46,8 @@ export type Move =
   | { kind: "system"; modifiers: Modifier[]; value: SystemValue }
   /** 잡기: f.throw = 앞잡기, b.throw = 뒤잡기, throw = 방향 없음 */
   | { kind: "throw"; modifiers: Modifier[]; direction: "f" | "b" | null }
-  | { kind: "note"; text: string }
+  /** 메모. memo: <텍스트> 로 적은 것 (색으로 구분), 아니면 예전 (텍스트) */
+  | { kind: "note"; text: string; memo?: boolean }
   /** 데미지: "=1040" (범위 "=1040~1200"), 숫자만 든 메모 "(1040)" */
   | { kind: "damage"; text: string }
   /** etc: 이후는 자유롭게 이어 간다 */
@@ -66,6 +68,8 @@ const MODIFIERS: Record<string, Modifier> = {
   counter: "counter",
   punish: "punish",
   guard: "guard",
+  hit: "hit",
+  stun: "stun",
   delay: "delay",
   dr: "DR",
   drc: "DRC",
@@ -94,8 +98,22 @@ const BUTTON_TOKENS: [string, Button[]][] = [
   ["A", ["A"]],
 ];
 
-/** 사용자가 편하게 입력한 기호를 표준 기호로 바꾼다. */
+/** 메모 <텍스트> 는 안에서 ⟨텍스트⟩ 로 바꿔 둔다 (> 가 → 로 바뀌지 않게) */
+const MEMO_OPEN = "⟨";
+const MEMO_CLOSE = "⟩";
+const MEMO = /⟨([^⟨⟩]*)⟩/g;
+
+/** 사용자가 편하게 입력한 기호를 표준 기호로 바꾼다. 메모 <텍스트> 의 안쪽은 건드리지 않는다. */
 export function normalizeNotation(src: string): string {
+  const memos: string[] = [];
+  const protectedSrc = src.replace(/[<⟨]([^<>⟨⟩]*)[>⟩]/g, (_, text: string) => `${MEMO_OPEN}${memos.push(text.trim()) - 1}${MEMO_CLOSE}`);
+  return normalizePlain(protectedSrc).replace(/⟨(\d+)⟩/g, (_, i: string) => `${MEMO_OPEN}${memos[Number(i)]}${MEMO_CLOSE}`);
+}
+
+/** 메모를 저장 · 텍스트 표시용 <텍스트> 로 되돌린다 */
+export const memoToInput = (src: string) => src.replace(MEMO, "<$1>");
+
+function normalizePlain(src: string): string {
   return src
     .replace(/->|>/g, "→")
     // 마침표 2개(..)가 타겟 콤보. 안에서는 · 로 통일한다 (말줄임 ... 은 건드리지 않음)
@@ -122,7 +140,7 @@ export function normalizeNotation(src: string): string {
  */
 export function displayNotation(src: string): string {
   return normalizeNotation(src)
-    .split(/(\([^)]*\))/)
+    .split(/(\([^)]*\)|⟨[^⟨⟩]*⟩)/)
     .map((part, i) =>
       i % 2 === 1
         ? part
@@ -139,7 +157,8 @@ export function displayNotation(src: string): string {
             .replace(/\s*=(?=\d)/g, " = ")
             .replace(/ :: /g, " / "),
     )
-    .join("");
+    .join("")
+    .replace(MEMO, "<$1>");
 }
 
 function parseButtons(src: string): Button[] | null {
@@ -156,6 +175,7 @@ function parseButtons(src: string): Button[] | null {
 
 function parseMove(src: string): Move {
   const text = src.trim();
+  if (/^⟨[^⟨⟩]*⟩$/.test(text)) return { kind: "note", text: text.slice(1, -1), memo: true };
   if (/^\(.*\)$/.test(text)) return noteOrDamage(text.slice(1, -1));
   if (/^=/.test(text) && DAMAGE.test(text.slice(1))) return { kind: "damage", text: text.slice(1) };
   if (/^etc\.?$/i.test(text)) return { kind: "etc" };
@@ -213,6 +233,11 @@ function parseMove(src: string): Move {
  * 한 조각을 해석한다. 앞뒤에 괄호 메모가 붙을 수 있다: "(약간 끌어서) 5HP", "f.throw (4F 비벼도 잡힘)"
  */
 function parsePart(part: string): Move[] {
+  // 꺾쇠 메모는 붙여 써도 된다: "5HP<약간 늦게>", "<앞걷기 후>5HP"
+  const memoLead = /^⟨([^⟨⟩]*)⟩\s*(.+)$/.exec(part);
+  if (memoLead) return [{ kind: "note", text: memoLead[1], memo: true }, ...parsePart(memoLead[2])];
+  const memoTrail = /^(.+?)\s*⟨([^⟨⟩]*)⟩$/.exec(part);
+  if (memoTrail) return [...parsePart(memoTrail[1]), { kind: "note", text: memoTrail[2], memo: true }];
   const lead = /^\(([^)]*)\)\s+(.+)$/.exec(part);
   if (lead) return [noteOrDamage(lead[1]), ...parsePart(lead[2])];
   const trail = /^(.+?)\s+\(([^)]*)\)$/.exec(part);
@@ -262,7 +287,11 @@ export function splitTopLevel(src: string, separator: string): string[] {
   let start = 0;
   for (let i = 0; i < src.length; i++) {
     const ch = src[i];
-    if (ch === "[") depth++;
+    if (ch === MEMO_OPEN) {
+      // 메모 안의 기호로는 나누지 않는다
+      const close = src.indexOf(MEMO_CLOSE, i);
+      if (close !== -1) i = close;
+    } else if (ch === "[") depth++;
     else if (ch === "]") depth = Math.max(0, depth - 1);
     else if (depth === 0 && src.startsWith(separator, i)) {
       parts.push(src.slice(start, i));
@@ -297,15 +326,14 @@ function parsePlain(src: string): Combo {
       return options.length > 0 ? [{ kind: "branch", options }] : [];
     }
     // "5HP :: 2HP" = 이 중 하나. 선택지마다 타겟 콤보 묶음으로 읽는다
-    const options = step.split("::").map(parseChain).filter((o) => o.length > 0);
+    const options = splitTopLevel(step, "::").map(parseChain).filter((o) => o.length > 0);
     return options.length > 1 ? [{ kind: "or", options }] : (options[0] ?? []);
   });
 }
 
 /** 타겟 콤보(..)로 묶인 기술 묶음 하나 */
 function parseChain(src: string): Move[] {
-  return src
-    .split("·")
+  return splitTopLevel(src, "·")
     .map((part) => part.trim())
     .filter(Boolean)
     .flatMap(parsePart);

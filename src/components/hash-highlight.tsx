@@ -24,12 +24,16 @@ export function HashHighlight() {
       el.setAttribute("data-highlight", "");
       el.scrollIntoView({ block: "start", behavior: "smooth" });
     }
-    // 목록이 그려진 뒤에 찾는다
-    const timer = window.setTimeout(apply, 50);
-    window.addEventListener("hashchange", apply);
+    // 목록이 그려진 뒤에 찾는다. 셋업 탭(#setup-12-v2)은 탭이 먼저 바뀐 뒤에
+    let timer = window.setTimeout(apply, 50);
+    const onHash = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(apply, 50);
+    };
+    window.addEventListener("hashchange", onHash);
     return () => {
       window.clearTimeout(timer);
-      window.removeEventListener("hashchange", apply);
+      window.removeEventListener("hashchange", onHash);
     };
   }, [pathname]);
 

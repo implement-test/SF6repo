@@ -17,7 +17,7 @@ import type {
   Video,
   VsGuide,
 } from "@/lib/types";
-import { normalizeOptions, normalizePractice } from "@/lib/setup";
+import { normalizeOptions, normalizePractice, normalizeSetup } from "@/lib/setup";
 import { normalizeStarterGroups } from "@/lib/starters";
 import { normalizeVsPatterns } from "@/lib/vs-patterns";
 import { linkedEndersFor, type LinkedEnder } from "@/lib/setup-links";
@@ -137,12 +137,12 @@ export async function getSetupSituations(): Promise<SetupSituation[]> {
 
 export async function getSetups(characterId: number): Promise<Setup[]> {
   const c = db();
-  if (!c) return sampleSetups.filter((s) => s.character_id === characterId);
+  if (!c) return sampleSetups.filter((s) => s.character_id === characterId).map(normalizeSetup);
   const list = await rows<Setup>(
     c.from("setups").select("*").eq("character_id", characterId).order("sort_order").order("id"),
   );
   // 이전 형식으로 저장된 옵션·프랙티스 설정도 현재 형식으로 맞춘다.
-  return list.map((s) => ({ ...s, options: normalizeOptions(s.options), practice: normalizePractice(s.practice) }));
+  return list.map(normalizeSetup);
 }
 
 /**
@@ -155,10 +155,11 @@ export async function getSetupForEmbed(
   const c = db();
   let setup: Setup | undefined;
   if (!c) {
-    setup = sampleSetups.find((s) => s.id === id);
+    const found = sampleSetups.find((s) => s.id === id);
+    setup = found && normalizeSetup(found);
   } else {
     const { data } = await c.from("setups").select("*").eq("id", id).maybeSingle();
-    if (data) setup = { ...data, options: normalizeOptions(data.options), practice: normalizePractice(data.practice) };
+    if (data) setup = normalizeSetup(data as Setup);
   }
   if (!setup || !setup.is_published) return null;
 

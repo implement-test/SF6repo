@@ -23,6 +23,11 @@ describe("lastStepKey", () => {
 });
 
 describe("resolveEnder", () => {
+  it("끝에 붙은 <메모> 는 빼고 비교", () => {
+    expect(lastStepKey("2MP > 236hp <늦게>")).toBe("236HP");
+    expect(lastStepKey("2MP > <벽꽝 확인> 236hp")).toBe("236HP");
+  });
+
   it("시동이 달라도 마지막 기술이 같으면 같은 엔더 (sort_order 가 앞인 것)", () => {
     expect(resolveEnder("LP > 214LP", null, enders)?.id).toBe(1);
     expect(resolveEnder("2LP > 214LP", null, enders)?.id).toBe(1);

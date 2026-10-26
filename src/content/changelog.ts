@@ -13,6 +13,52 @@ export type ChangelogEntry = { date: string; items: ChangelogItem[] };
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    date: "2026-10-26",
+    items: [
+      {
+        kind: "changed",
+        text: {
+          ko: "셋업 포스트 하나에 셋업 여러 개: 셋업마다 이어지는 엔더 · 공통 루트 · 프랙티스 설정 · 옵션을 탭으로, 콤보의 셋업 링크는 해당 탭으로",
+          en: "One setup post can hold several setups, each with its own enders, opening route, training settings and options, shown as tabs; combo links open the right tab",
+          ja: "1つのセットプレイ投稿に複数のセットプレイ：締め技・共通ルート・トレモ設定・オプションをタブごとに、コンボのリンクは該当タブへ",
+        },
+      },
+      {
+        kind: "added",
+        text: {
+          ko: "콤보 표기에 hit(히트시킴) · stun(스턴) 배지 추가",
+          en: "Added hit and stun badges to combo notation",
+          ja: "コンボ表記に hit（ヒットさせる）・stun（スタン）バッジを追加",
+        },
+      },
+      {
+        kind: "added",
+        text: {
+          ko: "콤보 표기의 메모를 <메모> 로 적으면 보라색으로 구분 (예전 ( ) 메모는 그대로)",
+          en: "Memos written as <memo> in combo notation now stand out in purple (older ( ) memos still work)",
+          ja: "コンボ表記のメモを <メモ> で書くと紫で区別（以前の ( ) メモもそのまま）",
+        },
+      },
+      {
+        kind: "added",
+        text: {
+          ko: "카드 제목에서 `236HK` 처럼 백틱으로 감싼 표기를 아이콘으로 표시",
+          en: "Notation wrapped in backticks in titles (`236HK`) is shown as icons",
+          ja: "カードのタイトルで `236HK` のようにバッククォートで囲んだ表記をアイコンで表示",
+        },
+      },
+      {
+        kind: "changed",
+        adminOnly: true,
+        text: {
+          ko: "셋업 편집 창: 셋업 목록(추가 · 복사 · 순서 · 삭제)과 셋업마다 엔더 고르기, 기존 연결 엔더가 체크되지 않던 문제 수정",
+          en: "Setup editor: list of setups (add, copy, reorder, delete) with enders per setup; fixed linked enders not showing as checked",
+          ja: "セットプレイ編集：セットプレイ一覧（追加・コピー・並べ替え・削除）とセットプレイごとの締め技選択、既存の締め技にチェックが付かない問題を修正",
+        },
+      },
+    ],
+  },
+  {
     date: "2026-10-19",
     items: [
       {

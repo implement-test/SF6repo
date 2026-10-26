@@ -7,6 +7,8 @@ import { LevelBadge, NotTranslatedBadge, OutdatedBadge } from "./badges";
 import { EditButton } from "./admin/admin-context";
 import { editScope } from "@/lib/admin/scope";
 import { VideoPlayer } from "./video-player";
+import { TitleText } from "./title-text";
+import { plainTitle } from "@/lib/title";
 
 /** 추천 영상 카드: 썸네일(누르면 재생) → [대상 수준] 제목 · 채널 · 언어 · 구간 → 설명 */
 export function VideoCard({
@@ -39,7 +41,7 @@ export function VideoCard({
           start={video.youtube_start}
           end={video.youtube_end}
           loop={video.youtube_loop}
-          title={title.text}
+          title={plainTitle(title.text)}
           labels={dict.video}
           playLabel={dict.videos.play}
         />
@@ -47,7 +49,7 @@ export function VideoCard({
       <div className="flex flex-1 flex-col gap-2 px-4 py-3">
         <header className="flex items-start gap-2">
           <h2 className="min-w-0 flex-1 font-bold leading-snug">
-            {title.text} {!title.translated && <NotTranslatedBadge label={dict.notTranslated} />}
+            <TitleText text={title.text} /> {!title.translated && <NotTranslatedBadge label={dict.notTranslated} />}
           </h2>
           <EditButton entity="video" id={video.id} scope={editScope(video.character_id)} />
         </header>

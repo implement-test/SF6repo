@@ -4,6 +4,8 @@
  * 관리자 화면은 한국어만 쓴다.
  */
 
+import { emptyVariant } from "@/lib/setup";
+
 export type Option = { value: string; label: string };
 
 export type Field = { key: string; label: string; help?: string; required?: boolean; wide?: boolean } & (
@@ -35,8 +37,11 @@ export type Field = { key: string; label: string; help?: string; required?: bool
   | { type: "setupOptions" }
   /** 트레이닝 모드 더미 설정 */
   | { type: "practice" }
-  /** 이 셋업으로 이어지는 엔더. 칼럼이 아니라 setup_enders 연결 표에 저장한다 */
-  | { type: "enderLinks" }
+  /**
+   * 셋업 포스트의 셋업 여러 개 (0031). variants 에 저장하고, 셋업마다 고른 엔더는
+   * 칼럼이 아니라 setup_enders 연결 표에 (몇 번째 셋업인지와 함께) 저장한다
+   */
+  | { type: "setupVariants" }
   /** 플레이 팁에 연결할 커맨드 리스트 기술 (move_ids) */
   | { type: "moveLinks" }
 );
@@ -58,6 +63,9 @@ export function today(): string {
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
+
+/** 제목 칸 안내 */
+const TITLE_HELP = "표기는 `236HK` 처럼 백틱으로 감싸면 아이콘으로 보입니다.";
 
 const LEVELS: Option[] = [
   { value: "beginner", label: "기본" },
@@ -176,7 +184,7 @@ export const ENTITIES: Record<EntityType, Entity> = {
       {
         title: "콤보",
         fields: [
-          { key: "title", label: "제목", type: "localized", required: true, help: "목록에서는 카드가 접혀 제목만 보입니다." },
+          { key: "title", label: "제목", type: "localized", required: true, help: "목록에서는 카드가 접혀 제목만 보입니다. 표기는 `236HK` 처럼 백틱으로 감싸면 아이콘으로 보입니다." },
           { key: "group_id", label: "그룹", type: "comboGroup", help: "그룹 만들기 · 이름 바꾸기 · 순서는 목록 위 '순서 · 그룹' 창에서 합니다." },
           {
             key: "starters",
@@ -231,43 +239,27 @@ export const ENTITIES: Record<EntityType, Entity> = {
     label: "셋업",
     groups: [
       {
-        title: "셋업",
+        title: "셋업 포스트",
         fields: [
-          { key: "title", label: "제목", type: "localized", required: true },
+          { key: "title", label: "제목", type: "localized", required: true, help: TITLE_HELP },
           { key: "situations", label: "상황", type: "situations", wide: true },
           {
-            key: "ender_links",
-            label: "이 셋업으로 이어지는 엔더",
-            type: "enderLinks",
-            wide: true,
-            help: "이 셋업으로 이어지는 엔더(콤보를 끝낸 기술)를 고릅니다. 그 기술로 끝나는 콤보의 루트 · 마무리에는 이 셋업이 자동으로 붙습니다. 엔더 목록은 콤보 탭의 '엔더 관리'에서 만듭니다. 잡기 후 셋업처럼 엔더가 없어도 됩니다.",
+            key: "description",
+            label: "공통 설명",
+            type: "localized",
+            multiline: true,
+            help: "셋업이 여러 개면 탭 위에, 하나면 공통 루트 아래에 보입니다.",
           },
-          { key: "notation_classic", label: "셋업 초반 공통 루트 (클래식)", type: "notation", wide: true, help: "옵션으로 갈라지기 전 공통 부분 (없으면 비움)" },
-          { key: "notation_modern", label: "셋업 초반 공통 루트 (모던)", type: "notation", wide: true },
-          { key: "description", label: "설명", type: "localized", multiline: true },
         ],
       },
-      { title: "셋업을 위한 프랙티스 설정", fields: [{ key: "practice", label: "트레이닝 모드 더미 설정", type: "practice", wide: true }] },
-      { title: "옵션", fields: [{ key: "options", label: "옵션 1 / 2 / …", type: "setupOptions", wide: true }] },
+      { title: "셋업", fields: [{ key: "variants", label: "셋업", type: "setupVariants", wide: true }] },
       MEDIA_GROUP,
       META_GROUP,
     ],
     defaults: () => ({
       ...metaDefaults(),
       situations: [],
-      options: [1, 2].map((n) => ({
-        label: `옵션 ${n}`,
-        classic: "",
-        modern: null,
-        description: null,
-        branches: [
-          { result: "hit", classic: "", modern: null, note: null },
-          { result: "guard", classic: "", modern: null, note: null },
-        ],
-        youtube_url: null,
-      })),
-      practice: null,
-      ender_links: [],
+      variants: [emptyVariant()],
     }),
   },
 
@@ -278,7 +270,7 @@ export const ENTITIES: Record<EntityType, Entity> = {
       {
         title: "추천 연습",
         fields: [
-          { key: "title", label: "제목", type: "localized", required: true },
+          { key: "title", label: "제목", type: "localized", required: true, help: TITLE_HELP },
           {
             key: "situation",
             label: "상황",
@@ -321,7 +313,7 @@ export const ENTITIES: Record<EntityType, Entity> = {
         title: "플레이 팁",
         fields: [
           { key: "topic", label: "주제", type: "select", options: TIP_TOPICS },
-          { key: "title", label: "제목", type: "localized", required: true, help: "목록에서는 카드가 접혀 제목만 보입니다." },
+          { key: "title", label: "제목", type: "localized", required: true, help: "목록에서는 카드가 접혀 제목만 보입니다. 표기는 `236HK` 처럼 백틱으로 감싸면 아이콘으로 보입니다." },
           {
             key: "situation",
             label: "상황",
@@ -435,7 +427,7 @@ export const ENTITIES: Record<EntityType, Entity> = {
       {
         title: "추천 영상",
         fields: [
-          { key: "title", label: "제목", type: "localized", required: true },
+          { key: "title", label: "제목", type: "localized", required: true, help: TITLE_HELP },
           { key: "youtube_url", label: "YouTube URL", type: "url", required: true, wide: true, help: "링크에 t= 가 있으면 그 시점부터 재생합니다." },
           { key: "youtube_start", label: "구간 시작", type: "clock", help: "예: 1:23 또는 83(초). 입력하면 링크의 t= 보다 우선합니다." },
           { key: "youtube_end", label: "구간 끝", type: "clock", help: "비우면 영상 끝까지 재생합니다." },
@@ -458,7 +450,7 @@ export const ENTITIES: Record<EntityType, Entity> = {
         title: "시스템 글 (공통 공략)",
         fields: [
           { key: "topic", label: "주제", type: "select", options: GUIDE_TOPICS },
-          { key: "title", label: "제목", type: "localized", required: true, help: "목록에서는 카드가 접혀 제목만 보입니다." },
+          { key: "title", label: "제목", type: "localized", required: true, help: "목록에서는 카드가 접혀 제목만 보입니다. 표기는 `236HK` 처럼 백틱으로 감싸면 아이콘으로 보입니다." },
           {
             key: "body",
             label: "내용",
@@ -485,7 +477,7 @@ export const ENTITIES: Record<EntityType, Entity> = {
         fields: [
           { key: "opponent", label: "상대 캐릭터", type: "opponent", required: true, help: "분류(초기 로스터 / 시즌)를 고른 뒤 캐릭터를 고릅니다." },
           { key: "topic", label: "주제", type: "select", options: VS_TOPICS },
-          { key: "title", label: "제목", type: "localized" },
+          { key: "title", label: "제목", type: "localized", help: TITLE_HELP },
           { key: "body", label: "공용 내용", type: "localized", multiline: true, help: "모든 선택지에 공통인 설명" },
           {
             key: "patterns",

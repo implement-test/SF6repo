@@ -35,10 +35,17 @@ function Icon({ icon }: { icon: IconRef }) {
   );
 }
 
-const SITUATION_LABELS: Record<Situation, string> = { air: "AIR", counter: "COUNTER", punish: "PUNISH", guard: "GUARD" };
+const SITUATION_LABELS: Record<Situation, string> = {
+  air: "AIR",
+  counter: "COUNTER",
+  punish: "PUNISH",
+  guard: "GUARD",
+  hit: "HIT",
+  stun: "STUN",
+};
 
 /**
- * 히트 상황 배지 (air / counter / punish / guard).
+ * 히트 상황 배지 (air / counter / punish / guard / hit / stun).
  * 커맨드 아이콘(둥근 버튼·방향키)과 헷갈리지 않도록 오른쪽을 가리키는 리본 모양으로 그린다.
  */
 function SituationBadge({ situation }: { situation: Situation }) {
@@ -109,7 +116,14 @@ function MoveIcons({ move }: { move: Move }) {
         />
       );
     case "note":
-      return <span className="text-sm text-muted">({move.text})</span>;
+      // <메모> 는 색 있는 메모 칩, 예전 (메모) 는 회색 글자
+      return move.memo ? (
+        <span className="nt-memo" title="memo">
+          {move.text}
+        </span>
+      ) : (
+        <span className="text-sm text-muted">({move.text})</span>
+      );
     case "damage":
       // 데미지: 메모(회색 괄호) · 타수와 헷갈리지 않게 노란 숫자 칩
       return (
@@ -234,8 +248,22 @@ function OrGroup({ options }: { options: ReactNode[] }) {
   );
 }
 
+/** 텍스트 표기. <메모> 는 이미지 표기와 같은 색으로 */
 export function NotationText({ notation }: { notation: string }) {
-  return <span className="nt-text">{displayNotation(notation)}</span>;
+  const parts = displayNotation(notation).split(/(<[^<>]*>)/);
+  return (
+    <span className="nt-text">
+      {parts.map((part, i) =>
+        i % 2 === 1 ? (
+          <span key={i} className="nt-memo-text">
+            {part}
+          </span>
+        ) : (
+          part
+        ),
+      )}
+    </span>
+  );
 }
 
 /** 방문자 설정(텍스트/이미지)에 따라 둘 중 하나가 보인다. */

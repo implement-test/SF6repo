@@ -16,6 +16,8 @@ import { ItemMedia } from "./media";
 import { EditButton } from "./admin/admin-context";
 import { ShareButton } from "./share-button";
 import { FavoriteButton } from "./favorite-button";
+import { TitleText } from "./title-text";
+import { plainTitle } from "@/lib/title";
 
 export function ComboCard({
   combo,
@@ -98,7 +100,7 @@ export function ComboCard({
         <>
           <LevelBadge level={combo.target_level} label={dict.level[combo.target_level]} />
           <PositionBadge label={position} />
-          {title && <h2 className="font-bold">{title.text}</h2>}
+          {title && <h2 className="font-bold"><TitleText text={title.text} /></h2>}
           {title && !title.translated && <NotTranslatedBadge label={dict.notTranslated} />}
           {outdated && <OutdatedBadge label={dict.patch.outdated} />}
         </>
@@ -329,7 +331,7 @@ export function ComboCard({
               youtubeEnd={combo.youtube_end}
               youtubeLoop={combo.youtube_loop}
               mediaUrl={combo.media_url}
-              title={title?.text ?? combo.notation_classic}
+              title={title ? plainTitle(title.text) : combo.notation_classic}
               labels={dict.video}
             />
           </div>

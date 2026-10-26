@@ -8,7 +8,7 @@ import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { pickLocalized } from "@/lib/i18n/localized";
 import { FAVORITE_KINDS, useAllFavorites, type FavoriteKind } from "@/lib/favorites";
-import { normalizeOptions, normalizePractice } from "@/lib/setup";
+import { normalizeOptions, normalizePractice, normalizeSetup } from "@/lib/setup";
 import { normalizeStarterGroups } from "@/lib/starters";
 import { normalizeVsPatterns } from "@/lib/vs-patterns";
 import { linkedEndersFor, type LinkedEnder } from "@/lib/setup-links";
@@ -319,7 +319,7 @@ async function load(favorites: Record<FavoriteKind, number[]>): Promise<Loaded> 
       ((situations.data ?? []) as { slug: string; name: Localized }[]).map((s) => [s.slug, s.name.ko]),
     ),
     combos: combos.map((c) => ({ ...c, starters: normalizeStarterGroups(c.starters) })),
-    setups: setups.map((s) => ({ ...s, options: normalizeOptions(s.options), practice: normalizePractice(s.practice) })),
+    setups: setups.map(normalizeSetup),
     setupEnders,
     enders,
     practices: practices.map((p) => ({ ...p, options: normalizeOptions(p.options), practice: normalizePractice(p.practice) })),

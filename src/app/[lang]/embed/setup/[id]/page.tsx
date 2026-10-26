@@ -6,6 +6,7 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import { pickLocalized } from "@/lib/i18n/localized";
 import { SetupCard } from "@/components/setup-card";
 import { EmbedFooter } from "@/components/embed-footer";
+import { plainTitle } from "@/lib/title";
 
 // 시간이 지나도 다시 만들지 않는다. 관리자가 저장할 때만 /api/revalidate 로 갱신 (CPU · R2 절약)
 export const revalidate = false;
@@ -20,7 +21,7 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/embed/setu
   const { lang, id } = await params;
   const found = await load(lang, id);
   if (!found || !hasLocale(lang)) return {};
-  return { title: pickLocalized(found.setup.title, lang).text };
+  return { title: plainTitle(pickLocalized(found.setup.title, lang).text) };
 }
 
 /** 셋업 퍼가기: 셋업 페이지의 카드와 같은 디자인·내용을 그대로 보여 준다 */
