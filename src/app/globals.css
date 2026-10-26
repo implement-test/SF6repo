@@ -399,8 +399,28 @@ article[id] {
 .title-nt {
   display: inline-flex;
   vertical-align: middle;
-  margin: -0.15rem 0.1rem 0;
+  margin: -0.1em 0.1em 0;
   font-weight: 400;
+}
+/* 제목 안에서는 아이콘 · 배지를 제목 글자 크기에 맞춘다 (본문 표기는 rem 고정) */
+.title-nt .nt {
+  column-gap: 0.25em;
+}
+.title-nt .notation-icon {
+  height: 1.3em;
+  width: 1.3em;
+}
+.title-nt .notation-icon[data-wide] {
+  width: auto;
+  height: 1.1em;
+}
+.title-nt .notation-overlay {
+  font-size: 0.65em;
+}
+.title-nt :is(.notation-situation, .notation-delay, .notation-etc, .notation-damage, .nt-memo) {
+  height: 1.75em;
+  min-height: 0;
+  font-size: 0.6em;
 }
 .nt-chain {
   display: inline-flex;

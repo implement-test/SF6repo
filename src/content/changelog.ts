@@ -42,9 +42,9 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         kind: "added",
         text: {
-          ko: "카드 제목에서 `236HK` 처럼 백틱으로 감싼 표기를 아이콘으로 표시",
-          en: "Notation wrapped in backticks in titles (`236HK`) is shown as icons",
-          ja: "カードのタイトルで `236HK` のようにバッククォートで囲んだ表記をアイコンで表示",
+          ko: "카드 제목에서 `236HK` 처럼 백틱으로 감싼 표기를 제목 글자 크기에 맞춘 아이콘으로 표시",
+          en: "Notation wrapped in backticks in titles (`236HK`) is shown as icons sized to the title text",
+          ja: "カードのタイトルで `236HK` のようにバッククォートで囲んだ表記を、文字サイズに合わせたアイコンで表示",
         },
       },
       {
