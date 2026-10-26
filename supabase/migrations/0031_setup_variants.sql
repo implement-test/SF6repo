@@ -10,7 +10,7 @@
 -- 셋업 하나로 읽고(src/lib/setup.ts 의 setupVariants), 편집 창에서 저장하면 variants 로 옮기고 예전 칼럼은 비운다.
 
 alter table setups
-  add column variants jsonb not null default '[]'::jsonb check (jsonb_typeof(variants) = 'array');
+  add column if not exists variants jsonb not null default '[]'::jsonb check (jsonb_typeof(variants) = 'array');
 
 -- 한 포스트 안에서 엔더 하나는 셋업 하나로만 이어진다 (unique (setup_id, ender_id) 그대로)
-alter table setup_enders add column variant int not null default 0 check (variant >= 0);
+alter table setup_enders add column if not exists variant int not null default 0 check (variant >= 0);
